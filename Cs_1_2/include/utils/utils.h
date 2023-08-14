@@ -64,7 +64,7 @@ std::string ToString(const std::vector<T>& arr)
         return oss.str();
     };
     
-    std::string result = "{";
+    std::string result = "[";
     for(const T& element : arr)
         result += convert(element) + " , ";
 
