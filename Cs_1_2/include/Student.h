@@ -20,6 +20,7 @@ public:
 
     void GainExp(int exp);
     void LevelUp();
+    //void CheckMissionState(Mission* mission);//TODO:CheckMissionState
     
     //getter
     std::string GetAccount();
@@ -49,6 +50,14 @@ void Student::LevelUp()
     this->level += 1;
     std::cout << "學員 " << this->account << "升級到 " << this->level << std::endl;
 }
+
+//TODO:Mission class and Mission
+// void Student::CheckMissionState(Mission* mission)
+// {
+
+// }
+    
+
 
 std::string Student::GetAccount()
 {

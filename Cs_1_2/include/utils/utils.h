@@ -19,6 +19,27 @@ void shouldBePositive(T val)
         throw std::invalid_argument("val must be positive.");
 }
 
+void lengthshouldBe(std::string str,int min,int max)
+{
+    if(str.size() > max || str.size() < min)
+    {
+        std::ostringstream oss;//   透過 ostringstream 來建立一個整數字符串
+        oss << str <<" size" << " should be " << min << " ~ " << max << ".";
+        throw std::invalid_argument(oss.str());
+    }
+}
+
+template<typename T>
+void valshouldBigger(T val,int min)
+{
+    if(val < min)
+    {
+        std::ostringstream oss;//透過 ostringstream 來建立一個整數字符串
+        oss << "val " << " should bigger than " << min << ".";
+        throw std::invalid_argument(oss.str());
+    }
+}
+
 
 template<typename T>
 std::string ToString(const T& val)
