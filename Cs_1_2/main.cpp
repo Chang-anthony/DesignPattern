@@ -9,7 +9,9 @@
 int main()
 {
     std::cout <<"hello world!!!" << std::endl;
-    int* object = 0;
-    requireNonNull(object);
+    // int* object = 0;
+    // requireNonNull(object);
+    Student test = Student("Anthony","123545");
+    test.GainExp(3000);
     return 0;
 }

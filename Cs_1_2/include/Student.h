@@ -6,17 +6,17 @@
 #include "LevelSheet.h" //Because Studnet Dependency on LevelSheet
 
 
-
 class Student
 {
 private:
+    LevelSheet* levelsheet = new LevelSheet();
     std::string account;
     std::string password;
     int level = 1;
     int exp = 0;
 public:
     Student(std::string account,std::string password):account(account),password(password){};
-    ~Student(){delete this;};
+    ~Student(){};
 
     void GainExp(int exp);
     void LevelUp();
@@ -35,13 +35,19 @@ protected:
 
 void Student::GainExp(int exp)
 {
-    // TODO : Level Sheet
-    return;
+    this->exp += exp;
+    int level = levelsheet->queryform(exp);
+    // int level = LevelSheet::form(this->exp);
+    int uplevel = level - this->level;
+    std::cout << "學員 " << this->account << " 獲得經驗值 " << exp << std::endl;
+    for(int i = 0 ; i < uplevel; i++)
+        this->LevelUp();
 }
 
 void Student::LevelUp()
 {
     this->level += 1;
+    std::cout << "學員 " << this->account << "升級到 " << this->level << std::endl;
 }
 
 std::string Student::GetAccount()

@@ -1,6 +1,5 @@
 #include <iostream>
 #include <stdio.h>
-#include "utils/utils.h"
 #include <string>
 
 
@@ -13,6 +12,8 @@ public:
     ~LevelSheet();
 
     int queryform(int exp);
+    
+    static int form(int exp);
 };
 
 LevelSheet::LevelSheet(/* args */)
@@ -25,6 +26,11 @@ LevelSheet::~LevelSheet()
 
 int LevelSheet::queryform(int exp)
 {
-    return (int) exp/1000;
+    return (int)exp/1000;
+}
+
+int LevelSheet::form(int exp)
+{
+    return (int)exp/1000;
 }
 
