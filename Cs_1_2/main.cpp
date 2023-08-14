@@ -5,7 +5,6 @@
 #include <stdio.h>
 #include "include/Student.h"
 
-// TODO:perform addition cal
 
 int main()
 {
