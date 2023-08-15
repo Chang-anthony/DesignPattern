@@ -45,6 +45,13 @@ static void valshouldBigger(T val,int min)
 }
 
 template<typename T>
+static void sizeshouldBigger(const std::vector<T>& arr,int val)
+{
+    if(arr.size() <= val)
+        throw std::invalid_argument("arr size should bigger than val");
+}
+
+template<typename T>
 static std::string ToString(const T& val)
 {
     auto convert = [](const T& val)
