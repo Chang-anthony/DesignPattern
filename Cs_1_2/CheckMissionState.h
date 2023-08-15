@@ -9,12 +9,13 @@
 #include "Student.h"
 #include "Mission.h"
 
-
-//關聯類別 Associated class
-//因為我要知道是哪個學生在做這個任務，並且該學生會可以查詢他自己的完成狀態 
-//Because I want to know which student is doing this task, and the student union can query his own completion status
-//所以初始化給予 哪個學生需要做個任務
-//So the initialization gives which student needs to do a task
+/*
+關聯類別 Associated class
+因為我要知道是哪個學生在做這個任務，並且該學生會可以查詢他自己的完成狀態 
+Because I want to know which student is doing this task, and the student union can query his own completion status
+所以初始化給予 哪個學生需要做個任務
+So the initialization gives which student needs to do a task
+*/
 
 class CheckMissionState
 {

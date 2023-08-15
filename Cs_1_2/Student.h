@@ -67,10 +67,12 @@ void Student::LevelUp()
 }
 
 
-//單向關聯類別(one-way association class) 
-//因為只有學生可以查詢他有多少任務需要完成並確認狀態，所以任務那邊不需要知道是哪個學生需要完成他，即單向關聯類別
-//Because only the student can query how many mission he needs to complete and confirm the status, 
-//the mission side does not need to know which student needs to complete him, that is, the one-way association category
+/*
+(單向關聯類別(one-way association class) 
+因為只有學生可以查詢他有多少任務需要完成並確認狀態，所以任務那邊不需要知道是哪個學生需要完成他，即單向關聯類別
+Because only the student can query how many mission he needs to complete and confirm the status, 
+the mission side does not need to know which student needs to complete him, that is, the one-way association category
+*/
 CheckMissionState* Student::CarryMission(Mission* mission)
 {
     std::cout << "【任務】學員 " << this->account << " 開始新任務：" << mission->GetName() << std::endl;
