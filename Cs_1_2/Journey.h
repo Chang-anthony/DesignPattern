@@ -1,3 +1,6 @@
+#ifndef JOURNEY_H
+#define JOURNEY_H
+
 #include <iostream>
 #include <stdio.h>
 #include <string>
@@ -16,8 +19,10 @@ public:
             this->SetDescription(description);
             this->SetPrice(price);
         }
-    ~Journey();
+    ~Journey(){};
 
+
+    //TODO : Student Join to this Journey
 
     //getter
     std::string GetName();
@@ -48,5 +53,19 @@ int Journey::GetPrice()
 void Journey::SetName(std::string name)
 {
     lengthshouldBe(name,1,30);
+    this->name = name;
 }
 
+void Journey::SetDescription(std::string description)
+{
+    lengthshouldBe(description,0,300);
+    this->description = description;
+}
+
+void Journey::SetPrice(int price)
+{
+    valshouldBigger(price,1);
+    this->price = price;
+}
+
+#endif

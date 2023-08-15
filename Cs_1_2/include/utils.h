@@ -1,3 +1,6 @@
+#ifndef UTILS_H
+#define UTILS_H
+
 #include <iostream>
 #include <stdio.h>
 #include <string>
@@ -6,7 +9,7 @@
 
 
 template<typename T>
-T* requireNonNull(T* object)
+static T* requireNonNull(T* object)
 {
     if(!object)
         throw std::invalid_argument("object can't be null.");
@@ -14,13 +17,13 @@ T* requireNonNull(T* object)
 }
 
 template<typename T>
-void shouldBePositive(T val)
+static void shouldBePositive(T val)
 {
     if(val <= 0)
         throw std::invalid_argument("val must be positive.");
 }
 
-void lengthshouldBe(std::string str,int min,int max)
+static void lengthshouldBe(std::string str,int min,int max)
 {
     if(str.size() > max || str.size() < min)
     {
@@ -31,7 +34,7 @@ void lengthshouldBe(std::string str,int min,int max)
 }
 
 template<typename T>
-void valshouldBigger(T val,int min)
+static void valshouldBigger(T val,int min)
 {
     if(val < min)
     {
@@ -42,7 +45,7 @@ void valshouldBigger(T val,int min)
 }
 
 template<typename T>
-std::string ToString(const T& val)
+static std::string ToString(const T& val)
 {
     auto convert = [](const T& val)
     {
@@ -54,7 +57,7 @@ std::string ToString(const T& val)
 }
 
 template<typename T>
-std::string ToString(const std::vector<T>& arr)
+static std::string ToString(const std::vector<T>& arr)
 {
     auto convert = [](const T& val)
     {
@@ -72,3 +75,4 @@ std::string ToString(const std::vector<T>& arr)
     return result;
 }
 
+#endif

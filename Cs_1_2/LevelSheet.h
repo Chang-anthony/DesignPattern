@@ -1,3 +1,6 @@
+#ifndef LEVELSHEET_H
+#define LEVELSHEET_H
+
 #include <iostream>
 #include <stdio.h>
 #include <string>
@@ -33,3 +36,4 @@ int LevelSheet::form(int exp)
     return (int)exp/1000;
 }
 
+#endif

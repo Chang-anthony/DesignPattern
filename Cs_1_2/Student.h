@@ -1,3 +1,6 @@
+#ifndef STUDENT_H
+#define STUDENT_H
+
 #include <iostream>
 #include <stdio.h>
 #include <string>
@@ -75,5 +78,4 @@ void Student::SetPassword(std::string password)
 }
 
 
-
-
+#endif
