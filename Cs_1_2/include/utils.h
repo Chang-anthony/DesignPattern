@@ -4,6 +4,7 @@
 #include <sstream>
 #include <vector>
 
+
 template<typename T>
 T* requireNonNull(T* object)
 {
@@ -40,7 +41,6 @@ void valshouldBigger(T val,int min)
     }
 }
 
-
 template<typename T>
 std::string ToString(const T& val)
 {
@@ -50,7 +50,6 @@ std::string ToString(const T& val)
         oss << val;
         return oss.str();
     };
-
     return convert(val);
 }
 
@@ -67,10 +66,9 @@ std::string ToString(const std::vector<T>& arr)
     std::string result = "[";
     for(const T& element : arr)
         result += convert(element) + " , ";
-
     if(!arr.empty())
         result = result.substr(0,result.size() - 3);//移除最後兩個空格與逗號
     result += "]";
-
     return result;
 }
+
