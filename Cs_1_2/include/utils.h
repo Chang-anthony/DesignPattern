@@ -1,11 +1,15 @@
+#ifndef UTILS_H
+#define UTILS_H
+
 #include <iostream>
 #include <stdio.h>
 #include <string>
 #include <sstream>
 #include <vector>
 
+
 template<typename T>
-T* requireNonNull(T* object)
+static T* requireNonNull(T* object)
 {
     if(!object)
         throw std::invalid_argument("object can't be null.");
@@ -13,13 +17,13 @@ T* requireNonNull(T* object)
 }
 
 template<typename T>
-void shouldBePositive(T val)
+static void shouldBePositive(T val)
 {
     if(val <= 0)
         throw std::invalid_argument("val must be positive.");
 }
 
-void lengthshouldBe(std::string str,int min,int max)
+static void lengthshouldBe(std::string str,int min,int max)
 {
     if(str.size() > max || str.size() < min)
     {
@@ -30,7 +34,7 @@ void lengthshouldBe(std::string str,int min,int max)
 }
 
 template<typename T>
-void valshouldBigger(T val,int min)
+static void valshouldBigger(T val,int min)
 {
     if(val < min)
     {
@@ -40,9 +44,16 @@ void valshouldBigger(T val,int min)
     }
 }
 
+//TODO : need to fix
+template<typename T>
+static void sizeshouldBigger(const std::vector<T>& arr,int val)
+{
+    if(arr.size() < val)
+        throw std::invalid_argument("arr size should bigger than val");
+}
 
 template<typename T>
-std::string ToString(const T& val)
+static std::string ToString(const T& val)
 {
     auto convert = [](const T& val)
     {
@@ -50,12 +61,11 @@ std::string ToString(const T& val)
         oss << val;
         return oss.str();
     };
-
     return convert(val);
 }
 
 template<typename T>
-std::string ToString(const std::vector<T>& arr)
+static std::string ToString(const std::vector<T>& arr)
 {
     auto convert = [](const T& val)
     {
@@ -67,10 +77,10 @@ std::string ToString(const std::vector<T>& arr)
     std::string result = "[";
     for(const T& element : arr)
         result += convert(element) + " , ";
-
     if(!arr.empty())
         result = result.substr(0,result.size() - 3);//移除最後兩個空格與逗號
     result += "]";
-
     return result;
 }
+
+#endif
