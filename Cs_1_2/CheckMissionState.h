@@ -17,6 +17,7 @@ Because I want to know which student is doing this task, and the student union c
 So the initialization gives which student needs to do a task
 */
 
+
 class CheckMissionState
 {
 
@@ -24,14 +25,14 @@ private:
     enum state 
     {inprogress,done};
     state currentstate;
-    Student* studnet;
-    Mission* mission;
+    // Student* studnet;
+    // Mission* mission;
 public:
-    CheckMissionState(Student* student,Mission* mission)
+    CheckMissionState()
     {
-        currentstate = state::inprogress;
-        this->student = student;
-        this->mission = mission;
+        this->currentstate = state::inprogress;
+        // this->student = student;
+        // this->mission = mission;
     };
     ~CheckMissionState(){};
     void CompleteMission();
@@ -39,9 +40,9 @@ public:
 
 void CheckMissionState::CompleteMission()
 {
-    currentstate = state::done;
-    std::cout << "任務】學員 " << studnet->GetAccount() << " 已成功完成任務" << mission->GetName() << std::endl;
-    student->GainExp(CheckMissionState::mission->ExpAward());
+    this->currentstate = state::done;
+    // std::cout << "任務】學員 " << studnet->GetAccount() << " 已成功完成任務" << mission->GetName() << std::endl;
+    // student->GainExp(CheckMissionState::mission->ExpAward());
 }
 
 

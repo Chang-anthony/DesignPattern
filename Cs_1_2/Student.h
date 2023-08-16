@@ -7,6 +7,7 @@
 #include <vector>
 #include "LevelSheet.h" //Because Studnet Dependency on LevelSheet
 #include "CheckMissionState.h"
+#include "Mission.h"
 
 
 class Student
@@ -24,15 +25,17 @@ private:
 
 
 public:
-    Student(std::string account,std::string password,std::vector<CheckMissionState*> missioncarryon):account(account),password(password)
+    Student(std::string account,std::string password,std::vector<CheckMissionState*> missioncarryon)
     {
+        SetAccount(account);
+        SetPassword(password);
         SetCheckMissionState(missioncarryon);
     };
     ~Student(){};
 
     void GainExp(int exp);
     void LevelUp();
-    //讓學生有這個任務要做 Give students this mission to do
+    //讓學生有這個任務要做 Give students this mission to do    
     CheckMissionState* CarryMission(Mission* mission);
     
     //getter
@@ -76,7 +79,8 @@ the mission side does not need to know which student needs to complete him, that
 CheckMissionState* Student::CarryMission(Mission* mission)
 {
     std::cout << "【任務】學員 " << this->account << " 開始新任務：" << mission->GetName() << std::endl;
-    CheckMissionState* missioncarryon= new CheckMissionState(this,mission);
+    CheckMissionState* missioncarryon = new CheckMissionState();
+    //CheckMissionState* missioncarryon= new CheckMissionState(this,mission);
     this->missioncarryon.push_back(missioncarryon);
     return missioncarryon;
 }
@@ -105,7 +109,7 @@ void Student::SetPassword(std::string password)
 
 void Student::SetCheckMissionState(std::vector<CheckMissionState*> missioncarryons)
 {
-    sizeshouldBigger(missioncarryons,0);
+    sizeshouldBigger(missioncarryons,-1);
     this->missioncarryon = missioncarryons;
 }
 

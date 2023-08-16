@@ -21,7 +21,7 @@ int main()
     std::string str = "1654135135";
     //lengthshouldBe(str,1,5);
     std::vector<CheckMissionState*> missioncarryon = std::vector<CheckMissionState*>();
-
+    std::cout << missioncarryon.size() << std::endl;
     Student test = Student("Anthony","123545",missioncarryon);
     VideoScene(1,"123");
     // test.GainExp(3000);
