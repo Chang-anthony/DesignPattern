@@ -8,7 +8,10 @@
 #include "include/utils.h"
 #include "Challenge.h"
 #include "Scene.h"
-#include "CheckMissionState.h"
+
+// Forward declaration
+// class Challenge;
+// class Scene;
 
 //Mission為在Chapter 底下中的其中一個，他不能單獨存在在 Chapter 之外 及單向複合關聯(A One-Way Composition Association)
 //所以Mission不須知道他在哪個Chapter 底下

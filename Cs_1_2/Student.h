@@ -5,9 +5,13 @@
 #include <stdio.h>
 #include <string>
 #include <vector>
-#include "LevelSheet.h" //Because Studnet Dependency on LevelSheet
 #include "CheckMissionState.h"
 #include "Mission.h"
+#include "LevelSheet.h"
+
+//Forward declaration
+//class Mission;
+//class LevelSheet;//Because Studnet Dependency on LevelSheet
 
 
 class Student
@@ -79,8 +83,8 @@ the mission side does not need to know which student needs to complete him, that
 CheckMissionState* Student::CarryMission(Mission* mission)
 {
     std::cout << "【任務】學員 " << this->account << " 開始新任務：" << mission->GetName() << std::endl;
-    CheckMissionState* missioncarryon = new CheckMissionState();
-    //CheckMissionState* missioncarryon= new CheckMissionState(this,mission);
+    //CheckMissionState* missioncarryon = new CheckMissionState();
+    CheckMissionState* missioncarryon= new CheckMissionState(this,mission);
     this->missioncarryon.push_back(missioncarryon);
     return missioncarryon;
 }
@@ -111,6 +115,5 @@ void Student::SetCheckMissionState(std::vector<CheckMissionState*> missioncarryo
 {
     this->missioncarryon = missioncarryons;
 }
-
 
 #endif
