@@ -43,13 +43,13 @@ std::string Challenge::GetName()
 
 void Challenge::SetID(int id)
 {
-    valshouldBigger(id,0);
+    utils::ValShouldBigger(id,0);
     this->id = id;
 }
 
 void Challenge::SetName(std::string name)
 {
-    lengthshouldBe(name,1,30);
+    utils::LengthShouldBe(name,1,30);
     this->name = name;
 }
 

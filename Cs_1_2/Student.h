@@ -109,7 +109,6 @@ void Student::SetPassword(std::string password)
 
 void Student::SetCheckMissionState(std::vector<CheckMissionState*> missioncarryons)
 {
-    sizeshouldBigger(missioncarryons,-1);
     this->missioncarryon = missioncarryons;
 }
 

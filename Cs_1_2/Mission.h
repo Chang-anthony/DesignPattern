@@ -79,25 +79,25 @@ std::vector<Scene*> Mission::GetScenes()
 
 void Mission::SetID(int id)
 {
-    valshouldBigger(id,0);
+    utils::ValShouldBigger(id,0);
     this->id = id;
 }
 
 void Mission::SetName(std::string name)
 {
-    lengthshouldBe(name,1,30);
+    utils::LengthShouldBe(name,1,30);
     this->name = name;
 }
 
 void Mission::SetChallenge(Challenge* Challenge)
 {
-    requireNonNull(challenge);
+    utils::RequireNonNull(challenge);
     this->challenge = challenge;
 }
 
 void Mission::SetScenes(std::vector<Scene*> scenes)
 {
-    sizeshouldBigger(scenes,0);
+    utils::SizeShouldBigger(scenes,0);
     this->scenes = scenes;
 }
 
