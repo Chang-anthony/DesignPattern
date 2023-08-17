@@ -34,13 +34,13 @@ private:
     Student* studnet;
     Mission* mission;
 public:
-    //CheckMissionState(Student* studnet,Mission* mission);
-    CheckMissionState(Student* studnet,Mission* mission)
-    {
-        this->currentstate = state::inprogress;
-        this->studnet = studnet;
-        this->mission = mission;
-    };
+    CheckMissionState(Student* studnet,Mission* mission);
+    // CheckMissionState(Student* studnet,Mission* mission)
+    // {
+    //     this->currentstate = state::inprogress;
+    //     this->studnet = studnet;
+    //     this->mission = mission;
+    // };
     ~CheckMissionState(){};
     void CompleteMission();
 };

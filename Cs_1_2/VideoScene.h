@@ -7,7 +7,8 @@
 #include "include/utils.h"
 #include "Scene.h"
 
-class VideoScene : Scene
+//need to public so the List can transform videoscene to father class scene
+class VideoScene : public Scene
 {
 private:
     /* data */

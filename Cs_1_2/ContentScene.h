@@ -8,13 +8,13 @@
 #include "Scene.h"
 
 
-class ContentScene : Scene
+class ContentScene : public Scene
 {
 private:
     /* data */
 public:
     //Derived class constructor
-    ContentScene(int id,int name):Scene(id,name){};
+    ContentScene(int id,std::string name):Scene(id,name){};
     ~ContentScene(){};
 
     int ExpAward() override; 
