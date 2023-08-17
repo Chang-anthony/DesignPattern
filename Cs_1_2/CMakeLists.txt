@@ -14,9 +14,10 @@ set(CMAKE_CXX_STANDARD 20)
 # set(PROTO_BUF_DIR ${PROJECT_SOURCE_DIR}/proto_buf)
 
 set(UTILS ${PROJECT_SOURCE_DIR}/include)
+# set(Mission ${PROJECT_SOURCE_DIR}/MissionState)
 
 # 编译子文件夹的CMakeLists.txt
-# add_subdirectory(proto_pb2)
+# add_subdirectory(MissionState)
 
 # 规定.h头文件路径
 include_directories(${PROJECT_SOURCE_DIR}
@@ -24,11 +25,11 @@ include_directories(${PROJECT_SOURCE_DIR}
 )
 set(SOURCES
     main.cpp
-    CheckMissionState.cpp
+    # CheckMissionState.cpp
 )
 
 # 生成可执行文件
 add_executable(${PROJECT_NAME} ${SOURCES})
 
 # 链接操作
-# target_link_libraries(${PROJECT_NAME})
+# target_link_libraries(${PROJECT_NAME} Mission_state)

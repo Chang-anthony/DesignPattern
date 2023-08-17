@@ -13,7 +13,6 @@
 //class Mission;
 //class LevelSheet;//Because Studnet Dependency on LevelSheet
 
-
 class Student
 {
 private:
@@ -29,6 +28,8 @@ private:
 
 
 public:
+    friend class CheckMissionState;
+
     Student(std::string account,std::string password,std::vector<CheckMissionState*> missioncarryon)
     {
         SetAccount(account);
@@ -115,5 +116,4 @@ void Student::SetCheckMissionState(std::vector<CheckMissionState*> missioncarryo
 {
     this->missioncarryon = missioncarryons;
 }
-
 #endif
