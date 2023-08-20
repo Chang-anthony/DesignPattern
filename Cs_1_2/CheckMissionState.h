@@ -1,9 +1,4 @@
 #pragma once
-#include <iostream>
-#include <stdio.h>
-#include <string>
-#include <vector>
-#include "include/utils.h"
 #include "Student.h"
 #include "Mission.h"
 
@@ -29,25 +24,18 @@ private:
     enum state 
     {inprogress,done};
     state currentstate;
-    Student student;
-    Mission mission;
+    Student *student;
+    Mission *mission;
 public:
 
     // friend class Student;
     // friend class Mission;
-    CheckMissionState(){}
-    CheckMissionState(Student student,Mission mission):student(student),mission(mission)
-    {
-        this->currentstate = state::inprogress;
-        // this->studnet = studnet;
-        // this->mission = mission;
-    };
-    ~CheckMissionState(){}
-    void CompleteMission()
-    {
-        this->currentstate = state::done;
-        std::cout << "任務】學員 " << student.GetAccount() << " 已成功完成任務" << mission.GetName() << std::endl;
-        // studnet.GainExp(mission.ExpAward());
-    }
+    CheckMissionState();
+    CheckMissionState(Student *student,Mission *mission);
+    ~CheckMissionState();
+    void CompleteMission();
+        // this->currentstate = state::done;
+        // std::cout << "任務】學員 " << student.GetAccount() << " 已成功完成任務" << mission.GetName() << std::endl;
+        // // studnet.GainExp(mission.ExpAward());
 };
 

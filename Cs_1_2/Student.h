@@ -84,7 +84,7 @@ CheckMissionState* Student::CarryMission(Mission* mission)
 {
     std::cout << "【任務】學員 " << this->account << " 開始新任務：" << mission->GetName() << std::endl;
     //CheckMissionState* missioncarryon = new CheckMissionState();
-    CheckMissionState* missionstate= new CheckMissionState(*this,*mission);
+    CheckMissionState* missionstate= new CheckMissionState(this,mission);
     this->missioncarryon.push_back(missionstate);
     return missionstate;
 }
