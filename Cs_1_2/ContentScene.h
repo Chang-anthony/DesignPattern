@@ -1,5 +1,6 @@
-#ifndef CONTENTSCENE_H
-#define CONTENTSCENE_H
+#pragma once
+#ifndef _CONTENTSCENE_H_
+#define _CONTENTSCENE_H_
 #include <iostream>
 #include <stdio.h>
 #include <string>

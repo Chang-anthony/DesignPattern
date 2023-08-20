@@ -1,5 +1,6 @@
-#ifndef SCENE_H
-#define SCENE_H
+#pragma once
+#ifndef _SCENE_H_
+#define _SCENE_H_
 
 #include <iostream>
 #include <stdio.h>

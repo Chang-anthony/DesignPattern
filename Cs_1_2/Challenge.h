@@ -1,5 +1,5 @@
-#ifndef CHALLENGE_H
-#define CHALLENGE_H
+#ifndef _CHALLENGE_H_
+#define _CHALLENGE_H_
 
 #include <iostream>
 #include <stdio.h>

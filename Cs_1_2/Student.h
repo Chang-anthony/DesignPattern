@@ -1,5 +1,6 @@
-#ifndef STUDENT_H
-#define STUDENT_H
+// #pragma once
+#ifndef _STUDENT_H_
+#define _STUDENT_H_
 
 #include <iostream>
 #include <stdio.h>
@@ -25,11 +26,8 @@ private:
     //學生可以透過這個了解自己有多少任務要做
     //Students can use this to understand how much mission they have to do
     std::vector<CheckMissionState*> missioncarryon;
-
-
 public:
-    friend class CheckMissionState;
-
+    Student(){};
     Student(std::string account,std::string password,std::vector<CheckMissionState*> missioncarryon)
     {
         SetAccount(account);
@@ -55,6 +53,7 @@ public:
 protected: 
 
 };
+
 
 
 void Student::GainExp(int exp)
@@ -85,7 +84,7 @@ CheckMissionState* Student::CarryMission(Mission* mission)
 {
     std::cout << "【任務】學員 " << this->account << " 開始新任務：" << mission->GetName() << std::endl;
     //CheckMissionState* missioncarryon = new CheckMissionState();
-    CheckMissionState* missionstate= new CheckMissionState(this,mission);
+    CheckMissionState* missionstate= new CheckMissionState(*this,*mission);
     this->missioncarryon.push_back(missionstate);
     return missionstate;
 }
@@ -116,4 +115,8 @@ void Student::SetCheckMissionState(std::vector<CheckMissionState*> missioncarryo
 {
     this->missioncarryon = missioncarryons;
 }
+
 #endif
+
+
+

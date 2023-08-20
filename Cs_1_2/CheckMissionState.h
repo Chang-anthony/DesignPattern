@@ -1,16 +1,14 @@
-#ifndef CHECKMISSIONSTATE_H
-#define CHECKMISSIONSTATE_H
-
+#pragma once
 #include <iostream>
 #include <stdio.h>
 #include <string>
 #include <vector>
 #include "include/utils.h"
-// #include "Student.h"
-// #include "Mission.h"
+#include "Student.h"
+#include "Mission.h"
 
-class Student;
-class Mission;
+// class Student;
+// class Mission;
 
 //Forward declaration 
 //use this technical need to create file CheckMissionstate.cpp and need to implemnt function in this file
@@ -31,25 +29,25 @@ private:
     enum state 
     {inprogress,done};
     state currentstate;
-    Student* studnet;
-    Mission* mission;
+    Student student;
+    Mission mission;
 public:
-    friend class Student;
-    friend class Mission;
-    //CheckMissionState(Student* studnet,Mission* mission);
-    CheckMissionState(Student* studnet,Mission* mission)
+
+    // friend class Student;
+    // friend class Mission;
+    CheckMissionState(){}
+    CheckMissionState(Student student,Mission mission):student(student),mission(mission)
     {
         this->currentstate = state::inprogress;
-        this->studnet = studnet;
-        this->mission = mission;
+        // this->studnet = studnet;
+        // this->mission = mission;
     };
-    ~CheckMissionState(){};
-    void CompleteMission();
-    // {
-    //     this->currentstate = state::done;
-    //     std::cout << "任務】學員 " << studnet.GetAccount() << " 已成功完成任務" << mission.GetName() << std::endl;
-    //     studnet.GainExp(mission.ExpAward());
-    // };
+    ~CheckMissionState(){}
+    void CompleteMission()
+    {
+        this->currentstate = state::done;
+        std::cout << "任務】學員 " << student.GetAccount() << " 已成功完成任務" << mission.GetName() << std::endl;
+        // studnet.GainExp(mission.ExpAward());
+    }
 };
 
-#endif // CHECKMISSIONSTATE_H

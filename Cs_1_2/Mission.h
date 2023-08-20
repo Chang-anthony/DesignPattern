@@ -1,11 +1,13 @@
-#ifndef MISSION_H
-#define MISSION_H
+#pragma once
+// #ifndef _MISSION_H_
+// #define _MISSION_H_
 
 #include <iostream>
 #include <stdio.h>
 #include <string>
 #include <vector>
 #include "include/utils.h"
+#include "CheckMissionState.h"
 #include "Challenge.h"
 #include "Scene.h"
 
@@ -27,6 +29,7 @@ private:
     Challenge* challenge;
     std::vector<Scene*> scenes;
 public:
+    Mission(){}
     Mission(int id,std::string name,Challenge* challenge,std::vector<Scene*> scenes)
     {
         SetID(id);
@@ -104,4 +107,4 @@ void Mission::SetScenes(std::vector<Scene*> scenes)
     this->scenes = scenes;
 }
 
-#endif // __MISSION_H__
+// #endif // __MISSION_H__

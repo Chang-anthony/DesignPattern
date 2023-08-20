@@ -1,5 +1,6 @@
-#ifndef LEVELSHEET_H
-#define LEVELSHEET_H
+#pragma once
+#ifndef _LEVELSHEET_H_
+#define _LEVELSHEET_H_
 
 #include <iostream>
 #include <stdio.h>
