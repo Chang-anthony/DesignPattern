@@ -19,7 +19,7 @@ int main()
     // int* object = 0;
     // requireNonNull(object);
     std::string str = "1654135135";
-    //lengthshouldBe(str,1,5);
+    lengthshouldBe(str,1,5);
     std::vector<CheckMissionState*> missioncarryon = std::vector<CheckMissionState*>();
     std::cout << missioncarryon.size() << std::endl;
     Student test = Student("Anthony","123545",missioncarryon);
