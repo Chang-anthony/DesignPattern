@@ -8,7 +8,10 @@
 #include "include/utils.h"
 #include "Challenge.h"
 #include "Scene.h"
-#include "CheckMissionState.h"
+
+// Forward declaration
+// class Challenge;
+// class Scene;
 
 //Mission為在Chapter 底下中的其中一個，他不能單獨存在在 Chapter 之外 及單向複合關聯(A One-Way Composition Association)
 //所以Mission不須知道他在哪個Chapter 底下
@@ -79,25 +82,25 @@ std::vector<Scene*> Mission::GetScenes()
 
 void Mission::SetID(int id)
 {
-    valshouldBigger(id,0);
+    utils::ValShouldBigger(id,0);
     this->id = id;
 }
 
 void Mission::SetName(std::string name)
 {
-    lengthshouldBe(name,1,30);
+    utils::LengthShouldBe(name,1,30);
     this->name = name;
 }
 
 void Mission::SetChallenge(Challenge* Challenge)
 {
-    requireNonNull(challenge);
+    utils::RequireNonNull(challenge);
     this->challenge = challenge;
 }
 
 void Mission::SetScenes(std::vector<Scene*> scenes)
 {
-    sizeshouldBigger(scenes,0);
+    utils::SizeShouldBigger(scenes,0);
     this->scenes = scenes;
 }
 

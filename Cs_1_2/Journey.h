@@ -68,25 +68,25 @@ std::vector<Chapter*> Journey::GetChapters()
 
 void Journey::SetName(std::string name)
 {
-    lengthshouldBe(name,1,30);
+    utils::LengthShouldBe(name,1,30);
     this->name = name;
 }
 
 void Journey::SetDescription(std::string description)
 {
-    lengthshouldBe(description,0,300);
+    utils::LengthShouldBe(description,0,300);
     this->description = description;
 }
 
 void Journey::SetPrice(int price)
 {
-    valshouldBigger(price,1);
+    utils::ValShouldBigger(price,1);
     this->price = price;
 }
 
 void Journey::SetChapters(std::vector<Chapter*> chapter)
 {
-    sizeshouldBigger(chapter,0);
+    utils::SizeShouldBigger(chapter,0);
     this->chapters = chapter;
 }
 

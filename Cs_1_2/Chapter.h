@@ -64,19 +64,19 @@ std::vector<Mission*> Chapter::GetMissions()
 
 void Chapter::SetID(int id)
 {
-    valshouldBigger(id,0);
+    utils::ValShouldBigger(id,0);
     this->id = id;
 }
 
 void Chapter::SetName(std::string name)
 {
-    lengthshouldBe(name,1,30);
+    utils::LengthShouldBe(name,1,30);
     this->name = name;
 }
 
 void Chapter::SetMissions(std::vector<Mission*> missions)
 {
-    sizeshouldBigger(missions,0);
+    utils::SizeShouldBigger(missions,0);
 }
 
 #endif
