@@ -43,6 +43,8 @@ add_library(SimpleDesignPattern STATIC
 
 # 設置MSVC編譯編碼
 # add_compile_options("$<$<CXX_COMPILER_ID:MSVC>:/source-charset:utf-8>")
+add_compile_options("$<$<C_COMPILER_ID:MSVC>:/utf-8>")
+add_compile_options("$<$<CXX_COMPILER_ID:MSVC>:/utf-8>")
 
 # 指定項目的執行檔名稱和源檔
 add_executable(${PROJECT_NAME} ${SOURCES})
