@@ -21,11 +21,6 @@
 int main()
 {
     std::vector<CheckMissionState*> missioncarryon = std::vector<CheckMissionState*>();
-    // std::vector<Scene*> scenes
-    // {
-    //     new VideoScene(3,"456"),
-    //     new ContentScene(4,"789"),
-    // };
 
     std::vector<Scene*> testtwo = std::vector<Scene*>();
 
@@ -47,11 +42,12 @@ int main()
                                 new VideoScene(4,"類別的關係 (Relationship)",600)
                             }),
                     }),
-        },std::vector<Adventurer*>(),std::vector<TourGroup*>());
+        },{},{});
 
-    
+    //std::vector<Adventurer*>(),std::vector<TourGroup*>()
+    //std::vector<CheckMissionState*>(),std::vector<Adventurer*>()
 
-    Student* anthony = new Student("Anthony","123545",std::vector<CheckMissionState*>(),std::vector<Adventurer*>());
+    Student* anthony = new Student("Anthony","123545",{},{});
     Adventurer* adventurer = designPattern->Join(anthony);
     TourGroup* tourGroup = adventurer->GetTourGroup();
     std::vector<Adventurer*> adventurers = tourGroup->GetAdventurers(); 
