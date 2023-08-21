@@ -37,8 +37,6 @@ public:
             ,const std::vector<TourGroup*>& tourgroups);
     ~Journey();
 
-
-    //TODO : Student Join to this Journey
     Adventurer* Join(Student* studnet);
     Mission* FirstMission();
     TourGroup* MatchTourGroup(Adventurer* adventurer);

@@ -17,7 +17,6 @@
 #include "../include/TourGroup.h"
 
 
-
 int main()
 {
     std::vector<CheckMissionState*> missioncarryon = std::vector<CheckMissionState*>();
@@ -58,7 +57,5 @@ int main()
     // 完成這項任務
     testmissionstate->CompleteMission();
 
-    //VideoScene(1,"123");
-    //test.GainExp(3000);
     return 0;
 }

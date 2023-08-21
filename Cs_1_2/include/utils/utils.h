@@ -1,6 +1,6 @@
 #pragma once
-#ifndef __UTILS_H__
-#define __UTILS_H__
+#ifndef _UTILS_H_
+#define _UTILS_H_
 
 #include <iostream>
 #include <stdio.h>
@@ -8,6 +8,7 @@
 #include <sstream>
 #include <vector>
 
+//TODO:need to add std::wstring determine function
 
 class utils 
 {
