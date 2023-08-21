@@ -1,4 +1,10 @@
+#include <iostream>
+#include <stdio.h>
+#include <string>
+#include <vector>
 #include "CheckMissionState.h"
+#include "Student.h"
+#include "Mission.h"
 
 CheckMissionState::CheckMissionState(Student* studnet,Mission* mission)
 {

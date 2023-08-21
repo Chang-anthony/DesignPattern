@@ -1,9 +1,9 @@
 #pragma once
-#include "Student.h"
-#include "Mission.h"
+// #include "Student.h"
+// #include "Mission.h"
 
-// class Student;
-// class Mission;
+class Student;
+class Mission;
 
 //Forward declaration 
 //use this technical need to create file CheckMissionstate.cpp and need to implemnt function in this file
