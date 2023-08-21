@@ -1,6 +1,8 @@
 #pragma once
-// #include "Student.h"
-// #include "Mission.h"
+#include <iostream>
+#include <stdio.h>
+#include <string>
+#include <vector>
 
 class Student;
 class Mission;
@@ -27,15 +29,8 @@ private:
     Student *student;
     Mission *mission;
 public:
-
-    // friend class Student;
-    // friend class Mission;
-    CheckMissionState();
     CheckMissionState(Student *student,Mission *mission);
     ~CheckMissionState();
     void CompleteMission();
-        // this->currentstate = state::done;
-        // std::cout << "任務】學員 " << student.GetAccount() << " 已成功完成任務" << mission.GetName() << std::endl;
-        // // studnet.GainExp(mission.ExpAward());
 };
 

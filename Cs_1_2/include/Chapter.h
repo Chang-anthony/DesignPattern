@@ -5,8 +5,10 @@
 #include <stdio.h>
 #include <string>
 #include <vector>
-#include "include/utils.h"
-#include "Mission.h"
+#include "../include/utils/utils.h"
+// #include "Mission.h"
+
+class Mission;
 
 //Chapter為在Journey 底下中的其中一個，他不能單獨存在在 Journey 之外
 //所以Chapter為包含在Journey 所以為單向複合關聯，他不需要知道自己在哪個Journey底下所以並不需宣告
@@ -26,13 +28,13 @@ private:
     std::string name;
     std::vector<Mission*> missions;
 public:
-    Chapter(int id,std::string name,std::vector<Mission*> missions)
-    {
-        SetID(id);
-        SetName(name);
-        SetMissions(missions);
-    };
-    ~Chapter(){};
+    Chapter(int id,std::string name,std::vector<Mission*> missions);
+    // {
+    //     SetID(id);
+    //     SetName(name);
+    //     SetMissions(missions);
+    // };
+    ~Chapter();
 
 
     //getter
@@ -47,36 +49,6 @@ public:
 
 };
 
-int Chapter::GetID()
-{
-    return this->id;
-}
 
-std::string Chapter::GetName()
-{
-    return this->name;
-}
-
-std::vector<Mission*> Chapter::GetMissions()
-{
-    return this->missions;
-}
-
-void Chapter::SetID(int id)
-{
-    utils::ValShouldBigger(id,0);
-    this->id = id;
-}
-
-void Chapter::SetName(std::string name)
-{
-    utils::LengthShouldBe(name,1,30);
-    this->name = name;
-}
-
-void Chapter::SetMissions(std::vector<Mission*> missions)
-{
-    utils::SizeShouldBigger(missions,0);
-}
 
 #endif

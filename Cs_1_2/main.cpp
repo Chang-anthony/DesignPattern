@@ -3,12 +3,12 @@
 */
 #include <iostream>
 #include <stdio.h>
-#include "Challenge.h"
-#include "Student.h"
-#include "Mission.h"
-// #include "CheckMissionState.h"
-#include "VideoScene.h"
-#include "ContentScene.h"
+#include "../include/Student.h"
+#include "../include/Mission.h"
+#include "../include/CheckMissionState.h"
+#include "../include/VideoScene.h"
+#include "../include/ContentScene.h"
+#include "../include/Challenge.h"
 
 
 
@@ -26,9 +26,11 @@ int main()
     // scenes.push_back(video);
     // scenes.push_back(content);
 
-    std::cout << missioncarryon.size() << std::endl;
+    // Challenge* challenge = new Challenge(2,"test2");
+
+    // std::cout << "test" << " ด๚ธี" << std::endl;
     Student anthony = Student("Anthony","123545",missioncarryon);
-    Mission* test = new Mission(1,"test",new Challenge(1,"test_challenge"),scenes);
+    Mission* test = new Mission(1,"test",new Challenge(2,"test2"),scenes);
     CheckMissionState* testmissionstate = anthony.CarryMission(test);
     testmissionstate->CompleteMission();
     //VideoScene(1,"123");

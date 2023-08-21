@@ -5,8 +5,8 @@
 #include <stdio.h>
 #include <string>
 #include <vector>
-#include "include/utils.h"
-#include "Scene.h"
+#include "../include/utils/utils.h"
+#include "../include/Scene.h"
 
 
 class ContentScene : public Scene
@@ -15,17 +15,14 @@ private:
     /* data */
 public:
     //Derived class constructor
-    ContentScene(int id,std::string name):Scene(id,name){};
-    ~ContentScene(){};
+    ContentScene(int id,std::string name);
+    ~ContentScene();
 
     int ExpAward() override; 
 };
 
 
-int ContentScene::ExpAward() 
-{
-    return 1000 * 1.1;
-}
+
 
 
 #endif // CONTENTSCENE_H

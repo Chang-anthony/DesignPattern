@@ -20,7 +20,7 @@ public:
     template<typename T>
     static T* RequireNonNull(T* object)
     {
-        if(!object)
+        if(object == nullptr)
             throw std::invalid_argument("object can't be null.");
         return object;
     }
