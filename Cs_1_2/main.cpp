@@ -3,6 +3,7 @@
 */
 #include <iostream>
 #include <stdio.h>
+#include "Challenge.h"
 #include "Student.h"
 #include "Mission.h"
 #include "CheckMissionState.h"
