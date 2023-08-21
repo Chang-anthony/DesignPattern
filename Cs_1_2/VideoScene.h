@@ -1,5 +1,6 @@
-#ifndef VIDEOSCENE_H
-#define VIDEOSCENE_H
+#pragma once
+#ifndef _VIDEOSCENE_H_
+#define _VIDEOSCENE_H_
 #include <iostream>
 #include <stdio.h>
 #include <string>

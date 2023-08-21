@@ -1,5 +1,6 @@
-#ifndef JOURNEY_H
-#define JOURNEY_H
+#pragma once
+#ifndef _JOURNEY_H_
+#define _JOURNEY_H_
 
 #include <iostream>
 #include <stdio.h>

@@ -6,7 +6,7 @@
 #include "Challenge.h"
 #include "Student.h"
 #include "Mission.h"
-#include "CheckMissionState.h"
+// #include "CheckMissionState.h"
 #include "VideoScene.h"
 #include "ContentScene.h"
 

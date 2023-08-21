@@ -1,5 +1,5 @@
-#ifndef CHAPTER_H
-#define CHAPTER_H
+#ifndef _CHAPTER_H_
+#define _CHAPTER_H_
 
 #include <iostream>
 #include <stdio.h>

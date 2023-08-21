@@ -1,11 +1,4 @@
-#ifndef CHECKMISSIONSTATE_H
-#define CHECKMISSIONSTATE_H
-
-#include <iostream>
-#include <stdio.h>
-#include <string>
-#include <vector>
-#include "include/utils.h"
+#pragma once
 // #include "Student.h"
 // #include "Mission.h"
 
@@ -31,25 +24,18 @@ private:
     enum state 
     {inprogress,done};
     state currentstate;
-    Student* studnet;
-    Mission* mission;
+    Student *student;
+    Mission *mission;
 public:
-    friend class Student;
-    friend class Mission;
-    //CheckMissionState(Student* studnet,Mission* mission);
-    CheckMissionState(Student* studnet,Mission* mission)
-    {
-        this->currentstate = state::inprogress;
-        this->studnet = studnet;
-        this->mission = mission;
-    };
-    ~CheckMissionState(){};
+
+    // friend class Student;
+    // friend class Mission;
+    CheckMissionState();
+    CheckMissionState(Student *student,Mission *mission);
+    ~CheckMissionState();
     void CompleteMission();
-    // {
-    //     this->currentstate = state::done;
-    //     std::cout << "任務】學員 " << studnet.GetAccount() << " 已成功完成任務" << mission.GetName() << std::endl;
-    //     studnet.GainExp(mission.ExpAward());
-    // };
+        // this->currentstate = state::done;
+        // std::cout << "任務】學員 " << student.GetAccount() << " 已成功完成任務" << mission.GetName() << std::endl;
+        // // studnet.GainExp(mission.ExpAward());
 };
 
-#endif // CHECKMISSIONSTATE_H
