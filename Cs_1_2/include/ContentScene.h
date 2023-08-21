@@ -15,7 +15,7 @@ private:
     /* data */
 public:
     //Derived class constructor
-    ContentScene(int id,std::string name);
+    ContentScene(int id,std::string name,int exp);
     ~ContentScene();
 
     int ExpAward() override; 

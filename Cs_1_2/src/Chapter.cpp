@@ -8,6 +8,11 @@ Chapter::Chapter(int id,std::string name,std::vector<Mission*> missions)
     SetMissions(missions);
 };
 
+Mission* Chapter::GetFirstMission()
+{
+    return this->missions[0];
+}
+
 int Chapter::GetID()
 {
     return this->id;
@@ -38,6 +43,7 @@ void Chapter::SetName(std::string name)
 void Chapter::SetMissions(std::vector<Mission*> missions)
 {
     utils::SizeShouldBigger(missions,0);
+    this->missions = missions;
 }
 
 Chapter::~Chapter()

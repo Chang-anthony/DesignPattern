@@ -2,6 +2,7 @@
 #include "../include/Mission.h"
 #include "../include/LevelSheet.h"
 #include "../include/CheckMissionState.h"
+#include "../include/Adventurer.h"
 
 
 Student::Student()
@@ -11,12 +12,15 @@ Student::Student()
     this->password = "";
 }
 
-Student::Student(std::string account,std::string password,std::vector<CheckMissionState*> missioncarryon)
+Student::Student(std::string account,std::string password,
+                const std::vector<CheckMissionState*>& missioncarryon,
+                const std::vector<Adventurer*>& adventurers)
 {
     this->levelsheet = new LevelSheet();
     SetAccount(account);
     SetPassword(password);
     SetCheckMissionState(missioncarryon);
+    SetAdventurers(adventurers);
 };
 
 
@@ -64,6 +68,10 @@ std::vector<CheckMissionState*> Student::GetMissionState()
     return missioncarryon;
 }
 
+std::vector<Adventurer*> Student::GetAdventurers()
+{
+    return this->adventurers;
+}
 
 void Student::SetAccount(std::string account)
 {
@@ -75,9 +83,16 @@ void Student::SetPassword(std::string password)
     this->password = password;
 }
 
-void Student::SetCheckMissionState(std::vector<CheckMissionState*> missioncarryons)
+void Student::SetCheckMissionState(const std::vector<CheckMissionState*>& missioncarryons)
 {
+    utils::RequireNonNull(&missioncarryons);
     this->missioncarryon = missioncarryons;
+}
+
+void Student::SetAdventurers(const std::vector<Adventurer*>& adventurers)
+{
+    utils::RequireNonNull(&adventurers);
+    this->adventurers = adventurers;
 }
 
 Student::~Student()

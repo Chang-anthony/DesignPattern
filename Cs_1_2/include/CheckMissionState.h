@@ -32,5 +32,13 @@ public:
     CheckMissionState(Student *student,Mission *mission);
     ~CheckMissionState();
     void CompleteMission();
+
+    //getter
+    Student* GetStuent();
+    Mission* GetMission();
+
+    //setter
+    void SetStudent(Student* student);
+    void SetMission(Mission *mission);
 };
 

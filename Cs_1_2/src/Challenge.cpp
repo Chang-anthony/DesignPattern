@@ -24,7 +24,7 @@ void Challenge::SetID(int id)
 
 void Challenge::SetName(std::string name)
 {
-    utils::LengthShouldBe(name,1,30);
+    utils::LengthShouldBe(name,1,50);
     this->name = name;
 }
 
