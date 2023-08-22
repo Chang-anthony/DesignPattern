@@ -5,7 +5,6 @@
 
 Mission::Mission(int id,std::string name,Challenge* challenge,std::vector<Scene*> scenes)
 {
-    std::cout << "add new option" << std::endl;
     SetID(id);
     SetName(name);
     SetChallenge(challenge);
