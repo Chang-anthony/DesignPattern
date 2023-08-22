@@ -25,12 +25,13 @@ int main()
 
     Mission* test = new Mission(1,"test",new Challenge(2,"test2"),testtwo);
 
-    std::string str = "物件導向的新手村";
+    std::wstring str = L"物件導向不新手的新手村";
+    utils::LengthShouldBe(str,1,5);
     // std::wstring str = L"物件導向不新手的新手村";//中文字為寬字元所以現在使用的可能長度都要使用此解法
 
     // 開設旅程
     Journey* designPattern = new Journey("軟體設計模式精通之旅","我們只做最好的內容。",6999,{
-        new Chapter(1,str
+        new Chapter(1,"物件導向的新手村"
                     ,{new Mission(1,"OOA｜建出你的領域模型吧！",
                         new Challenge(1,"一起建出領域模型吧！"),
                             std::vector<Scene*>

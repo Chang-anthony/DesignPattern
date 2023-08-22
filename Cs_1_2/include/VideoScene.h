@@ -17,13 +17,7 @@ private:
 public:
     VideoScene(int id,std::string name,int exp);
     ~VideoScene();
-
     int ExpAward() override;
-    // or
-    // int ExpAward() override
-    // {
-    //     return 1000 * 1.5;
-    // }
 
 };
 
