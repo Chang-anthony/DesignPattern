@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 3.12)
 set_property(GLOBAL PROPERTY USE_FOLDERS ON)
 set_property(GLOBAL PROPERTY PREDEFINED_TARGETS_FOLDER "cmake")
 
-project(Designpattern_Cs13)
+project(Designpattern_Cs13_1)
 set(CMAKE_CXX_STANDARD 20)
 
 #加入include directories 位置
@@ -19,27 +19,6 @@ add_subdirectory(${CMAKE_CURRENT_LIST_DIR}/src)
 set(SOURCES
     main.cpp
 )
-
-
-
-#靜態函式庫
-# add_library(SimpleDesignPattern STATIC
-#     #source files
-#     src/CheckMissionState.cpp
-#     src/Student.cpp
-#     src/Mission.cpp
-#     src/LevelSheet.cpp
-#     src/Journey.cpp
-#     src/Challenge.cpp
-#     src/Chapter.cpp
-#     src/Scene.cpp
-#     src/VideoScene.cpp
-#     src/ContentScene.cpp
-#     src/Adventurer.cpp
-#     src/TourGroup.cpp
-    
-# )
-
 
 
 # 指定項目的執行檔名稱和源檔
