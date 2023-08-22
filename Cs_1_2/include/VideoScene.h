@@ -15,7 +15,7 @@ class VideoScene : public Scene
 private:
     /* data */
 public:
-    VideoScene(int id,std::string name);
+    VideoScene(int id,std::string name,int exp);
     ~VideoScene();
 
     int ExpAward() override;

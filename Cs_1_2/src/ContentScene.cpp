@@ -1,7 +1,7 @@
 #include "../include/ContentScene.h"
 
 
-ContentScene::ContentScene(int id,std::string name):Scene(id,name)
+ContentScene::ContentScene(int id,std::string name,int exp):Scene(id,name,exp)
 {
 
 }
@@ -9,7 +9,7 @@ ContentScene::ContentScene(int id,std::string name):Scene(id,name)
 
 int ContentScene::ExpAward() 
 {
-    return 1000 * 1.1;
+    return this->GetExp() * 1.3;
 }
 
 ContentScene::~ContentScene()

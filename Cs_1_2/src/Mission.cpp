@@ -3,7 +3,7 @@
 #include "../include/Challenge.h"
 
 
-Mission::Mission(int id,std::string name,Challenge* challenge,std::vector<Scene*> scenes)
+Mission::Mission(int id,std::string name,Challenge* challenge,const std::vector<Scene*> &scenes)
 {
     SetID(id);
     SetName(name);
@@ -47,7 +47,7 @@ void Mission::SetID(int id)
 
 void Mission::SetName(std::string name)
 {
-    utils::LengthShouldBe(name,1,30);
+    utils::LengthShouldBe(name,1,50);
     this->name = name;
 }
 
@@ -57,9 +57,10 @@ void Mission::SetChallenge(Challenge* challenge)
     this->challenge = challenge;
 }
 
-void Mission::SetScenes(std::vector<Scene*> scenes)
+void Mission::SetScenes(const std::vector<Scene*> &scenes)
 {
-    utils::SizeShouldBigger(scenes,0);
+
+    utils::RequireNonNull(&scenes);
     this->scenes = scenes;
 }
 

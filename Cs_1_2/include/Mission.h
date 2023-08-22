@@ -25,16 +25,10 @@ private:
     Challenge* challenge;
     std::vector<Scene*> scenes;
 public:
-    Mission(int id,std::string name,Challenge* challenge,std::vector<Scene*> scenes);
-    // {
-    //     SetID(id);
-    //     SetName(name);
-    //     SetChallenge(challenge);
-    //     SetScenes(scenes);
-    // };
+    Mission(int id,std::string name,Challenge* challenge,const std::vector<Scene*> &scenes);
     ~Mission();
-
     int ExpAward();
+
 
     //getter
     int GetID();
@@ -46,7 +40,7 @@ public:
     void SetID(int id);
     void SetName(std::string name);
     void SetChallenge(Challenge* challenge);
-    void SetScenes(std::vector<Scene*> scenes);
+    void SetScenes(const std::vector<Scene*>& scenes);
 
 };
 

@@ -14,6 +14,7 @@
 class Mission;
 class LevelSheet;//Because Studnet Dependency on LevelSheet
 class CheckMissionState;
+class Adventurer;
 
 class Student
 {
@@ -27,14 +28,12 @@ private:
     //學生可以透過這個了解自己有多少任務要做
     //Students can use this to understand how much mission they have to do
     std::vector<CheckMissionState*> missioncarryon;
+    std::vector<Adventurer*> adventurers;
 public:
     Student();
-    Student(std::string account,std::string password,std::vector<CheckMissionState*> missioncarryon);
-    // {
-    //     SetAccount(account);
-    //     SetPassword(password);
-    //     SetCheckMissionState(missioncarryon);
-    // };
+    Student(std::string account,std::string password,
+            const std::vector<CheckMissionState*>& missioncarryon,
+            const std::vector<Adventurer*>& adventurers);
     ~Student();
 
     void GainExp(int exp);
@@ -45,11 +44,13 @@ public:
     //getter
     std::string GetAccount();
     std::vector<CheckMissionState*> GetMissionState();
+    std::vector<Adventurer*> GetAdventurers();
 
     //setter
     void SetAccount(std::string account);
     void SetPassword(std::string password);
-    void SetCheckMissionState(std::vector<CheckMissionState*> missioncarryon);
+    void SetCheckMissionState(const std::vector<CheckMissionState*>& missioncarryon);
+    void SetAdventurers(const std::vector<Adventurer*>& adventurers);
 
 protected: 
 

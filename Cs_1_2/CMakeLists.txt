@@ -27,6 +27,9 @@ add_library(SimpleDesignPattern STATIC
     src/Scene.cpp
     src/VideoScene.cpp
     src/ContentScene.cpp
+    src/Adventurer.cpp
+    src/TourGroup.cpp
+    
 
     #Header files
     # include/Chapter.h
@@ -41,10 +44,7 @@ add_library(SimpleDesignPattern STATIC
     # include/Challenge.h
 )
 
-# 設置MSVC編譯編碼
-# add_compile_options("$<$<CXX_COMPILER_ID:MSVC>:/source-charset:utf-8>")
-add_compile_options("$<$<C_COMPILER_ID:MSVC>:/utf-8>")
-add_compile_options("$<$<CXX_COMPILER_ID:MSVC>:/utf-8>")
+
 
 # 指定項目的執行檔名稱和源檔
 add_executable(${PROJECT_NAME} ${SOURCES})
@@ -56,3 +56,9 @@ target_include_directories(${PROJECT_NAME} PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/i
 
 # 設定項目的目標特性，比如 C++ 版本
 # target_compile_features(${PROJECT_NAME} PRIVATE cxx_std_20)
+target_compile_options(${PROJECT_NAME} PRIVATE -finput-charset=UTF-8)
+
+# 設置MSVC編譯編碼
+add_compile_options("$<$<CXX_COMPILER_ID:MSVC>:/source-charset:utf-8>")
+add_compile_options("$<$<C_COMPILER_ID:MSVC>:/utf-8>")
+add_compile_options("$<$<CXX_COMPILER_ID:MSVC>:/utf-8>")

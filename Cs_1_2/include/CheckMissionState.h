@@ -18,7 +18,6 @@ Because I want to know which student is doing this task, and the student union c
 So the initialization gives which student needs to do a task
 */
 
-//TODO : need to fix
 class CheckMissionState
 {
 
@@ -32,5 +31,13 @@ public:
     CheckMissionState(Student *student,Mission *mission);
     ~CheckMissionState();
     void CompleteMission();
+
+    //getter
+    Student* GetStuent();
+    Mission* GetMission();
+
+    //setter
+    void SetStudent(Student* student);
+    void SetMission(Mission *mission);
 };
 

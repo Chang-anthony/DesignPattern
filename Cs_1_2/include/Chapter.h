@@ -29,13 +29,10 @@ private:
     std::vector<Mission*> missions;
 public:
     Chapter(int id,std::string name,std::vector<Mission*> missions);
-    // {
-    //     SetID(id);
-    //     SetName(name);
-    //     SetMissions(missions);
-    // };
     ~Chapter();
 
+    // 提供一些好用的方法：拿第一個任務
+    Mission* GetFirstMission();
 
     //getter
     int GetID();
