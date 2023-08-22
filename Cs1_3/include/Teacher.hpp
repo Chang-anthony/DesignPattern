@@ -1,6 +1,9 @@
 #ifndef _TEACHER_H_
 #define _TEACHER_H_
 
+#include "../include/utils/utils.h"
+
+class Handout;
 class Teacher
 {
 private:
@@ -8,15 +11,11 @@ private:
 public:
     Teacher(/* args */);
     ~Teacher();
+
+    void Teach(Handout* handout);
 };
 
-Teacher::Teacher(/* args */)
-{
-}
 
-Teacher::~Teacher()
-{
-}
 
 
 
