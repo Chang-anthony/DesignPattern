@@ -11,11 +11,8 @@
 int main()
 {
     School* nkust = new School();
-    Classroom* classroom1 = new Classroom();
-    Classroom* classroom2 = new Classroom();
-    nkust->AddClassroom(classroom1);
-    nkust->AddClassroom(classroom2);
-
+    Classroom* classroom1 = new Classroom(nkust);
+    Classroom* classroom2 = new Classroom(nkust);
     // std::cout << "test" << std::endl;
     return 0;
 }
