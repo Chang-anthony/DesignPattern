@@ -1,6 +1,9 @@
 #ifndef _TEACHER_H_
 #define _TEACHER_H_
 
+#include <iostream>
+#include <set>
+#include <vector>
 #include "../include/utils/utils.h"
 
 class Student;
@@ -9,7 +12,8 @@ class Teacher
 {
 private:
     /* data */
-    std::vector<Student*> students;
+    std::set<Student*> students;
+    //std::vector<Student*> students;
 public:
     Teacher(/* args */);
     ~Teacher();
@@ -17,10 +21,10 @@ public:
     void Teach(Student* student);
 
     //getter
-    std::vector<Student*> GetStudents();
+    //std::vector<Student*> GetStudents();
 
     //setter
-    void SetStudents(std::vector<Student*> students);
+    //void SetStudents(std::vector<Student*> students);
 
 };
 

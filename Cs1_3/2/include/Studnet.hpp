@@ -4,24 +4,28 @@
 #include <iostream>
 #include <string>
 #include <vector>
+#include <set>
 #include "../include/utils/utils.h"
 
 class Teacher;
 
 class Student
 {
+    
 private:
     /* data */
-    std::vector<Teacher*> teachers;
+    std::set<Teacher*> teachers;
+    //std::vector<Teacher*> teachers;
 public:
     Student(/* args */);
     ~Student();
 
+    void AddTeacher(Teacher* teacher);
     //getter
-    std::vector<Teacher*> GetTeachers();
+    //std::vector<Teacher*> GetTeachers();
 
     //setter
-    void SetTeachers(std::vector<Teacher*> teachers);
+    //void SetTeachers(std::vector<Teacher*> teachers);
     
 };
 
