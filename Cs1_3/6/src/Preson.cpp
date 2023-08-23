@@ -3,6 +3,7 @@
 
 Preson::Preson(/* args */)
 {
+    this->inlove = nullptr;
 }
 
 Love* Preson::InLove(Preson* preson)
@@ -17,7 +18,7 @@ Love* Preson::InLove(Preson* preson)
     return inlove;
 }
 
-void Preson::SetInLove(Love* love)
+void Preson::SetInLove(Preson* love)
 {
     this->inlove = nullptr;
 }

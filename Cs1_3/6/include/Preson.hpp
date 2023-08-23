@@ -17,7 +17,7 @@ public:
     Love* InLove(Preson* preson);
 
     //setter
-    void SetInLove(Love* Love);
+    void SetInLove(Preson* Love);//將他們相愛的人都設為nullptr
 };
 
 #endif // _PRESON_H_

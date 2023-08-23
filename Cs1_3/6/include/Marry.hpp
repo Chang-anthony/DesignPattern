@@ -13,7 +13,7 @@ private:
     Love* inlove;
 public:
     Marry();
-    Marry(Love* inlove);
+    Marry(Love* inlove,int day);
     ~Marry();
 
     void Divorce(int day);

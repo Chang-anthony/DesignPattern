@@ -20,7 +20,7 @@ int main()
 
     marry1->Divorce(10);
 
-    // marry1->Divorce(9);
+    marry1->Divorce(9);
 
     
     // std::cout << "test" << std::endl;

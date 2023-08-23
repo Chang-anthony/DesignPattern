@@ -6,9 +6,9 @@ Marry::Marry()
 
 }
 
-Marry::Marry(Love* inlove):inlove(inlove)
+Marry::Marry(Love* inlove,int day):inlove(inlove),day(day)
 {
-    this->day = 10;
+
 }
 
 void Marry::Divorce(int day)
@@ -17,6 +17,7 @@ void Marry::Divorce(int day)
     {
         std::cout << "this marry is broken!!!" << std::endl;
         this->inlove->SetMarry(nullptr);
+        this->inlove->breakup();
     } 
     else
         std::cout << "this marry is happy!!!" << std::endl;
