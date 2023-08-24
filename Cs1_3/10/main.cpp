@@ -17,6 +17,7 @@ int main()
 
     C->Manage(A);
     C->Manage(B);
+    
 
     return 0;
 }
