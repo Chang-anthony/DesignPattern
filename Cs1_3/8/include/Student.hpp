@@ -1,21 +1,21 @@
 #ifndef _STUDENT_H_
 #define _STUDENT_H_
 
-class School;
+class Registration;
 class Student
 {
 private:
     /* data */
-    School* school;
+    Registration* registeration;
 public:
     Student(/* args */);
     ~Student();
 
     //getter
-    School* GetSchool();
+    Registration* GetRegisration();
 
     //setter
-    void SetSchool(School* school);
+    void SetRegisration(Registration* registeration);
 };
 
 

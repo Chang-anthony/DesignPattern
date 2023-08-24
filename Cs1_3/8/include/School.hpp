@@ -11,7 +11,7 @@ class School
 {
 private:
     /* data */
-    std::set<Student*> students;
+    // std::set<Student*> students;
     std::set<Registration*> registers;
 public:
     School();
@@ -20,11 +20,9 @@ public:
     Registration* Register(Student* student,int score);
 
     //getter
-    std::set<Student*> GetStudents();
     std::set<Registration*> GetRegister();
 
     //setter
-    void SetStudents(std::set<Student*> students);
     void SetRegister(std::set<Registration*> registers);
 };
 

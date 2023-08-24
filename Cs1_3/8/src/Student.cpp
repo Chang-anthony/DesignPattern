@@ -1,19 +1,19 @@
 #include "../include/Student.hpp"
-#include "../include/School.hpp"
+#include "../include/Registration.hpp"
 
 Student::Student(/* args */)
 {
     
 }
 
-School* Student::GetSchool()
+Registration* Student::GetRegisration()
 {
-    return this->school;
+    return this->registeration;
 }
 
-void Student::SetSchool(School* school)
+void Student::SetRegisration(Registration* registeration)
 {
-    this->school = school;
+    this->registeration = registeration;
 }
 
 Student::~Student()
