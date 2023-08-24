@@ -5,16 +5,21 @@
 #include <string>
 #include <stdio.h>
 #include <vector>
-#include "../include/Classmate.hpp"
+#include "../include/School.hpp"
+#include "../include/Registration.hpp"
+#include "../include/Student.hpp"
 
 int main()
 {
-    Classmate* me = new Classmate();
-    Classmate* one = new Classmate();
-    Classmate* two = new Classmate();
+    School* nkust = new School();
+    Student* me = new Student();
+    Student* one = new Student();
+    Student* two = new Student();
 
-    me->makefriend(one);
-    me->makefriend(two);
+    nkust->Register(me,90);
+    nkust->Register(one,60);
+    nkust->Register(two,100);
+    
 
     // std::cout << "test" << std::endl;
     return 0;
