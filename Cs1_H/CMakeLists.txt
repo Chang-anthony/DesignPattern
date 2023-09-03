@@ -5,6 +5,28 @@ set_property(GLOBAL PROPERTY PREDEFINED_TARGETS_FOLDER "cmake")
 project(Designpattern_Cs1_H)
 set(CMAKE_CXX_STANDARD 20)
 
+# ========================================================
+# GTEST
+
+include(FetchContent)
+FetchContent_Declare(
+    googletest
+    URL
+    https://github.com/google/googletest/archive/609281088cfefc76f9d0ce82e1ff6c30cc3591e5.zip
+    DOWNLOAD_NO_EXTRACT TRUE
+)
+
+set(gtest_force_shared_crt ON CACHE BOOL "" FORCE)
+FetchContent_MakeAvailable(googletest)
+
+set_property(TARGET gmock PROPERTY FOLDER "gtest")
+set_property(TARGET gmock_main PROPERTY FOLDER "gtest")
+set_property(TARGET gtest PROPERTY FOLDER "gtest")
+set_property(TARGET gtest_main PROPERTY FOLDER "gtest")
+
+# ======================================================
+
+
 #加入include directories 位置
 include_directories(${CMAKE_SOURCE_DIR}/include ${CMAKE_SOURCE_DIR}/include/utils)
 
@@ -32,3 +54,9 @@ target_compile_options(${PROJECT_NAME} PRIVATE -finput-charset=UTF-8)
 add_compile_options("$<$<CXX_COMPILER_ID:MSVC>:/source-charset:utf-8>")
 add_compile_options("$<$<C_COMPILER_ID:MSVC>:/utf-8>")
 add_compile_options("$<$<CXX_COMPILER_ID:MSVC>:/utf-8>")
+
+
+#GTEST
+enable_testing()
+add_subdirectory(test)
+

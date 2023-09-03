@@ -24,6 +24,7 @@ set(CMAKE_CXX_STANDARD 20)
 #靜態函式庫
 add_library(SimpleDesignPatternCs1H STATIC
     #source files
+    Test.cpp
 )
 
 
