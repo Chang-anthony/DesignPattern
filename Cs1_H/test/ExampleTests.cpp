@@ -22,7 +22,7 @@ TEST(Suit,SuitTest)
     EXPECT_EQ("1",SuitToString(a)); 
 
     EXPECT_EQ("Club",SuitToName(Suit::Club)); 
-    EXPECT_EQ("Club",SuitToName(Suit::Diamond));
+    EXPECT_EQ("Diamond",SuitToName(Suit::Diamond));
 }
 
 TEST(Card,CardTest)
@@ -35,5 +35,17 @@ TEST(Card,CardTest)
 
     // EXPECT_EQ(card,card2); 
     EXPECT_EQ("11",RankToString(card2->GetRank())); 
+}
 
+TEST(Card,CardBiggerTest)
+{
+    Card* card1 = new Card(Rank::A,Suit::Club);
+    Card* card2 = new Card(Rank::A,Suit::Spade);
+
+    Card* card3 = new Card(Rank::J,Suit::Heart);
+    Card* card4 = new Card(Rank::Ten,Suit::Diamond);
+    
+    EXPECT_EQ(false,card1->IsBigger(card2));
+    EXPECT_EQ(true,card1->IsBigger(card3));
+    EXPECT_EQ(false,card4->IsBigger(card3));
 }

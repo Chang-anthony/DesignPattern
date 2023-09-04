@@ -24,7 +24,7 @@ public:
     void SetSuit(Suit suit);
 
     void render();
-    bool IsBigger(Card card);
+    bool IsBigger(Card* card);
 };
 
 #endif /* _CARD_H_ */
