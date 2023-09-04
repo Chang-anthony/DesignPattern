@@ -15,7 +15,7 @@ enum class Suit
     Spade
 };
 
-
 std::string SuitToString(Suit rank);
+std::string SuitToName(Suit rank);
 
 #endif /* _SUIT_H_ */
