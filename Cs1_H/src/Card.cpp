@@ -1,6 +1,12 @@
 #include "../include/Card.hpp"
+#include "../include/Deck.hpp"
 
-Card::Card(Rank rank,Suit suit):rank(rank),suit(suit)
+Card::Card(Rank rank,Suit suit):rank(rank),suit(suit),deck(nullptr)
+{
+    
+}
+
+Card::Card(Rank rank,Suit suit,Deck* deck):rank(rank),suit(suit),deck(deck)
 {
 
 }
@@ -8,7 +14,7 @@ Card::Card(Rank rank,Suit suit):rank(rank),suit(suit)
 void Card::render()
 {
     std::cout << SuitToName(this->GetSuit())  
-    << "[" << RankToName(this->GetRank());
+    << "[" << RankToName(this->GetRank()) << "]" << std::endl;
 }
 
 /*if this card bigger than card return true;*/

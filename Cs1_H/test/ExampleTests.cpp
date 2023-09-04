@@ -2,6 +2,7 @@
 #include "../include/Rank.hpp"
 #include "../include/Suit.hpp"
 #include "../include/Card.hpp"
+#include "../include/Deck.hpp"
 
 
 TEST(Rank,RankTest)
@@ -48,4 +49,17 @@ TEST(Card,CardBiggerTest)
     EXPECT_EQ(false,card1->IsBigger(card2));
     EXPECT_EQ(true,card1->IsBigger(card3));
     EXPECT_EQ(false,card4->IsBigger(card3));
+}
+
+TEST(Deck,DeckTest)
+{
+    Deck* deck = new Deck();
+    std::vector<Card*> card1 = deck->GetCards();
+
+    EXPECT_EQ(52,deck->GetCards().size());
+
+    deck->Suffle();
+    std::vector<Card*> card2 = deck->GetCards();
+
+    EXPECT_NE(card1[0],card2[1]);
 }

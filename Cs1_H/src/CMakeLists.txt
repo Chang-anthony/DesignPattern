@@ -27,6 +27,7 @@ add_library(SimpleDesignPatternCs1H STATIC
     Rank.cpp
     Suit.cpp
     Card.cpp
+    Deck.cpp
 )
 
 
