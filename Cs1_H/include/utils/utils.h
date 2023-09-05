@@ -118,6 +118,14 @@ public:
     }
 
     template<typename T>
+    static void SizeShouldSmaller(const std::vector<T>& arr,int val)
+    {
+        if(arr.size() > val)
+            throw std::invalid_argument("arr size should Smaller than val");
+    }
+
+
+    template<typename T>
     static void ArrayShouldNotBeEmpty(const std::vector<T>& arr)
     {
         if(arr.empty())

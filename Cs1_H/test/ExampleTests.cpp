@@ -3,6 +3,7 @@
 #include "../include/Suit.hpp"
 #include "../include/Card.hpp"
 #include "../include/Deck.hpp"
+#include "../include/Player.hpp"
 
 
 TEST(Rank,RankTest)
@@ -62,4 +63,21 @@ TEST(Deck,DeckTest)
     std::vector<Card*> card2 = deck->GetCards();
 
     EXPECT_NE(card1[0],card2[1]);
+}
+
+TEST(Player,PlayerTest)
+{
+    //pure virtual function can not use this constructor
+    Player* player1 = new Player(true);
+    std::string name = "123";
+    Deck* deck = new Deck();
+    deck->Suffle();
+
+    player1->NameSelf();
+    EXPECT_EQ("123",player1->GetName());
+    player1->DrawCard(deck);
+
+    EXPECT_EQ(51,deck->GetCards().size());
+    EXPECT_EQ(1,player1->GetHandCards().size());
+    std::cout << "test" << std::endl;
 }
