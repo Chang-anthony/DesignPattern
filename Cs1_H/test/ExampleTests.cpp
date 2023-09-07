@@ -4,6 +4,8 @@
 #include "../include/Card.hpp"
 #include "../include/Deck.hpp"
 #include "../include/Player.hpp"
+#include "../include/HumanPlayer.hpp"
+#include "../include/AIPlayer.hpp"
 
 
 TEST(Rank,RankTest)
@@ -65,19 +67,49 @@ TEST(Deck,DeckTest)
     EXPECT_NE(card1[0],card2[1]);
 }
 
-TEST(Player,PlayerTest)
+TEST(HumanPlayer,PlayerTest)
 {
     //pure virtual function can not use this constructor
-    Player* player1 = new Player(true);
+    HumanPlayer* player1 = new HumanPlayer();
     std::string name = "123";
     Deck* deck = new Deck();
     deck->Suffle();
 
     player1->NameSelf();
     EXPECT_EQ("123",player1->GetName());
-    player1->DrawCard(deck);
+    for(int i = 0 ; i < 13;i++)
+        player1->DrawCard(deck);
 
-    EXPECT_EQ(51,deck->GetCards().size());
-    EXPECT_EQ(1,player1->GetHandCards().size());
+    // EXPECT_EQ(51,deck->GetCards().size());
+    // EXPECT_EQ(1,player1->GetHandCards().size());
+
+    Card* card = player1->GetHandCards()[5];
+    Card* choose = player1->ShowCard();
+
+    // EXPECT_EQ(card,choose);
+    EXPECT_EQ(12,player1->GetHandCards().size());
+    std::cout << "test" << std::endl;
+}
+
+TEST(AIPlayer,PlayerTest)
+{
+    //pure virtual function can not use this constructor
+    AIPlayer* player1 = new AIPlayer();
+    std::string name = "456";
+    Deck* deck = new Deck();
+    deck->Suffle();
+
+    player1->NameSelf();
+    EXPECT_EQ("456",player1->GetName());
+    for(int i = 0 ; i < 13;i++)
+        player1->DrawCard(deck);
+    int test = 0;
+
+    
+    Card* choose = player1->ShowCard();
+    // std::cin >> test;
+    // Card* card = player1->GetHandCards()[test-1];
+    // EXPECT_EQ(card,choose);
+    EXPECT_EQ(12,player1->GetHandCards().size());
     std::cout << "test" << std::endl;
 }

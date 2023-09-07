@@ -21,7 +21,7 @@ void Player::NameSelf()
 
 void Player::DrawCard(Deck* deck)
 {
-    std::cout << "玩家 :" << this->GetName() << "從牌堆抽牌" << std::endl;
+    std::cout << "玩家 :" << this->GetName() << " 從牌堆抽牌" << std::endl;
     Card* card = deck->DrawCard();
     this->handcards.push_back(card);
     //handle handcard length bigger to 13

@@ -29,6 +29,8 @@ add_library(SimpleDesignPatternCs1H STATIC
     Card.cpp
     Deck.cpp
     Player.cpp
+    AIPlayer.cpp
+    HumanPlayer.cpp
 )
 
 

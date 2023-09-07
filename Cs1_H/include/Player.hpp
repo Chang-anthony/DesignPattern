@@ -25,7 +25,7 @@ public:
 
     void NameSelf();
     void DrawCard(Deck* deck);
-    // virtual Card* ShowCard() = 0;
+    virtual Card* ShowCard() = 0;
     // TODO : Exchange function and virtual function
 
     //getter

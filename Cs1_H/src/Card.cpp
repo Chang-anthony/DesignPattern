@@ -13,8 +13,8 @@ Card::Card(Rank rank,Suit suit,Deck* deck):rank(rank),suit(suit),deck(deck)
 
 void Card::render()
 {
-    std::cout << SuitToName(this->GetSuit())  
-    << "[" << RankToName(this->GetRank()) << "]" << std::endl;
+    std::cout << SuitToName(this->GetSuit())[0]  
+    << "[" << RankToName(this->GetRank()) << "]";
 }
 
 /*if this card bigger than card return true;*/
