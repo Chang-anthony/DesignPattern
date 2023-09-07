@@ -31,6 +31,7 @@ add_library(SimpleDesignPatternCs1H STATIC
     Player.cpp
     AIPlayer.cpp
     HumanPlayer.cpp
+    ExchangeCard.cpp
 )
 
 

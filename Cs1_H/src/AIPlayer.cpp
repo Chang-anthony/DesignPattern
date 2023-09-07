@@ -27,15 +27,15 @@ Card* AIPlayer::ShowCard()
     std::cout << "玩家 :" << this->GetName() 
         << "請選擇要出什麼牌?" << std::endl; 
     
-    count = rand() % this->GetHandCards().size(); 
+    count = rand() % handcards.size(); 
     
     std::cout << "玩家 :" << this->GetName() 
         << "選擇第" << count+1 << "張手牌" << std::endl;
 
-    Card* choosecard = this->GetHandCards()[count];
-    //TODO:need to fix erase problem
+    Card* choosecard = handcards[count];
     std::vector<Card*>::iterator it = handcards.begin()+count;
     handcards.erase(it);
+    this->SetHandCards(handcards);
     
     return  choosecard;
 }

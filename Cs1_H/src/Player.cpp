@@ -1,5 +1,6 @@
 #include "../include/Player.hpp"
 #include "../include/Deck.hpp"
+#include "../include/ExchangeCard.hpp"
 
 
 Player::Player(bool Human)
@@ -9,6 +10,7 @@ Player::Player(bool Human)
     this->IsHuman = Human;
     this->point = 0;
     this->handcards = std::vector<Card*>();
+    this->exchangecard = nullptr;
 }
 
 void Player::NameSelf()
@@ -26,6 +28,21 @@ void Player::DrawCard(Deck* deck)
     this->handcards.push_back(card);
     //handle handcard length bigger to 13
     utils::SizeShouldSmaller(this->handcards,13);
+}
+
+void Player::DoExchange(Player* player2)
+{
+    if(this->GetExchange())
+    {
+        this->SetExchange(false);
+        ExchangeCard* exchangecard = new ExchangeCard(this,player2);
+        this->SetExChangeCard(exchangecard);
+        player2->SetExChangeCard(exchangecard);
+    }
+    else
+    {
+        this->SetExChangeCard(nullptr);
+    }
 }
 
 
@@ -54,6 +71,11 @@ int Player::GetPoint()
     return this->point;
 }
 
+ExchangeCard* Player::GetExChangeCard()
+{
+    return this->exchangecard;
+}
+
 void Player::SetName(std::string name)
 {
     this->name = name;
@@ -77,6 +99,11 @@ void Player::SetExchange(bool exchange)
 void Player::SetPoint(int point)
 {
     this->point = point;
+}
+
+void Player::SetExChangeCard(ExchangeCard* exchangecard)
+{
+    this->exchangecard = exchangecard;
 }
 
 Player::~Player()

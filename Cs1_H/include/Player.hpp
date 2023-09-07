@@ -9,11 +9,13 @@
 
 class Card;
 class Deck;
+class ExchangeCard;
 
 class Player
 {
 private:
     /* data */
+    ExchangeCard* exchangecard;
     std::string name;
     std::vector<Card*> handcards;
     bool IsHuman;
@@ -26,7 +28,7 @@ public:
     void NameSelf();
     void DrawCard(Deck* deck);
     virtual Card* ShowCard() = 0;
-    // TODO : Exchange function and virtual function
+    void DoExchange(Player* player2);
 
     //getter
     std::string GetName();
@@ -34,6 +36,8 @@ public:
     bool GetIsHuman();
     bool GetExchange();
     int GetPoint();
+    ExchangeCard* GetExChangeCard();
+    
 
     //setter
     void SetName(std::string name);
@@ -41,6 +45,7 @@ public:
     void SetIsHuman(bool ishuman);
     void SetExchange(bool exchange);
     void SetPoint(int point);
+    void SetExChangeCard(ExchangeCard* exchangecard);
 
 };
 
