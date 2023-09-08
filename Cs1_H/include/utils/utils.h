@@ -111,6 +111,13 @@ public:
     }
 
     template<typename T>
+    static void SizeShouldBe(const std::vector<T>& arr,int val)
+    {
+        if(arr.size() != val)
+            throw std::invalid_argument("arr size should be val");
+    }
+
+    template<typename T>
     static void SizeShouldBigger(const std::vector<T>& arr,int val)
     {
         if(arr.size() < val)

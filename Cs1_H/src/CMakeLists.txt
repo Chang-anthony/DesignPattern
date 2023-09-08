@@ -32,6 +32,7 @@ add_library(SimpleDesignPatternCs1H STATIC
     AIPlayer.cpp
     HumanPlayer.cpp
     ExchangeCard.cpp
+    Showdown.cpp
 )
 
 
