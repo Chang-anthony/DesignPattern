@@ -55,7 +55,7 @@ void Showdown::DrawCard()
     }
 }
 
-//TODO: need to do Round Function
+
 void Showdown::Round()
 {
     std::vector<Card*> show = std::vector<Card*>();
