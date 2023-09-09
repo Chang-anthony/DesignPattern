@@ -2,6 +2,7 @@
 #include "../include/Deck.hpp"
 #include "../include/Player.hpp"
 #include "../include/Card.hpp"
+#include "../include/ExchangeCard.hpp"
 #include <algorithm>
 #include <random>
 
@@ -60,12 +61,11 @@ void Showdown::Round()
     std::vector<Card*> show = std::vector<Card*>();
     for(auto player:players)
     {
-        if(player->GetExchange())
+        if(player->GetIsHuman())
         {
-            
-            std::cout << "請選擇 " << "1.行使交換權" << " " << "2. Show一張卡牌"  << std::endl;
-            if(player->GetIsHuman())
+            if(player->GetExchange())
             {
+                std::cout << "請選擇 " << "1.行使交換權" << " " << "2. Show一張卡牌"  << std::endl;
                 int choose = 0;
                 std::cin >> choose;
                 if(choose == 1)
@@ -76,32 +76,57 @@ void Showdown::Round()
                         return remove == player;
                     }),can_choose.end());
                     std::cout << "請輸入 1 ~ 3的數字選擇想交換卡牌的玩家" << std::endl;
-                    std::cin >> choose;
+                    choose = utils::HandleInput(1,3);
+                    std::cout << "玩家:" << player->GetName() << " 選擇 :" << can_choose[choose-1]->GetName() << " 交換手牌" << std::endl;
                     player->DoExchange(can_choose[choose-1]);
-                }
-                else
-                {
-                    if(player->GetExChangeCard())
-                    {
-                        
-                        
-                    }
-                    else
-                    {
-                        show.push_back(player->ShowCard());
-                    }
                 }
             }
             else
             {
-                
+                std::cout << "您已沒有交換卡牌的權利 直接選擇出牌" << std::endl; 
             }
         }
         else
         {
-
+            if(player->GetExchange())
+            {
+                std::cout << "請選擇 " << "1.行使交換權" << " " << "2. Show一張卡牌"  << std::endl;
+                // std::srand(unsigned(std::time(nullptr)));
+                int choose = rand() % 2;
+                if(choose == 1)
+                {
+                    std::vector<Player*> can_choose = this->GetPlayers();
+                    can_choose.erase(std::remove_if(can_choose.begin(),can_choose.end(),[player](Player* remove)
+                    {
+                        return remove == player;
+                    }),can_choose.end());
+                    std::cout << "請輸入 1 ~ 3的數字選擇想交換卡牌的玩家" << std::endl;
+                    choose = rand() % 3;
+                    std::cout << "玩家:" << player->GetName() << " 選擇 :" << can_choose[choose]->GetName() << " 交換手牌" << std::endl;
+                    player->DoExchange(can_choose[choose]);
+                }
+            }
+            else
+            {
+                std::cout << "您已沒有交換卡牌的權利 直接選擇出牌" << std::endl; 
+            }
         }
     }
+
+    for(auto player:this->players)
+    {
+        show.push_back(this->DoShowCard(player));
+    }
+
+    this->Render(show);
+    Player* winner = this->Bigger(show);
+    std::cout << "這回合的勝者為 :" << winner->GetName() << std::endl;
+    winner->SetPoint(winner->GetPoint()+1);
+}
+
+Card* Showdown::DoShowCard(Player* player)
+{
+    return player->ShowCard(); 
 }
 
 void Showdown::Render(std::vector<Card*> cards)
@@ -109,9 +134,12 @@ void Showdown::Render(std::vector<Card*> cards)
     int count = 1;
     for(auto card:cards)
     {
-        std::cout << "P" << count << ": " ;
+        std::cout << "P" << count << ": ";
         card->render();
+        std::cout << " ";
+        count++;
     }
+    std::cout << std::endl;
 }
 
 Player* Showdown::Bigger(std::vector<Card*> cards)

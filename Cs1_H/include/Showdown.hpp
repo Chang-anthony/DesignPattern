@@ -26,6 +26,7 @@ public:
     void DoShuffle();
     void DrawCard();
     void Round();
+    Card* DoShowCard(Player* player);
     void Render(std::vector<Card*> cards);
     Player* Bigger(std::vector<Card*> cards);
     void GameEnd();

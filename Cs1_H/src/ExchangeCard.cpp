@@ -6,6 +6,11 @@ ExchangeCard::ExchangeCard(Player* player1,Player* player2):player1(player1),pla
     int round = 3;
 }
 
+Player* ExchangeCard::Show(Player* player)
+{
+    return player1 == player ? player2 : player1;
+}
+
 Player* ExchangeCard::GetPlayer1()
 {
     return this->player1;
@@ -38,5 +43,5 @@ void ExchangeCard::SetRound(int round)
 
 ExchangeCard::~ExchangeCard()
 {
-    
+
 }

@@ -99,6 +99,21 @@ public:
         } 
     }
 
+    static int HandleInput(int min,int max)
+    {
+        std::cout << "請選擇數值介於" << min << "~" << max  << "之間!!!"<< std::endl;
+        int input;
+        std::cin >> input;
+        if( input < min || input > max)
+        {
+            return HandleInput(min,max);
+        }
+        else
+        {
+            return input;
+        }
+    }
+
     template<typename T>
     static void ValShouldBigger(T val,int min)
     {

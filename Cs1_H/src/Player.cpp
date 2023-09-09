@@ -36,12 +36,9 @@ void Player::DoExchange(Player* player2)
     {
         this->SetExchange(false);
         ExchangeCard* exchangecard = new ExchangeCard(this,player2);
+        //雙向關聯
         this->SetExChangeCard(exchangecard);
         player2->SetExChangeCard(exchangecard);
-    }
-    else
-    {
-        this->SetExChangeCard(nullptr);
     }
 }
 

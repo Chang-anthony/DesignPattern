@@ -46,7 +46,6 @@ public:
     void SetExchange(bool exchange);
     void SetPoint(int point);
     void SetExChangeCard(ExchangeCard* exchangecard);
-
 };
 
 #endif /* _PLAYER_H_ */

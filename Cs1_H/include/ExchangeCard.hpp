@@ -13,6 +13,8 @@ public:
     ExchangeCard(Player* player1,Player* player2);
     ~ExchangeCard();
 
+    Player* Show(Player* player);
+
     //getter
     Player* GetPlayer1();
     Player* GetPlayer2();
