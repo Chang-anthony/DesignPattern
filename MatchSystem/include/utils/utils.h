@@ -10,6 +10,9 @@
 #include <stdexcept>
 #include <codecvt>
 #include <locale>
+#include <algorithm>
+#include <cmath>
+#include <set>
 
 
 class CustomException : public std::exception{
@@ -64,6 +67,36 @@ public:
             throw std::invalid_argument("object can't be null.");
         return object;
     }
+
+    template<typename T>
+    static std::vector<T*> SetToVector(std::set<T*> set)
+    {
+        std::vector<T*> v = std::vector<T*>();
+        for(auto it:set)
+            v.push_back(it);
+        return v;
+
+        // auto tovector = [](std::set<T*> set)
+        // {
+        //     std::vector<T*> v = std::vector<T*>();
+        //     for(auto it:set)
+        //         v.push_back(it);
+        //     return v;
+        // };
+        // return tovector(set);
+    }
+
+    template<typename T>
+    static std::vector<T*> DeleteVal(T* val,std::vector<T*> vector)
+    {
+        vector.erase(std::remove_if(vector.begin(),vector.end(),[val](T* remove){
+            return remove == val;
+        }),vector.end());
+
+        return vector;
+    }
+
+
 
     template<typename T>
     static void ShouldBePositive(T val)

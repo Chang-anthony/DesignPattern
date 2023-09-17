@@ -22,6 +22,12 @@ void Individual::SetID(int id)
     id = id;
 }
 
+void Individual::AddHabit(Habit* habit)
+{
+    utils::RequireNonNull(habit);
+    this->habits.push_back(habit);
+}
+
 void Individual::SetAge(int age)
 {
     utils::ValShouldBigger(age,17);
