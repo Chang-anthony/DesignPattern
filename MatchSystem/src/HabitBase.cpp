@@ -51,7 +51,7 @@ Individual* HabitBase::Match(Individual* preson,std::set<Individual*> individual
     }
     else
     {
-        int max_count = INT_MAX - 1;
+        int max_count = -1;
         std::set<std::string> presonhabit = std::set<std::string>();
         for (auto habit:preson->GetHabits())
         {
@@ -63,12 +63,12 @@ Individual* HabitBase::Match(Individual* preson,std::set<Individual*> individual
             int count = 0;
             for(auto habit:v->GetHabits())
             {
-                if(presonhabit.find(habit->GetHabit()) != presonhabit.end())
+                if(presonhabit.find(habit->GetHabit()) == presonhabit.end())
                     count++;
             }
-            if(count <= max_count)
+            if(count >= max_count)
             {
-                matched = !matched ? v : count < max_count ? v : matched->GetID() > v->GetID() ? matched : v;
+                matched = !matched ? v : count > max_count ? v : matched->GetID() < v->GetID() ? matched : v;
                 max_count = std::max(count,max_count);
             }
         }

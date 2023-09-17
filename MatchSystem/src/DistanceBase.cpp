@@ -27,7 +27,7 @@ Individual* DistanceBase::Match(Individual* preson,std::set<Individual*> individ
 
     if(!preson->GetReverse())
     {
-        double distance = INT_MAX - 1 ;
+        double distance = INT_MAX - 1;
         for(auto v:can_choose)
         {
             double disx = preson->GetCoord()->GetX() - v->GetCoord()->GetX();
@@ -42,7 +42,7 @@ Individual* DistanceBase::Match(Individual* preson,std::set<Individual*> individ
     }
     else
     {
-        double distance = INT_MAX - 1 ;
+        double distance = INT_MIN + 1;
         for(auto v:can_choose)
         {
             double disx = preson->GetCoord()->GetX() - v->GetCoord()->GetX();
@@ -51,6 +51,7 @@ Individual* DistanceBase::Match(Individual* preson,std::set<Individual*> individ
             if(dis >= distance)
             {
                 matched = !matched ? v : dis > distance ? v : matched->GetID() > v->GetID() ? matched : v;
+                distance = std::max(distance,dis);
             }
         }
 
