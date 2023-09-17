@@ -66,9 +66,9 @@ Individual* MatchSystem::Match(Individual* person)
                         count++;
                 }
 
-                if(count > max_count)
+                if(count >= max_count)
                 {
-                    matched = !matched ? v : count > max_count ? v : matched;
+                    matched = !matched ? v : count > max_count ? v : matched->GetID() < v->GetID() ? matched : v;
                     max_count = std::max(count,max_count);
                 }
             }
@@ -108,9 +108,9 @@ Individual* MatchSystem::Match(Individual* person)
                         count++;
                 }
 
-                if(count < max_count)
+                if(count <= max_count)
                 {
-                    matched = !matched ? v : count < max_count ? v : matched;
+                    matched = !matched ? v : count < max_count ? v : matched->GetID() > v->GetID() ? matched : v;
                     max_count = std::max(count,max_count);
                 }
             }
