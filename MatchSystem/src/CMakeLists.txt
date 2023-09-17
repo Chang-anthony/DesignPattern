@@ -28,6 +28,9 @@ add_library(SimpleDesignPatternCs21H STATIC
     Habit.cpp
     Individual.cpp
     MatchSystem.cpp
+    MatchType.cpp
+    HabitBase.cpp
+    DistanceBase.cpp
 )
 
 

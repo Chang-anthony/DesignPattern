@@ -29,6 +29,4 @@ public:
     void SetIndividuals(std::set<Individual*> individuals);
 };
 
-
-
 #endif /* _MATCHSYSTEM_H_ */
