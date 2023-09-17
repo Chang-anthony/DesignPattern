@@ -9,14 +9,16 @@
 #include <algorithm>
 
 class Individual;
+class MatchType;
 
 class MatchSystem
 {
 private:
     /* data */
     std::set<Individual*> individuals;
+    MatchType* matchtype;
 public:
-    MatchSystem(/* args */);
+    MatchSystem(MatchType* matchtype);
     ~MatchSystem();
 
     void AddIndividuals(Individual* individual);
@@ -24,9 +26,11 @@ public:
 
     //get
     std::set<Individual*> GetIndividuals();
+    MatchType* GetMatchType();
 
     //set
     void SetIndividuals(std::set<Individual*> individuals);
+    void SetMatchType(MatchType* matchtype);
 };
 
 #endif /* _MATCHSYSTEM_H_ */

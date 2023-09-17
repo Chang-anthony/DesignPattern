@@ -4,14 +4,11 @@
 #include "../include/MatchSystem.hpp"
 
 Individual::Individual(int age,std::string gender,Coord* coord,std::string intro,
-                std::string prefermatch,bool reverse,std::vector<Habit*> habits,MatchSystem* system)
+                bool reverse,std::vector<Habit*> habits)
 {
-    SetMatchSystem(system);
-    SetID();
     SetAge(age);
     SetGender(gender);
     SetIntro(intro);
-    SetPreferMatch(prefermatch);
     SetReverse(reverse);
     SetHabits(habits);
     SetCoord(coord);
@@ -23,15 +20,9 @@ void Individual::AddHabit(Habit* habit)
     this->habits.push_back(habit);
 }
 
-void Individual::SetID()
+void Individual::SetID(int id)
 {
-    this->id = GetMatchSystem()->GetIndividuals().size() + 1;
-}
-
-void Individual::SetMatchSystem(MatchSystem* system)
-{
-    utils::RequireNonNull(system);
-    this->system = system;
+    this->id = id;
 }
 
 void Individual::SetAge(int age)
@@ -66,11 +57,6 @@ void Individual::SetReverse(bool reverse)
     this->reverse = reverse;
 }
 
-void Individual::SetPreferMatch(std::string prefermatch)
-{
-    this->prefermatch = prefermatch;
-}
-
 void Individual::SetHabits(std::vector<Habit*> habits)
 {
     utils::RequireNonNull(&habits);
@@ -97,10 +83,6 @@ std::string Individual::GetGender()
     return gender;
 }
 
-std::string Individual::GetPreferMatch()
-{
-    return prefermatch;
-}
 
 bool Individual::GetReverse()
 {
@@ -115,11 +97,6 @@ Coord* Individual::GetCoord()
 std::vector<Habit*> Individual::GetHabits()
 {
     return habits;
-}
-
-MatchSystem* Individual::GetMatchSystem()
-{
-    return system;
 }
 
 Individual::~Individual()
