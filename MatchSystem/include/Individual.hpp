@@ -6,6 +6,7 @@
 #include <vector>
 #include "../include/utils/utils.h"
 
+class MatchSystem;
 class Habit;
 class Coord;
 
@@ -14,6 +15,8 @@ class Individual
 {
 private:
     /* data */
+    MatchSystem* system;
+
     int id;
     int age;
     std::string gender;
@@ -23,8 +26,8 @@ private:
     std::string prefermatch;
     bool reverse;
 public:
-    Individual(int id,int age,std::string gender,Coord* coord,std::string intro,
-                std::string prefermatch,bool reverse,std::vector<Habit*> habits);
+    Individual(int age,std::string gender,Coord* coord,std::string intro,
+                std::string prefermatch,bool reverse,std::vector<Habit*> habits,MatchSystem* system);
     ~Individual();
 
     void AddHabit(Habit* habit);
@@ -38,9 +41,10 @@ public:
     std::string GetPreferMatch();
     bool GetReverse();
     std::vector<Habit*> GetHabits();
+    MatchSystem* GetMatchSystem();
 
     //setter
-    void SetID(int id);
+    void SetID();
     void SetAge(int age);
     void SetGender(std::string gender);
     void SetCoord(Coord* coord);
@@ -48,6 +52,7 @@ public:
     void SetPreferMatch(std::string prefermatch);
     void SetReverse(bool reverse);
     void SetHabits(std::vector<Habit*> habits);
+    void SetMatchSystem(MatchSystem* system);
 };
 
 #endif /* _INDIVIDUAL_H_ */

@@ -1,11 +1,13 @@
 #include "../include/Individual.hpp"
 #include "../include/Coord.hpp"
 #include "../include/Habit.hpp"
+#include "../include/MatchSystem.hpp"
 
-Individual::Individual(int id,int age,std::string gender,Coord* coord,std::string intro,
-                std::string prefermatch,bool reverse,std::vector<Habit*> habits)
+Individual::Individual(int age,std::string gender,Coord* coord,std::string intro,
+                std::string prefermatch,bool reverse,std::vector<Habit*> habits,MatchSystem* system)
 {
-    SetID(id);
+    SetMatchSystem(system);
+    SetID();
     SetAge(age);
     SetGender(gender);
     SetIntro(intro);
@@ -15,17 +17,21 @@ Individual::Individual(int id,int age,std::string gender,Coord* coord,std::strin
     SetCoord(coord);
 }
 
-void Individual::SetID(int id)
-{
-    //TODO: need to change to system size + 1
-    utils::ValShouldBigger(id,0);
-    id = id;
-}
-
 void Individual::AddHabit(Habit* habit)
 {
     utils::RequireNonNull(habit);
     this->habits.push_back(habit);
+}
+
+void Individual::SetID()
+{
+    this->id = GetMatchSystem()->GetIndividuals().size() + 1;
+}
+
+void Individual::SetMatchSystem(MatchSystem* system)
+{
+    utils::RequireNonNull(system);
+    this->system = system;
 }
 
 void Individual::SetAge(int age)
@@ -109,6 +115,11 @@ Coord* Individual::GetCoord()
 std::vector<Habit*> Individual::GetHabits()
 {
     return habits;
+}
+
+MatchSystem* Individual::GetMatchSystem()
+{
+    return system;
 }
 
 Individual::~Individual()
