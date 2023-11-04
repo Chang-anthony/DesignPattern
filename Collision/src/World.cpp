@@ -10,22 +10,10 @@ World::World()
 
     this->SetSprites(this->GenSprites());
     
-    // while(this->sprites.size() < 10)
-    // {
-    //     Sprite* sprite = Sprite::RandGenSprite();
-    //     if(this->sprites.find(sprite->GetCoord()) == this->sprites.end())
-    //     {
-    //         this->sprites.insert({sprite->GetCoord(),sprite});
-    //     }
-    // }
 }
 
 void World::AddSprite(Sprite* sprite)
 {
-    // if(this->sprites.find(sprite->GetCoord()) == this->sprites.end())
-    // {
-    //     this->sprites.insert({sprite->GetCoord(),sprite});
-    // }
 
     if(!this->sprites[sprite->GetCoord()])
     {
@@ -35,11 +23,6 @@ void World::AddSprite(Sprite* sprite)
 
 void World::Move(int x1,int x2)
 {
-    // if(this->sprites.find(x1) == this->sprites.end() 
-    //     || this->sprites.find(x2) == this->sprites.end())
-    // {
-    //     std::cout << "they have no Sprite" << std::endl;
-    // }
 
 }
 
