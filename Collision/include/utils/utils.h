@@ -159,6 +159,17 @@ public:
     }
 
     template<typename T>
+    static void ValShouldBe(T val,int min,int max)
+    {
+        if(val > max || val < min)
+        {
+           std::ostringstream oss;//   透過 ostringstream 來建立一個整數字符串
+            oss <<" val" << " should be " << min << " ~ " << max << ".";
+            throw std::invalid_argument(oss.str());
+        }
+    }
+
+    template<typename T>
     static void SizeShouldBe(const std::vector<T>& arr,int val)
     {
         if(arr.size() != val)

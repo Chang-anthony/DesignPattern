@@ -25,6 +25,10 @@ set(CMAKE_CXX_STANDARD 20)
 add_library(SimpleDesignPatternCs23H STATIC
     #source files
     World.cpp
+    Sprite.cpp
+    Fire.cpp
+    Water.cpp
+    Hero.cpp
 )
 
 
