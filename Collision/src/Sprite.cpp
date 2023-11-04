@@ -1,5 +1,8 @@
 #include "../include/Sprite.hpp"
 #include "../include/utils/utils.h"
+#include "../include/Hero.hpp"
+#include "../include/Water.hpp"
+#include "../include/Fire.hpp"
 #include <random>
 
 
@@ -10,14 +13,20 @@ Sprite::Sprite(char type)
     this->SetType(type);
 }
 
-Sprite::~Sprite()
-{
-    delete this;
-}
-
 void Sprite::Remove()
 {
     this->~Sprite();
+}
+
+Sprite* Sprite::RandGenSprite()
+{
+    std::vector<Sprite*> sprites = std::vector<Sprite*>{
+                            new Water(),
+                            new Fire(),
+                            new Hero()
+                            };
+    
+    return sprites[std::rand() % sprites.size()];
 }
 
 int Sprite::GetCoord()
@@ -40,3 +49,9 @@ void Sprite::SetType(char type)
 {
     this->type = type;
 }
+
+Sprite::~Sprite()
+{
+    delete this;
+}
+

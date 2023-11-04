@@ -22,6 +22,7 @@ public:
 
     //getter
     std::vector<Sprite*> GetSprites();
+    std::set<int> GetPostion();
 
     //setter
     void SetSprites(std::vector<Sprite*> sprites);

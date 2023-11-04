@@ -16,6 +16,7 @@ public:
     ~Sprite();
     //TODO : need to virtual function
     void Remove();
+    static Sprite* RandGenSprite();
 
     //getter
     int GetCoord();
