@@ -10,6 +10,7 @@ private:
 public:
     Water(/* args */);
     ~Water();
+    void Remove() override;
 };
 
 #endif /* _WATER_H_ */

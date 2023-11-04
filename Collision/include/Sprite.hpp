@@ -14,8 +14,7 @@ private:
 public:
     Sprite(char type);
     ~Sprite();
-    //TODO : need to virtual function
-    void Remove();
+    virtual void Remove();
     static Sprite* RandGenSprite();
 
     //getter

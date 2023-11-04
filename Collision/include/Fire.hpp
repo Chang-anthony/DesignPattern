@@ -11,6 +11,7 @@ private:
 public:
     Fire(/* args */);
     ~Fire();
+    void Remove() override;
 };
 
 #endif /* _FIRE_H_ */
