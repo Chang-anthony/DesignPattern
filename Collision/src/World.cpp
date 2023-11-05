@@ -34,8 +34,6 @@ void World::SetSprites(std::vector<Sprite*> sprites)
     this->sprites = sprites;
 }
 
-
-
 World::~World()
 {
 
