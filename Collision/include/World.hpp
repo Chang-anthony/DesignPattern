@@ -21,7 +21,7 @@ public:
     ~World();
     void AddSprite(Sprite* sprite);
     void Move(int x1,int x2);
-    void Collision(Sprite* c1,Sprite* c2);
+    void Collision(Sprite* c1,Sprite* c2,Sprite** sprites);
     Sprite** GenSprites();
     Sprite* (*TestGenSprites())[30];
 

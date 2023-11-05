@@ -13,9 +13,9 @@ public:
     CollisionHandle(CollisionHandle* next);
     ~CollisionHandle();
 
-    void handle(Sprite* c1,Sprite* c2);
+    void handle(Sprite* c1,Sprite* c2,Sprite** sprites);
     virtual bool match(Sprite* c1,Sprite* c2) = 0;
-    virtual void dohandle(Sprite* c1,Sprite* c2) = 0;
+    virtual void dohandle(Sprite* c1,Sprite* c2,Sprite** sprites) = 0;
 
     //setter
     void SetNext(CollisionHandle* next);

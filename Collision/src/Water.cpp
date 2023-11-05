@@ -11,5 +11,5 @@ void Water::Remove()
 
 Water::~Water()
 {
-    delete this;
+    //delete this;
 }

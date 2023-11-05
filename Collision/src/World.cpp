@@ -17,12 +17,18 @@ void World::AddSprite(Sprite* sprite)
 
 void World::Move(int x1,int x2)
 {
-
+    Sprite* c1 = this->sprites[x1];
+    Sprite* c2 = this->sprites[x2];
+    if(!c1 || !c2) 
+        return;
+    else
+        this->Collision(c1,c2,this->sprites);
 }
 
-void World::Collision(Sprite* c1,Sprite* c2)
+void World::Collision(Sprite* c1,Sprite* c2,Sprite** sprites)
 {
-    //this->CoR->handle(c1,c2);
+    //TODO:UML File Need to add Sprites param on world collision
+    this->CoR->handle(c1,c2,sprites);
 }
 
 Sprite** World::GetSprites()

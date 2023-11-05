@@ -52,6 +52,6 @@ void Sprite::SetType(char type)
 
 Sprite::~Sprite()
 {
-    delete this;
+    //delete this;
 }
 

@@ -11,7 +11,7 @@ void Fire::Remove()
 
 Fire::~Fire()
 {
-    delete this;
+    // delete this;
 }
 
 

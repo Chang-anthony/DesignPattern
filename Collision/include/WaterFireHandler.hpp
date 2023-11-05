@@ -3,6 +3,7 @@
 
 #include "../include/CollisionHandle.hpp"
 class Sprite;
+class Hero;
 
 class WaterFireHandler:public CollisionHandle
 {
@@ -13,7 +14,7 @@ public:
     ~WaterFireHandler();
 
     bool match(Sprite* c1,Sprite* c2) override;
-    void dohandle(Sprite* c1,Sprite* c2) override;
+    void dohandle(Sprite* c1,Sprite* c2,Sprite** sprites) override;
 };
 
 #endif /* _WATERFIREHANDLER_H_ */

@@ -13,7 +13,7 @@ public:
     ~SameTypeHandler();
 
     bool match(Sprite* c1,Sprite* c2) override;
-    void dohandle(Sprite* c1,Sprite* c2) override;
+    void dohandle(Sprite* c1,Sprite* c2,Sprite** sprites) override;
 };
 
 

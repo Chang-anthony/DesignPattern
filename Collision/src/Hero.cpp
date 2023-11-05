@@ -28,5 +28,5 @@ int Hero::GetHp()
 
 Hero::~Hero()
 {
-    delete this;
+    //delete this;
 }
