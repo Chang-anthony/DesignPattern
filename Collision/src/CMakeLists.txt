@@ -30,6 +30,10 @@ add_library(SimpleDesignPatternCs23H STATIC
     Water.cpp
     Hero.cpp
     CollisionHandle.cpp
+    HeroFireHandler.cpp
+    HeroWaterHandler.cpp
+    WaterFireHandler.cpp
+    SameTypeHandler.cpp
 )
 
 

@@ -17,7 +17,7 @@ private:
     Sprite* sprites[30];
     CollisionHandle* CoR;
 public:
-    World();
+    World(CollisionHandle* CoR);
     ~World();
     void AddSprite(Sprite* sprite);
     void Move(int x1,int x2);

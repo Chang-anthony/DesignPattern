@@ -4,21 +4,15 @@
 #include "../include/CollisionHandle.hpp"
 
 
-World::World()
+World::World(CollisionHandle* CoR):CoR(CoR)
 {
-    //this->CoR = CoR;
-
     this->SetSprites(this->GenSprites());
     
 }
 
 void World::AddSprite(Sprite* sprite)
 {
-
-    if(!this->sprites[sprite->GetCoord()])
-    {
-        this->sprites[sprite->GetCoord()] = sprite;
-    }
+    this->sprites[sprite->GetCoord()] = sprite;
 }
 
 void World::Move(int x1,int x2)

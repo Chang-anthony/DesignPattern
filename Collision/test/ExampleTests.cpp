@@ -5,6 +5,10 @@
 #include "../include/Hero.hpp"
 #include "../include/World.hpp"
 #include "../include/CollisionHandle.hpp"
+#include "../include/SameTypeHandler.hpp"
+#include "../include/HeroFireHandler.hpp"
+#include "../include/HeroWaterHandler.hpp"
+#include "../include/WaterFireHandler.hpp"
 
 
 TEST(Sprite,Sprite_test)
@@ -22,8 +26,13 @@ TEST(Sprite,Sprite_test)
 TEST(World,World_test)
 {
     // CollisionHandle* head = new CollisionHandle();
-    World* world = new World();
-    World* world2 = new World();
+    HeroFireHandler* head = new HeroFireHandler(
+                                new HeroWaterHandler(
+                                    new WaterFireHandler(
+                                        new SameTypeHandler(
+                                            nullptr))));
+    World* world = new World(head);
+    World* world2 = new World(head);
 
     Sprite** sprites = world->GetSprites();
     Sprite** gen = world->GenSprites();
