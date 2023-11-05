@@ -11,7 +11,8 @@ public:
     HabitBase(/* args */);
     ~HabitBase();
     
-    Individual* Match(Individual* preson,std::set<Individual*> individuals) override;
+    std::vector<Individual*> Match(Individual* preson,std::set<Individual*> individuals) override;
+    Individual* result(Individual* person,std::set<Individual*> individuals) override;
 };
 
 #endif /* _HABITBASE_H_ */

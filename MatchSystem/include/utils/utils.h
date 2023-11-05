@@ -14,6 +14,15 @@
 #include <cmath>
 #include <set>
 
+template<typename T>
+struct cmp
+{
+    bool operator()(const T& a,const T& b)
+    {
+        //小排到大
+        return a < b;
+    }
+};
 
 class CustomException : public std::exception{
 public:

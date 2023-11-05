@@ -16,7 +16,8 @@ public:
     MatchType();
     ~MatchType();
 
-    virtual Individual* Match(Individual* person,std::set<Individual*> individuals) = 0;
+    virtual std::vector<Individual*> Match(Individual* person,std::set<Individual*> individuals) = 0;
+    virtual Individual* result(Individual* person,std::set<Individual*> individuals) = 0;
 };
 
 #endif /* _MATCHTYPE_H_ */

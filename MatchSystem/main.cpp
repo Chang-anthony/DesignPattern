@@ -19,13 +19,13 @@ int main()
     MatchSystem* system = new MatchSystem(new HabitBase());
 
     Individual* one = new Individual(18,"MALE",new Coord(1,0),
-                        "Hi my name is one",false,{new Habit("1"),new Habit("2"),new Habit("3")});
+                        "Hi my name is one",{new Habit("1"),new Habit("2"),new Habit("3")});
     
     Individual* two = new Individual(19,"MALE",new Coord(2,-1),
-                "Hi my name is two",false,{new Habit("2"),new Habit("3"),new Habit("5")});
+                "Hi my name is two",{new Habit("2"),new Habit("3"),new Habit("5")});
 
     Individual* three = new Individual(21,"FEMALE",new Coord(1,-1),
-                "Hi my name is two",false,{new Habit("1"),new Habit("2"),new Habit("3")});
+                "Hi my name is two",{new Habit("1"),new Habit("2"),new Habit("3")});
 
     system->AddIndividuals(one);
     system->AddIndividuals(two);

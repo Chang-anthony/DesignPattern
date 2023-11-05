@@ -1,21 +1,21 @@
-#ifndef _DISTANCEBASE_H_
-#define _DISTANCEBASE_H_
+#ifndef _REVERSE_H_
+#define _REVERSE_H_
 
 #include "../include/MatchType.hpp"
 
+class Individual;
 
-
-class DistanceBase : public MatchType
+class Reverse : public MatchType
 {
 private:
     /* data */
+    MatchType* reverse;
 public:
-    DistanceBase(/* args */);
-    ~DistanceBase();
+    Reverse(MatchType* reverse);
+    ~Reverse();
 
     std::vector<Individual*> Match(Individual* preson,std::set<Individual*> individuals) override;
     Individual* result(Individual* person,std::set<Individual*> individuals) override;
 };
 
-
-#endif /* _DISTANCEBASE_H_ */
+#endif /* _REVERSE_H_ */

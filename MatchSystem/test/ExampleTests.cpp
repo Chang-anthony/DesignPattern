@@ -6,19 +6,20 @@
 #include "../include/Habit.hpp"
 #include "../include/DistanceBase.hpp"
 #include "../include/HabitBase.hpp"
+#include "../include/Reverse.hpp"
 
 TEST(DISTANCEBASE,DISTANCEBASE_TEST)
 {
     MatchSystem* system = new MatchSystem(new DistanceBase());
 
     Individual* one = new Individual(18,"MALE",new Coord(1,0),
-                        "Hi my name is one",false,{new Habit("1"),new Habit("2"),new Habit("3")});
+                        "Hi my name is one",{new Habit("1"),new Habit("2"),new Habit("3")});
     
     Individual* two = new Individual(19,"MALE",new Coord(2,-1),
-                "Hi my name is two",false,{new Habit("2"),new Habit("3"),new Habit("5")});
+                "Hi my name is two",{new Habit("2"),new Habit("3"),new Habit("5")});
 
     Individual* three = new Individual(21,"FEMALE",new Coord(1,-1),
-                "Hi my name is two",false,{new Habit("1"),new Habit("2"),new Habit("3")});
+                "Hi my name is two",{new Habit("1"),new Habit("2"),new Habit("3")});
 
     system->AddIndividuals(one);
     system->AddIndividuals(two);
@@ -30,16 +31,16 @@ TEST(DISTANCEBASE,DISTANCEBASE_TEST)
 
 TEST(DISTANCEBASE_REVERSE,DISTANCEBASE_REVERSE_TEST)
 {
-    MatchSystem* system = new MatchSystem(new DistanceBase());
+    MatchSystem* system = new MatchSystem(new Reverse(new DistanceBase()));
 
     Individual* one = new Individual(18,"MALE",new Coord(1,0),
-                        "Hi my name is one",true,{new Habit("1"),new Habit("2"),new Habit("3")});
+                        "Hi my name is one",{new Habit("1"),new Habit("2"),new Habit("3")});
     
     Individual* two = new Individual(19,"MALE",new Coord(2,-1),
-                "Hi my name is two",false,{new Habit("2"),new Habit("3"),new Habit("5")});
+                "Hi my name is two",{new Habit("2"),new Habit("3"),new Habit("5")});
 
     Individual* three = new Individual(21,"FEMALE",new Coord(1,-1),
-                "Hi my name is two",false,{new Habit("1"),new Habit("2"),new Habit("3")});
+                "Hi my name is two",{new Habit("1"),new Habit("2"),new Habit("3")});
 
     system->AddIndividuals(one);
     system->AddIndividuals(two);
@@ -52,16 +53,16 @@ TEST(DISTANCEBASE_REVERSE,DISTANCEBASE_REVERSE_TEST)
 
 TEST(HABITBASE,HABITBASE_TEST)
 {
-    MatchSystem* system = new MatchSystem(new HabitBase());
+    MatchSystem* system = new MatchSystem(new Reverse(new Reverse(new HabitBase())));
 
     Individual* one = new Individual(18,"MALE",new Coord(1,0),
-                        "Hi my name is one",false,{new Habit("1"),new Habit("2"),new Habit("3")});
+                        "Hi my name is one",{new Habit("1"),new Habit("2"),new Habit("3")});
     
     Individual* two = new Individual(19,"MALE",new Coord(2,-1),
-                "Hi my name is two",false,{new Habit("2"),new Habit("3"),new Habit("5")});
+                "Hi my name is two",{new Habit("2"),new Habit("3"),new Habit("5")});
 
     Individual* three = new Individual(21,"FEMALE",new Coord(1,-1),
-                "Hi my name is two",false,{new Habit("1"),new Habit("2"),new Habit("3")});
+                "Hi my name is two",{new Habit("1"),new Habit("2"),new Habit("3")});
 
     system->AddIndividuals(one);
     system->AddIndividuals(two);
@@ -73,16 +74,16 @@ TEST(HABITBASE,HABITBASE_TEST)
 
 TEST(HABITBASE_REVERSE,HABITBASE_REVERSE_TEST)
 {
-    MatchSystem* system = new MatchSystem(new HabitBase());
+    MatchSystem* system = new MatchSystem(new Reverse(new HabitBase()));
 
     Individual* one = new Individual(18,"MALE",new Coord(1,0),
-                        "Hi my name is one",true,{new Habit("1"),new Habit("2"),new Habit("3")});
+                        "Hi my name is one",{new Habit("1"),new Habit("2"),new Habit("3")});
     
     Individual* two = new Individual(19,"MALE",new Coord(2,-1),
-                "Hi my name is two",false,{new Habit("2"),new Habit("3"),new Habit("5")});
+                "Hi my name is two",{new Habit("2"),new Habit("3"),new Habit("5")});
 
     Individual* three = new Individual(21,"FEMALE",new Coord(1,-1),
-                "Hi my name is two",false,{new Habit("1"),new Habit("2"),new Habit("3")});
+                "Hi my name is two",{new Habit("1"),new Habit("2"),new Habit("3")});
 
     system->AddIndividuals(one);
     system->AddIndividuals(two);

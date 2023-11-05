@@ -4,12 +4,11 @@
 #include "../include/MatchSystem.hpp"
 
 Individual::Individual(int age,std::string gender,Coord* coord,std::string intro,
-                bool reverse,std::vector<Habit*> habits)
+                std::vector<Habit*> habits)
 {
     SetAge(age);
     SetGender(gender);
     SetIntro(intro);
-    SetReverse(reverse);
     SetHabits(habits);
     SetCoord(coord);
 }
@@ -52,11 +51,6 @@ void Individual::SetCoord(Coord* coord)
     this->coord = coord;
 }
 
-void Individual::SetReverse(bool reverse)
-{
-    this->reverse = reverse;
-}
-
 void Individual::SetHabits(std::vector<Habit*> habits)
 {
     utils::RequireNonNull(&habits);
@@ -83,11 +77,6 @@ std::string Individual::GetGender()
     return gender;
 }
 
-
-bool Individual::GetReverse()
-{
-    return reverse;
-}
 
 Coord* Individual::GetCoord()
 {

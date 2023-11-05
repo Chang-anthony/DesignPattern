@@ -1,12 +1,15 @@
 #include "../include/HabitBase.hpp"
 #include "../include/Individual.hpp"
 #include "../include/Habit.hpp"
+#include <algorithm>
+
+typedef std::pair<int,Individual*> P;
 
 HabitBase::HabitBase(/* args */) : MatchType()
 {
 }
 
-Individual* HabitBase::Match(Individual* preson,std::set<Individual*> individuals)
+std::vector<Individual*> HabitBase::Match(Individual* preson,std::set<Individual*> individuals)
 {
 
     auto tovector = [](std::set<Individual*> individuals)
@@ -23,58 +26,46 @@ Individual* HabitBase::Match(Individual* preson,std::set<Individual*> individual
         return remove == preson;
     }),can_choose.end());
 
-    Individual* matched = nullptr;
-    if(!preson->GetReverse())
+    std::vector<P> helper = std::vector<P>();
+    std::vector<Individual*> result = std::vector<Individual*>();
+
+
+    int max_count = -1;
+    std::set<std::string> presonhabit = std::set<std::string>();
+    for (auto habit:preson->GetHabits())
     {
-       
-        int max_count = -1;
-        std::set<std::string> presonhabit = std::set<std::string>();
-        for (auto habit:preson->GetHabits())
-        {
-            presonhabit.insert(habit->GetHabit());
-        }
-        
-        for(auto v : can_choose)
-        {
-            int count = 0;
-            for(auto habit:v->GetHabits())
-            {
-                if(presonhabit.find(habit->GetHabit()) != presonhabit.end())
-                    count++;
-            }
-            if(count >= max_count)
-            {
-                matched = !matched ? v : count > max_count ? v : matched->GetID() < v->GetID() ? matched : v;
-                max_count = std::max(count,max_count);
-            }
-        }
+        presonhabit.insert(habit->GetHabit());
     }
-    else
+    
+    for(auto v : can_choose)
     {
-        int max_count = -1;
-        std::set<std::string> presonhabit = std::set<std::string>();
-        for (auto habit:preson->GetHabits())
+        int count = 0;
+        for(auto habit:v->GetHabits())
         {
-            presonhabit.insert(habit->GetHabit());
+            if(presonhabit.find(habit->GetHabit()) != presonhabit.end())
+                count++;
         }
-        
-        for(auto v : can_choose)
-        {
-            int count = 0;
-            for(auto habit:v->GetHabits())
-            {
-                if(presonhabit.find(habit->GetHabit()) == presonhabit.end())
-                    count++;
-            }
-            if(count >= max_count)
-            {
-                matched = !matched ? v : count > max_count ? v : matched->GetID() < v->GetID() ? matched : v;
-                max_count = std::max(count,max_count);
-            }
-        }
+        helper.push_back({count,v});
     }
 
-    return matched;
+    std::sort(helper.begin(),helper.end(),[](const P& a,const P& b)
+    {
+        if(a.first == b.first)
+            return a.second->GetID() < b.second->GetID();
+        else
+            return a.first > b.first;
+    });
+
+    for(auto p:helper)
+        result.push_back(p.second);
+    
+    return result;
+}
+
+Individual* HabitBase::result(Individual* person,std::set<Individual*> individuals)
+{
+    std::vector<Individual*> result = this->Match(person,individuals);
+    return result[0];
 }
 
 HabitBase::~HabitBase()

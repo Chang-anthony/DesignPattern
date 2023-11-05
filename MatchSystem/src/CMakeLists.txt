@@ -31,6 +31,7 @@ add_library(SimpleDesignPatternCs21H STATIC
     MatchType.cpp
     HabitBase.cpp
     DistanceBase.cpp
+    Reverse.cpp
 )
 
 

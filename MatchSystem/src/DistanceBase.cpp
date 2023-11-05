@@ -2,12 +2,15 @@
 #include "../include/Individual.hpp"
 #include "../include/Coord.hpp"
 #include <cmath>
+#include <algorithm>
+
+typedef std::pair<double,Individual*> P;
 
 DistanceBase::DistanceBase(/* args */) : MatchType()
 {
 }
 
-Individual* DistanceBase::Match(Individual* preson,std::set<Individual*> individuals)
+std::vector<Individual*> DistanceBase::Match(Individual* preson,std::set<Individual*> individuals)
 {
     auto tovector = [](std::set<Individual*> individuals)
     {
@@ -23,41 +26,37 @@ Individual* DistanceBase::Match(Individual* preson,std::set<Individual*> individ
         return remove == preson;
     }),can_choose.end());
 
-    Individual* matched = nullptr;
+    std::vector<P> helper = std::vector<P>();
+    std::vector<Individual*> result = std::vector<Individual*>();
 
-    if(!preson->GetReverse())
+    double distance = INT_MAX - 1;
+    for(auto v:can_choose)
     {
-        double distance = INT_MAX - 1;
-        for(auto v:can_choose)
-        {
-            double disx = preson->GetCoord()->GetX() - v->GetCoord()->GetX();
-            double disy = preson->GetCoord()->GetY() - v->GetCoord()->GetY();
-            double dis = std::sqrt((disx*disx + disy*disy));
-            if(dis <= distance)
-            {
-                matched = !matched ? v : dis < distance ? v : matched->GetID() < v->GetID() ? matched : v;
-                distance = std::min(distance,dis);
-            }
-        }
-    }
-    else
-    {
-        double distance = INT_MIN + 1;
-        for(auto v:can_choose)
-        {
-            double disx = preson->GetCoord()->GetX() - v->GetCoord()->GetX();
-            double disy = preson->GetCoord()->GetY() - v->GetCoord()->GetY();
-            double dis = std::sqrt((disx*disx + disy*disy));
-            if(dis >= distance)
-            {
-                matched = !matched ? v : dis > distance ? v : matched->GetID() > v->GetID() ? matched : v;
-                distance = std::max(distance,dis);
-            }
-        }
-
+        double disx = preson->GetCoord()->GetX() - v->GetCoord()->GetX();
+        double disy = preson->GetCoord()->GetY() - v->GetCoord()->GetY();
+        double dis = std::sqrt((disx*disx + disy*disy));
+        helper.push_back({dis,v});
     }
 
-    return matched;
+    //sort use first val
+    std::sort(helper.begin(),helper.end(),[](const P& a,const P& b){
+            if(a.first == b.first)
+                return a.second->GetID() < b.second->GetID(); 
+            //小排到大
+            else
+                return a.first < b.first;
+    });
+
+    for(auto r:helper)
+        result.push_back(r.second);
+
+    return result;
+}
+
+Individual* DistanceBase::result(Individual* person,std::set<Individual*> individuals)
+{
+    std::vector<Individual*> result = this->Match(person,individuals);
+    return result[0];
 }
 
 DistanceBase::~DistanceBase()

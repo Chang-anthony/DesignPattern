@@ -11,7 +11,7 @@ MatchSystem::MatchSystem(MatchType* matchtype)
 
 Individual* MatchSystem::Match(Individual* person)
 {
-    return this->matchtype->Match(person,this->individuals);
+    return this->matchtype->result(person,this->individuals);
 }
 
 void MatchSystem::AddIndividuals(Individual* individual)

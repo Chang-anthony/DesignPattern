@@ -20,10 +20,9 @@ private:
     Coord* coord;
     std::vector<Habit*> habits;
     std::string intro;
-    bool reverse;
 public:
     Individual(int age,std::string gender,Coord* coord,std::string intro,
-                bool reverse,std::vector<Habit*> habits);
+                std::vector<Habit*> habits);
     ~Individual();
 
     void AddHabit(Habit* habit);
@@ -34,7 +33,6 @@ public:
     std::string GetGender();
     Coord* GetCoord();
     std::string GetIntro();
-    bool GetReverse();
     std::vector<Habit*> GetHabits();
 
     //setter
@@ -43,7 +41,6 @@ public:
     void SetGender(std::string gender);
     void SetCoord(Coord* coord);
     void SetIntro(std::string intro);
-    void SetReverse(bool reverse);
     void SetHabits(std::vector<Habit*> habits);
 };
 
