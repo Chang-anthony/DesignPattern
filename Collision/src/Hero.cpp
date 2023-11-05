@@ -6,6 +6,11 @@ Hero::Hero(/* args */):Sprite('H')
     this->hp = 30;
 }
 
+void Hero::Remove()
+{
+    this->~Hero();
+}
+
 void Hero::GainHp(int hp)
 {
     this->hp += hp;
@@ -23,4 +28,5 @@ int Hero::GetHp()
 
 Hero::~Hero()
 {
+    delete this;
 }

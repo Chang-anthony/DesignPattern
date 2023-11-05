@@ -4,6 +4,7 @@
 #include "../include/Water.hpp"
 #include "../include/Hero.hpp"
 #include "../include/World.hpp"
+#include "../include/CollisionHandle.hpp"
 
 
 TEST(Sprite,Sprite_test)
@@ -20,11 +21,35 @@ TEST(Sprite,Sprite_test)
 
 TEST(World,World_test)
 {
+    // CollisionHandle* head = new CollisionHandle();
     World* world = new World();
+    World* world2 = new World();
 
-    std::set<int> pos = world->GetPostion();
-    std::vector<Sprite*> sprites = world->GetSprites();
+    Sprite** sprites = world->GetSprites();
+    Sprite** gen = world->GenSprites();
+    world->SetSprites(gen);
+    // Sprite* (*gen2)[30] = world->TestGenSprites();
+    
+    Sprite** nowSprites = world->GetSprites();
 
-    EXPECT_EQ(pos.size(),10);
-    EXPECT_EQ(sprites.size(),10);
+    Sprite* T1 = *(nowSprites+1);
+    Sprite* T2 = *(gen+1); 
+
+
+    EXPECT_EQ(T1,T2);
+    //EXPECT_EQ(*(nowSprites+3)->GetCoord(),*(gen+3)->GetCoord());
+
+    Sprite* (*gen2)[30] = world->TestGenSprites();
+    world2->SetSprites(gen2);
+    Sprite** nowSprites2 = world2->GetSprites();
+
+    Sprite* T3 = *(nowSprites2+2);
+    Sprite* T4 = (*gen2)[2];// (*gen2) -> Sprite* [30]
+
+    EXPECT_EQ(T3,T4);
+
+    std::cout << "Test Done" << std::endl;
+    // EXPECT_EQ(sprites[1],nullptr);
+    // EXPECT_EQ(sprites.size(),10);
+
 }

@@ -11,6 +11,7 @@ private:
 public:
     Hero(/* args */);
     ~Hero();
+    void Remove() override;
     void GainHp(int hp);
     bool IsDead();
 

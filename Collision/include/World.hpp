@@ -4,30 +4,33 @@
 #include <iostream>
 #include <vector>
 #include <string>
+#include <map>
 #include <set>
 
 class Sprite;
+class CollisionHandle;
 
 class World
 {
 private:
     /* data */
-    std::vector<Sprite*> sprites;
+    Sprite* sprites[30];
+    CollisionHandle* CoR;
 public:
-    World(/* args */);
+    World();
     ~World();
-    void AddSprites(Sprite* sprite);
+    void AddSprite(Sprite* sprite);
     void Move(int x1,int x2);
     void Collision(Sprite* c1,Sprite* c2);
+    Sprite** GenSprites();
+    Sprite* (*TestGenSprites())[30];
 
     //getter
-    std::vector<Sprite*> GetSprites();
-    std::set<int> GetPostion();
+    Sprite** GetSprites();
 
     //setter
-    void SetSprites(std::vector<Sprite*> sprites);
-protected:
-    std::set<int> position;
+    void SetSprites(Sprite** sprites);
+    void SetSprites(Sprite* (*sprites)[30]);
 };
 
 #endif /* _WORLD_H_ */
