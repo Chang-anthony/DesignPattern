@@ -16,7 +16,7 @@
 
 
 //TODO: need to wirte simple test to test Round function
-int main()
+int main(int argc, char **argv)
 {
     HumanPlayer* P1 = new HumanPlayer();
     AIPlayer* P2 = new AIPlayer();
