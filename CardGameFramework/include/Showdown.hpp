@@ -6,38 +6,29 @@
 #include <string>
 #include <vector>
 #include "../include/utils/utils.h"
+#include "../include/CardGame.hpp"
 
 class Player;
 class Deck;
 class Card;
 
-class Showdown
+class Showdown : public CardGame
 {
 private:
     /* data */
-    Deck* deck;
-    std::vector<Player*> players;
+    int drawcardend;
+    int round;
 public:
-    Showdown(Deck* deck,std::vector<Player*> players);
+    Showdown(std::vector<Player*> players,Deck* deck);
     ~Showdown();
 
-    void GameStart();
-    void NameHimSelf();
-    void DoShuffle();
-    void DrawCard();
-    void Round();
-    Card* DoShowCard(Player* player);
+    void Round() override;
     void Render(std::vector<Card*> cards);
+    bool DrawCardEnd() override;
+    bool IsGameEnd() override;
+    Player* GetWinner() override;
     Player* Bigger(std::vector<Card*> cards);
-    void GameEnd();
 
-    //getter
-    Deck* GetDeck();
-    std::vector<Player*> GetPlayers();
-
-    //setter
-    void SetDeck(Deck* deck);
-    void SetPlayers(std::vector<Player*> players);
 };
 
 #endif /* _SHOWDOWN_H_ */

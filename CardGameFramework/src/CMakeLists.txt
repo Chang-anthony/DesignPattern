@@ -26,13 +26,14 @@ add_library(SimpleDesignPatternCs2_2H STATIC
     #source files
     Rank.cpp
     Suit.cpp
-    Card.cpp
+    ShowDownCard.cpp
     Deck.cpp
-    Player.cpp
+    ShowDownPlayer.cpp
     AIPlayer.cpp
     HumanPlayer.cpp
-    ExchangeCard.cpp
     Showdown.cpp
+    Card.cpp
+    Hand.cpp
 )
 
 

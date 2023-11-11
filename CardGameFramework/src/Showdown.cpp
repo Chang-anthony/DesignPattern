@@ -2,131 +2,81 @@
 #include "../include/Deck.hpp"
 #include "../include/Player.hpp"
 #include "../include/Card.hpp"
-#include "../include/ExchangeCard.hpp"
+#include "../include/ShowDownPlayer.hpp"
+#include "../include/ShowDownCard.hpp"
+#include "../include/Hand.hpp"
 #include <algorithm>
+#include <typeinfo>
 #include <random>
 
-Showdown::Showdown(Deck* deck,std::vector<Player*> players):deck(deck),players(players)
+
+Showdown::Showdown(std::vector<Player*> players,Deck* deck):CardGame(players,deck)
 {
-    utils::SizeShouldBe(players,4);
+    this->drawcardend = 0;
+    this->round = 0;
 }
 
-void Showdown::GameStart()
+bool Showdown::DrawCardEnd()
 {
-    std::cout << "ShowDown遊戲開始!!!" << std::endl;
-    std::cout << "請各位玩家取名!!!" << std::endl;
+    this->drawcardend++;
+    return this->drawcardend < 13; 
 }
 
-Deck* Showdown::GetDeck()
+bool  Showdown::IsGameEnd()
 {
-    return this->deck;
+    return this->round < 13;
 }
 
-std::vector<Player*> Showdown::GetPlayers()
+Player* Showdown::GetWinner()
 {
-    return  this->players;
-}
-
-void Showdown::SetDeck(Deck* deck)
-{
-    this->deck = deck;
-}
-
-void Showdown::NameHimSelf()
-{
-    for(auto player:this->players)
-        player->NameSelf();
-}
-
-void Showdown::DoShuffle()
-{
-    std::cout << "開始洗牌!!!" << std::endl;
-    this->GetDeck()->Suffle();
-    std::cout << "洗牌結束!!!" << std::endl;
-}
-
-void Showdown::DrawCard()
-{
-    std::cout << "各玩家輪流抽牌" << std::endl;
-    for(int i = 0 ; i < 13 ; i++ )
+    Player* win = nullptr;
+    int maxv = 0;
+    for(auto player:this->GetPlayers())
     {
-        for(auto player:this->players)
-            player->DrawCard(this->deck);  
+        ShowDownPlayer* p = dynamic_cast<ShowDownPlayer*>(player);
+        if(p->GetPoint() > maxv)
+        {
+            win = p;
+            maxv = p->GetPoint();
+        }
     }
+
+    return win;
 }
 
 
 void Showdown::Round()
 {
     std::vector<Card*> show = std::vector<Card*>();
-    for(auto player:players)
+    
+    for(auto player:this->GetPlayers())
     {
-        if(player->GetIsHuman())
-        {
-            if(player->GetExchange())
-            {
-                std::cout << "請選擇 " << "1.行使交換權" << " " << "2. Show一張卡牌"  << std::endl;
-                int choose = 0;
-                std::cin >> choose;
-                if(choose == 1)
-                {
-                    std::vector<Player*> can_choose = this->GetPlayers();
-                    can_choose.erase(std::remove_if(can_choose.begin(),can_choose.end(),[player](Player* remove)
-                    {
-                        return remove == player;
-                    }),can_choose.end());
-                    std::cout << "請輸入 1 ~ 3的數字選擇想交換卡牌的玩家" << std::endl;
-                    choose = utils::HandleInput(1,3);
-                    std::cout << "玩家:" << player->GetName() << " 選擇 :" << can_choose[choose-1]->GetName() << " 交換手牌" << std::endl;
-                    player->DoExchange(can_choose[choose-1]);
-                }
-            }
-            else
-            {
-                std::cout << "您已沒有交換卡牌的權利 直接選擇出牌" << std::endl; 
-            }
-        }
-        else
-        {
-            if(player->GetExchange())
-            {
-                std::cout << "請選擇 " << "1.行使交換權" << " " << "2. Show一張卡牌"  << std::endl;
-                // std::srand(unsigned(std::time(nullptr)));
-                int choose = rand() % 2;
-                if(choose == 1)
-                {
-                    std::vector<Player*> can_choose = this->GetPlayers();
-                    can_choose.erase(std::remove_if(can_choose.begin(),can_choose.end(),[player](Player* remove)
-                    {
-                        return remove == player;
-                    }),can_choose.end());
-                    std::cout << "請輸入 1 ~ 3的數字選擇想交換卡牌的玩家" << std::endl;
-                    choose = rand() % 3;
-                    std::cout << "玩家:" << player->GetName() << " 選擇 :" << can_choose[choose]->GetName() << " 交換手牌" << std::endl;
-                    player->DoExchange(can_choose[choose]);
-                }
-            }
-            else
-            {
-                std::cout << "您已沒有交換卡牌的權利 直接選擇出牌" << std::endl; 
-            }
-        }
-    }
-
-    for(auto player:this->players)
-    {
-        show.push_back(this->DoShowCard(player));
+        show.push_back(player->takeTurn(player->GetHand()->GetHandCard()));
     }
 
     this->Render(show);
-    Player* winner = this->Bigger(show);
+    ShowDownPlayer* winner = dynamic_cast<ShowDownPlayer*>(this->Bigger(show));
     std::cout << "這回合的勝者為 :" << winner->GetName() << std::endl;
-    winner->SetPoint(winner->GetPoint()+1);
+    winner->gainPoint();
 }
 
-Card* Showdown::DoShowCard(Player* player)
+Player* Showdown::Bigger(std::vector<Card*> cards)
 {
-    return player->ShowCard(); 
+    std::vector<Player*> players = this->GetPlayers();
+    Player* winner = players[0];
+
+    ShowDownCard* bigger = dynamic_cast<ShowDownCard*>(cards[0]);
+
+    for(int i = 1 ; i < 4 ; i++)
+    {
+        ShowDownCard* next = dynamic_cast<ShowDownCard*>(cards[i]);
+        if(!bigger->IsBigger(next))
+        {
+            bigger = next;
+            winner = players[i];
+        }
+    }
+    return winner;
 }
 
 void Showdown::Render(std::vector<Card*> cards)
@@ -140,44 +90,6 @@ void Showdown::Render(std::vector<Card*> cards)
         count++;
     }
     std::cout << std::endl;
-}
-
-Player* Showdown::Bigger(std::vector<Card*> cards)
-{
-    std::vector<Player*> players = this->GetPlayers();
-    Player* winner = players[0];
-    Card* bigger = cards[0];
-    for(int i = 1 ; i < 4 ; i++)
-    {
-        if(!bigger->IsBigger(cards[i]))
-        {
-            bigger = cards[i];
-            winner = players[i];
-        }
-    }
-    return winner;
-}
-
-void Showdown::GameEnd()
-{
-    int point = 0;
-    Player* winner = nullptr;
-    for(auto player:this->players)
-    {
-        if(point < player->GetPoint())
-        {
-            winner = player;
-            point = std::max(point,player->GetPoint());
-        }
-    }
-
-    std::cout << "遊戲結束!!!" << "  勝利的玩家為 :"
-        << winner->GetName() <<  std::endl;
-}
-
-void Showdown::SetPlayers(std::vector<Player*> players)
-{
-    this->players = players;
 }
 
 Showdown::~Showdown()
