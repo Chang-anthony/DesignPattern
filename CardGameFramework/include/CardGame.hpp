@@ -18,10 +18,10 @@ public:
     CardGame(std::vector<Player*> players,Deck* deck);
     ~CardGame();
 
-    virtual void Round();
-    virtual bool DrawCardEnd();
-    virtual bool IsGameEnd();
-    virtual Player* GetWinner();
+    virtual void Round() = 0;
+    virtual bool DrawCardEnd() = 0;
+    virtual bool IsGameEnd() = 0;
+    virtual Player* GetWinner() = 0;
     void GameEnd(Player* winner);
     void GameStart();
 

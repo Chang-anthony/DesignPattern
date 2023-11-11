@@ -58,6 +58,7 @@ void Showdown::Round()
     ShowDownPlayer* winner = dynamic_cast<ShowDownPlayer*>(this->Bigger(show));
     std::cout << "這回合的勝者為 :" << winner->GetName() << std::endl;
     winner->gainPoint();
+    this->round++;
 }
 
 Player* Showdown::Bigger(std::vector<Card*> cards)

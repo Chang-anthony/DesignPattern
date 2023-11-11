@@ -24,16 +24,23 @@ set(CMAKE_CXX_STANDARD 20)
 #靜態函式庫
 add_library(SimpleDesignPatternCs2_2H STATIC
     #source files
-    Rank.cpp
-    Suit.cpp
-    ShowDownCard.cpp
     Deck.cpp
-    ShowDownPlayer.cpp
-    AIPlayer.cpp
-    HumanPlayer.cpp
-    Showdown.cpp
     Card.cpp
     Hand.cpp
+    CardGame.cpp
+    Player.cpp
+
+    #showDown
+    Showdown.cpp
+    ShowDownCard.cpp
+    ShowDownPlayer.cpp
+    ShowDownAIPlayer.cpp
+    ShowDownHumanPlayer.cpp
+    Rank.cpp
+    Suit.cpp
+
+    #UNO
+    
 )
 
 

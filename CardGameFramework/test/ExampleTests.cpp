@@ -6,8 +6,12 @@
 #include "../include/Card.hpp"
 #include "../include/Deck.hpp"
 #include "../include/Player.hpp"
-#include "../include/HumanPlayer.hpp"
-#include "../include/AIPlayer.hpp"
+#include "../include/ShowDownCard.hpp"
+#include "../include/Showdown.hpp"
+#include "../include/ShowDownHumanPlayer.hpp"
+#include "../include/ShowDownPlayer.hpp"
+#include "../include/ShowDownAIPlayer.hpp"
+#include "../include/CardGame.hpp"
 
 void MyFunction() {
     std::cout << "Hello, World!" << std::endl;
@@ -50,25 +54,25 @@ TEST(Suit,SuitTest)
     EXPECT_EQ("Diamond",SuitToName(Suit::Diamond));
 }
 
-TEST(Card,CardTest)
+TEST(ShowDownCard,CardTest)
 {
     Rank a = Rank::A;
     Suit b = Suit::Club;
     Rank c = Rank::J;
-    Card* card =new Card(a,b);
-    Card* card2 =new Card(c,b);
+    ShowDownCard* card =new ShowDownCard(a,b);
+    ShowDownCard* card2 =new ShowDownCard(c,b);
 
     // EXPECT_EQ(card,card2); 
     EXPECT_EQ("11",RankToString(card2->GetRank())); 
 }
 
-TEST(Card,CardBiggerTest)
+TEST(ShowDownCard,CardBiggerTest)
 {
-    Card* card1 = new Card(Rank::A,Suit::Club);
-    Card* card2 = new Card(Rank::A,Suit::Spade);
+    ShowDownCard* card1 = new ShowDownCard(Rank::A,Suit::Club);
+    ShowDownCard* card2 = new ShowDownCard(Rank::A,Suit::Spade);
 
-    Card* card3 = new Card(Rank::J,Suit::Heart);
-    Card* card4 = new Card(Rank::Ten,Suit::Diamond);
+    ShowDownCard* card3 = new ShowDownCard(Rank::J,Suit::Heart);
+    ShowDownCard* card4 = new ShowDownCard(Rank::Ten,Suit::Diamond);
     
     EXPECT_EQ(false,card1->IsBigger(card2));
     EXPECT_EQ(true,card1->IsBigger(card3));
@@ -77,7 +81,7 @@ TEST(Card,CardBiggerTest)
 
 TEST(Deck,DeckTest)
 {
-    Deck* deck = new Deck();
+    Deck* deck = new Deck(ShowDownCard::GenCards());
     std::vector<Card*> card1 = deck->GetCards();
 
     EXPECT_EQ(52,deck->GetCards().size());
@@ -88,12 +92,12 @@ TEST(Deck,DeckTest)
     EXPECT_NE(card1[0],card2[1]);
 }
 
-TEST(HumanPlayer,PlayerTest)
+TEST(ShowDownHumanPlayer,PlayerTest)
 {
     //pure virtual function can not use this constructor
-    HumanPlayer* player1 = new HumanPlayer();
+    ShowDownHumanPlayer* player1 = new ShowDownHumanPlayer();
     std::string name = "123";
-    Deck* deck = new Deck();
+    Deck* deck = new Deck(ShowDownCard::GenCards());
     deck->Suffle();
 
     // player1->NameSelf();
@@ -105,8 +109,11 @@ TEST(HumanPlayer,PlayerTest)
 
     EXPECT_EQ("123","123");
     for(int i = 0 ; i < 13;i++)
-        player1->DrawCard(deck);
-
+    {
+        Card* card = deck->DrawCard();
+        player1->AddCard(card);
+    }
+        
     // EXPECT_EQ(51,deck->GetCards().size());
     // EXPECT_EQ(1,player1->GetHandCards().size());
 
@@ -118,12 +125,12 @@ TEST(HumanPlayer,PlayerTest)
     // std::cout << "test" << std::endl;
 }
 
-TEST(AIPlayer,PlayerTest)
+TEST(ShowDownAIPlayer,PlayerTest)
 {
     //pure virtual function can not use this constructor
-    AIPlayer* player1 = new AIPlayer();
+    ShowDownAIPlayer* player1 = new ShowDownAIPlayer();
     std::string name = "456";
-    Deck* deck = new Deck();
+    Deck* deck = new Deck(ShowDownCard::GenCards());
     deck->Suffle();
 
 
@@ -131,16 +138,12 @@ TEST(AIPlayer,PlayerTest)
     //player1->NameSelf();
     EXPECT_EQ("456","456");
     for(int i = 0 ; i < 13;i++)
-        player1->DrawCard(deck);
+    {
+        Card* card = deck->DrawCard();
+        player1->AddCard(card);
+    }
+        
     int test = 0;
-
-    
-    // Card* choose = player1->ShowCard();
-    // // std::cin >> test;
-    // // Card* card = player1->GetHandCards()[test-1];
-    // // EXPECT_EQ(card,choose);
-    // EXPECT_EQ(12,player1->GetHandCards().size());
-    // std::cout << "test" << std::endl;
 }
 
 

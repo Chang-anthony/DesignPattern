@@ -4,75 +4,10 @@
 #include <random>
 #include <chrono> //std::chrono::system_clock
 
-Deck::Deck(/* args */)
+Deck::Deck(std::vector<Card*> cards)
 {
     //只要有牌組一定有牌，但有牌可能是單張的所以並不是複合關聯
-    this->cards = std::vector<Card*>();
-    //A
-    this->cards.push_back(new Card(Rank::A,Suit::Club,this));
-    this->cards.push_back(new Card(Rank::A,Suit::Diamond,this));
-    this->cards.push_back(new Card(Rank::A,Suit::Heart,this));
-    this->cards.push_back(new Card(Rank::A,Suit::Spade,this));
-    //2
-    this->cards.push_back(new Card(Rank::Sec,Suit::Club,this));
-    this->cards.push_back(new Card(Rank::Sec,Suit::Diamond,this));
-    this->cards.push_back(new Card(Rank::Sec,Suit::Heart,this));
-    this->cards.push_back(new Card(Rank::Sec,Suit::Spade,this));
-    //3
-    this->cards.push_back(new Card(Rank::Thr,Suit::Club,this));
-    this->cards.push_back(new Card(Rank::Thr,Suit::Diamond,this));
-    this->cards.push_back(new Card(Rank::Thr,Suit::Heart,this));
-    this->cards.push_back(new Card(Rank::Thr,Suit::Spade,this));
-    //4
-    this->cards.push_back(new Card(Rank::Four,Suit::Club,this));
-    this->cards.push_back(new Card(Rank::Four,Suit::Diamond,this));
-    this->cards.push_back(new Card(Rank::Four,Suit::Heart,this));
-    this->cards.push_back(new Card(Rank::Four,Suit::Spade,this));
-    //5
-    this->cards.push_back(new Card(Rank::Five,Suit::Club,this));
-    this->cards.push_back(new Card(Rank::Five,Suit::Diamond,this));
-    this->cards.push_back(new Card(Rank::Five,Suit::Heart,this));
-    this->cards.push_back(new Card(Rank::Five,Suit::Spade,this));
-    //6
-    this->cards.push_back(new Card(Rank::Six,Suit::Club,this));
-    this->cards.push_back(new Card(Rank::Six,Suit::Diamond,this));
-    this->cards.push_back(new Card(Rank::Six,Suit::Heart,this));
-    this->cards.push_back(new Card(Rank::Six,Suit::Spade,this));
-    //7
-    this->cards.push_back(new Card(Rank::Seven,Suit::Club,this));
-    this->cards.push_back(new Card(Rank::Seven,Suit::Diamond,this));
-    this->cards.push_back(new Card(Rank::Seven,Suit::Heart,this));
-    this->cards.push_back(new Card(Rank::Seven,Suit::Spade,this));
-    //8
-    this->cards.push_back(new Card(Rank::Eight,Suit::Club,this));
-    this->cards.push_back(new Card(Rank::Eight,Suit::Diamond,this));
-    this->cards.push_back(new Card(Rank::Eight,Suit::Heart,this));
-    this->cards.push_back(new Card(Rank::Eight,Suit::Spade,this));
-    //9
-    this->cards.push_back(new Card(Rank::Night,Suit::Club,this));
-    this->cards.push_back(new Card(Rank::Night,Suit::Diamond,this));
-    this->cards.push_back(new Card(Rank::Night,Suit::Heart,this));
-    this->cards.push_back(new Card(Rank::Night,Suit::Spade,this));
-    //10
-    this->cards.push_back(new Card(Rank::Ten,Suit::Club,this));
-    this->cards.push_back(new Card(Rank::Ten,Suit::Diamond,this));
-    this->cards.push_back(new Card(Rank::Ten,Suit::Heart,this));
-    this->cards.push_back(new Card(Rank::Ten,Suit::Spade,this));
-    //11
-    this->cards.push_back(new Card(Rank::J,Suit::Club,this));
-    this->cards.push_back(new Card(Rank::J,Suit::Diamond,this));
-    this->cards.push_back(new Card(Rank::J,Suit::Heart,this));
-    this->cards.push_back(new Card(Rank::J,Suit::Spade,this));
-    //12
-    this->cards.push_back(new Card(Rank::Q,Suit::Club,this));
-    this->cards.push_back(new Card(Rank::Q,Suit::Diamond,this));
-    this->cards.push_back(new Card(Rank::Q,Suit::Heart,this));
-    this->cards.push_back(new Card(Rank::Q,Suit::Spade,this));
-    //13
-    this->cards.push_back(new Card(Rank::K,Suit::Club,this));
-    this->cards.push_back(new Card(Rank::K,Suit::Diamond,this));
-    this->cards.push_back(new Card(Rank::K,Suit::Heart,this));
-    this->cards.push_back(new Card(Rank::K,Suit::Spade,this));
+    this->cards = cards;
 }
 
 //Draw Top card
@@ -104,9 +39,9 @@ void Deck::Suffle()
     }
 }
 
-Deck* Deck::ReFresh()
+Deck* Deck::ReFresh(std::vector<Card*> cards)
 {
-    return new Deck();
+    return new Deck(cards);
 }
 
 void Deck::RenderCards()
