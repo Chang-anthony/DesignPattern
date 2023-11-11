@@ -19,7 +19,7 @@ public:
     ~Player();
 
     void AddCard(Card* card);
-    virtual void NameSelf() = 0;
+    virtual void NameSelf();
     virtual Card* takeTurn(std::vector<Card*> cards) = 0;
 
     //getter

@@ -20,7 +20,6 @@ public:
     ~ShowDownPlayer();
 
     void gainPoint();
-    void NameSelf() override;
     virtual Card* takeTurn(std::vector<Card*> cards) = 0;
 
     //getter

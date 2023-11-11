@@ -40,7 +40,6 @@ set(SOURCES
     main.cpp
 )
 
-
 # 指定項目的執行檔名稱和源檔
 add_executable(${PROJECT_NAME} ${SOURCES})
 
@@ -64,12 +63,13 @@ enable_testing()
 add_subdirectory(test)
 
 # 在主程序之前添加一个自定义目标以运行测试
-add_custom_target(RunTests
-    COMMAND ${CMAKE_CTEST_COMMAND}
-    WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
-    COMMENT "Running tests before the main program"
-)
+# add_custom_target(RunTests
+#     COMMAND ${CMAKE_CTEST_COMMAND}
+#     WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
+#     COMMENT "Running tests before the main program"
+# )
+
 
 # 添加依赖关系，确保在运行主程序之前运行测试
-add_dependencies(${PROJECT_NAME} RunTests)
+# add_dependencies(${PROJECT_NAME} RunTests)
 

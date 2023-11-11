@@ -19,7 +19,7 @@ Showdown::Showdown(std::vector<Player*> players,Deck* deck):CardGame(players,dec
 bool Showdown::DrawCardEnd()
 {
     this->drawcardend++;
-    return this->drawcardend < 13; 
+    return this->drawcardend <= 13; 
 }
 
 bool  Showdown::IsGameEnd()

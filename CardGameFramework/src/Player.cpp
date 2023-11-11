@@ -14,6 +14,15 @@ void Player::AddCard(Card* card)
     this->hand->AddCard(card);
 }
 
+void Player::NameSelf()
+{
+    std::cout << "Please Name Your Self :";
+    std::string InputName;
+    std::cin >> InputName;
+    this->SetName(InputName);
+}
+
+
 Hand* Player::GetHand()
 {
     return this->hand;

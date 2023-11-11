@@ -28,7 +28,6 @@ public:
     bool IsGameEnd() override;
     Player* GetWinner() override;
     Player* Bigger(std::vector<Card*> cards);
-
 };
 
 #endif /* _SHOWDOWN_H_ */

@@ -1,5 +1,4 @@
 #include "../include/ShowDownCard.hpp"
-#include "../include/Deck.hpp"
 
 ShowDownCard::ShowDownCard(Rank rank,Suit suit):Card(),rank(rank),suit(suit)
 {
