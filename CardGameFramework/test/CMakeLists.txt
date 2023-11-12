@@ -20,7 +20,7 @@ target_link_libraries(${GTest} PUBLIC
 )
 
 # 指定生成的可执行文件路径
-set(EXECUTABLE_OUTPUT_PATH ${CMAKE_CURRENT_SOURCE_DIR}/Run)
+# set(EXECUTABLE_OUTPUT_PATH ${CMAKE_CURRENT_SOURCE_DIR}/Run)
 
 include(GoogleTest)
 gtest_discover_tests(${GTest})
