@@ -141,7 +141,7 @@ TEST(ShowDownAIPlayer,PlayerTest)
 
 
     //player1->NameSelf();
-    EXPECT_EQ("456","456");
+    EXPECT_EQ("456",name);
     for(int i = 0 ; i < 13;i++)
     {
         Card* card = deck->DrawCard();

@@ -70,17 +70,9 @@ add_compile_options("$<$<CXX_COMPILER_ID:MSVC>:/utf-8>")
 
 
 #GTEST
-set(GTESTON ON)
-# 在主程序之前添加一个自定义目标以运行测试
-if(GTESTON)
-    enable_testing()
-    add_custom_target(RunTests
-        COMMAND ${CMAKE_CTEST_COMMAND} -V
-        # WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
-        COMMENT "Running tests before the main program"
-    )
-    add_subdirectory(test)
-endif()
+enable_testing()
+add_subdirectory(test)
+
 
 # 在主程序之前添加一个自定义目标以运行测试
 # add_custom_target(RunTests
