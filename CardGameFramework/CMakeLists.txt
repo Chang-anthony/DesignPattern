@@ -32,8 +32,14 @@ set_property(TARGET gtest_main PROPERTY FOLDER "gtest")
 
 #加入include directories 位置
 include_directories(${CMAKE_SOURCE_DIR}/include ${CMAKE_SOURCE_DIR}/include/utils)
+include_directories(${CMAKE_SOURCE_DIR}/include/ShowDown)
+include_directories(${CMAKE_SOURCE_DIR}/include/Uno)
+include_directories(${CMAKE_SOURCE_DIR}/include/CardFramework)
 
-add_subdirectory(${CMAKE_CURRENT_LIST_DIR}/src)
+add_subdirectory(${CMAKE_CURRENT_LIST_DIR}/src/CardFramework)
+add_subdirectory(${CMAKE_CURRENT_LIST_DIR}/src/ShowDown)
+add_subdirectory(${CMAKE_CURRENT_LIST_DIR}/src/Uno)
+# add_subdirectory(${CMAKE_CURRENT_LIST_DIR}/src)
 
 # 將所有源檔案放入變數中
 set(SOURCES
@@ -43,10 +49,14 @@ set(SOURCES
 # 指定項目的執行檔名稱和源檔
 add_executable(${PROJECT_NAME} ${SOURCES})
 
-target_link_libraries(${PROJECT_NAME} SimpleDesignPatternCs2_2H)
+target_link_libraries(${PROJECT_NAME} ShowDown Uno CardFrameWork)
+
 
 # 將項目的 include 路徑設定為當前目錄（或是你的標頭檔所在的目錄）
 target_include_directories(${PROJECT_NAME} PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/include ${CMAKE_CURRENT_SOURCE_DIR}/include/utils)
+target_include_directories(${PROJECT_NAME} PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/include/ShowDown)
+target_include_directories(${PROJECT_NAME} PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/include/Uno)
+target_include_directories(${PROJECT_NAME} PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/include/CardFramework)
 
 # 設定項目的目標特性，比如 C++ 版本
 # target_compile_features(${PROJECT_NAME} PRIVATE cxx_std_20)
@@ -58,9 +68,19 @@ add_compile_options("$<$<C_COMPILER_ID:MSVC>:/utf-8>")
 add_compile_options("$<$<CXX_COMPILER_ID:MSVC>:/utf-8>")
 
 
+
 #GTEST
-enable_testing()
-add_subdirectory(test)
+set(GTESTON ON)
+# 在主程序之前添加一个自定义目标以运行测试
+if(GTESTON)
+    enable_testing()
+    add_custom_target(RunTests
+        COMMAND ${CMAKE_CTEST_COMMAND} -V
+        # WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
+        COMMENT "Running tests before the main program"
+    )
+    add_subdirectory(test)
+endif()
 
 # 在主程序之前添加一个自定义目标以运行测试
 # add_custom_target(RunTests

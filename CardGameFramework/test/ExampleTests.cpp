@@ -1,17 +1,17 @@
 #include <iostream>
 #include <gtest/gtest.h>
 #include "gtest/gtest-spi.h"
-#include "../include/Rank.hpp"
-#include "../include/Suit.hpp"
-#include "../include/Card.hpp"
-#include "../include/Deck.hpp"
-#include "../include/Player.hpp"
-#include "../include/ShowDownCard.hpp"
-#include "../include/Showdown.hpp"
-#include "../include/ShowDownHumanPlayer.hpp"
-#include "../include/ShowDownPlayer.hpp"
-#include "../include/ShowDownAIPlayer.hpp"
-#include "../include/CardGame.hpp"
+#include "../include/ShowDown/Rank.hpp"
+#include "../include/ShowDown/Suit.hpp"
+#include "../include/CardFramework/Card.hpp"
+#include "../include/CardFramework/Deck.hpp"
+#include "../include/CardFramework/Player.hpp"
+#include "../include/ShowDown/ShowDownCard.hpp"
+#include "../include/ShowDown/Showdown.hpp"
+#include "../include/ShowDown/ShowDownHumanPlayer.hpp"
+#include "../include/ShowDown/ShowDownPlayer.hpp"
+#include "../include/ShowDown/ShowDownAIPlayer.hpp"
+#include "../include/CardFramework/CardGame.hpp"
 
 void MyFunction() {
     std::cout << "Hello, World!" << std::endl;
@@ -99,6 +99,11 @@ TEST(ShowDownHumanPlayer,PlayerTest)
     std::string name = "123";
     Deck* deck = new Deck(ShowDownCard::GenCards());
     deck->Suffle();
+
+    std::istringstream input("Your input data");
+    std::streambuf* original_cin = std::cin.rdbuf(input.rdbuf());
+
+    std::cin.rdbuf(original_cin);
 
     // player1->NameSelf();
     // testing::internal::CaptureStdout();

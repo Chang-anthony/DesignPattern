@@ -69,6 +69,18 @@ public:
     }
 
     template<typename T>
+    static std::vector<T*> RemoveObjectFromVector(std::vector<T*> V,T* target)
+    {
+        V.erase(std::remove_if(V.begin(),V.end(),[target](T* v)
+        {
+            return v == target;
+        }),V.end());
+
+        return V;
+    }
+
+
+    template<typename T>
     static std::vector<T*> SetToVector(std::set<T*> set)
     {
         std::vector<T*> v = std::vector<T*>();

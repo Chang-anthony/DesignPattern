@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 3.12)
 set_property(GLOBAL PROPERTY USE_FOLDERS ON)
 set_property(GLOBAL PROPERTY PREDEFINED_TARGETS_FOLDER "cmake")
 
-project(libComibined)
+project(ShowDown)
 set(CMAKE_CXX_STANDARD 20)
 
 #加入include directories 位置
@@ -13,12 +13,6 @@ set(CMAKE_CXX_STANDARD 20)
 # set(TOP_DIR ${CMAKE_CURRENT_LIST_DIR}/../)
 
 # add_subdirectory(${TOP_DIR}/src)
-# add_subdirectory(${CMAKE_CURRENT_LIST_DIR}/CardFramework)
-# add_subdirectory(${CMAKE_CURRENT_LIST_DIR}/ShowDown)
-# add_subdirectory(${CMAKE_CURRENT_LIST_DIR}/Uno)
-
-target_link_libraries(ShowDown CardFrameWork)
-target_link_libraries(Uno CardFrameWork)
 
 
 # 將所有源檔案放入變數中
@@ -28,9 +22,18 @@ target_link_libraries(Uno CardFrameWork)
 
 
 #靜態函式庫
-# target_link_libraries(${PROJECT_NAME} ShowDown Uno CardFrameWork)
-# target_link_libraries(ShowDown CardFrameWork)
-# target_link_libraries(Uno CardFrameWork)
+add_library(${PROJECT_NAME} STATIC
+    #showDown
+    Showdown.cpp
+    ShowDownCard.cpp
+    ShowDownPlayer.cpp
+    ShowDownAIPlayer.cpp
+    ShowDownHumanPlayer.cpp
+    Rank.cpp
+    Suit.cpp
+)
+
+
 
 
 # 指定項目的執行檔名稱和源檔

@@ -5,17 +5,17 @@
 #include <string>
 #include <stdio.h>
 #include <vector>
-#include "../include/Showdown.hpp"
-#include "../include/Player.hpp"
-#include "../include/Deck.hpp"
-#include "../include/Showdown.hpp"
-#include "../include/ShowDownHumanPlayer.hpp"
-#include "../include/ShowDownAIPlayer.hpp"
-#include "../include/ShowDownCard.hpp"
-#include "../include/Rank.hpp"
-#include "../include/Suit.hpp"
-#include "../include/Card.hpp"
-#include "../include/CardGame.hpp"
+#include "../include/ShowDown/Showdown.hpp"
+#include "../include/CardFramework/Player.hpp"
+#include "../include/CardFramework/Deck.hpp"
+#include "../include/ShowDown/Showdown.hpp"
+#include "../include/ShowDown/ShowDownHumanPlayer.hpp"
+#include "../include/ShowDown/ShowDownAIPlayer.hpp"
+#include "../include/ShowDown/ShowDownCard.hpp"
+#include "../include/ShowDown/Rank.hpp"
+#include "../include/ShowDown/Suit.hpp"
+#include "../include/CardFramework/Card.hpp"
+#include "../include/CardFramework/CardGame.hpp"
 
 int main(int argc, char **argv)
 {
