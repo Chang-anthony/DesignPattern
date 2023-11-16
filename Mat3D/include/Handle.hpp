@@ -3,7 +3,7 @@
 #include <iostream>
 #include <string>
 
-//forward declare 前向宣告
+//forward declare 嚙箴嚙碾嚙褐告
 class Mat3D;
 
 class Handle
@@ -14,7 +14,6 @@ public:
 
 	void HandlePrintPlane(std::string flat, int planeToPrint, Mat3D* mat);
 	void doHandle(int planeToPrint, Mat3D* mat);
-	void PrintPlane(int planeToPrint, Mat3D* mat);
 	
 	virtual bool IsBounder(int planeToPrint, Mat3D* mat) = 0; 
 	virtual bool match(std::string flat) = 0;
