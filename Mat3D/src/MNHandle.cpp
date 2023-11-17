@@ -1,7 +1,7 @@
 #include "../include/Mat3D.hpp"
 #include "../include/MNHandle.hpp"
 
-MNHandle::MNHandle(Handle* next) :Handle(next)
+MNHandle::MNHandle(Handle* next) :PrintPlaneTemplate(next)
 {
 
 }

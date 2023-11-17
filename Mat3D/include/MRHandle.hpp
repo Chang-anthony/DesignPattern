@@ -1,8 +1,8 @@
 #pragma once
-#include "../include/Handle.hpp"
+#include "../include/PrintPlaneTemplate.hpp"
 class Mat3D;
 
-class MRHandle : public Handle
+class MRHandle : public PrintPlaneTemplate
 {
 public:
 	MRHandle(Handle* next);

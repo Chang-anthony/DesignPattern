@@ -29,6 +29,7 @@ add_library(Mat3DsubH STATIC
     MNHandle.cpp
     MRHandle.cpp
     NRHandle.cpp
+    PrintPlaneTemplate.cpp
 )
 
 

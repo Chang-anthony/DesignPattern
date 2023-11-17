@@ -1,7 +1,7 @@
 #include "../include/NRHandle.hpp"
 #include "../include/Mat3D.hpp"
 
-NRHandle::NRHandle(Handle* next) :Handle(next)
+NRHandle::NRHandle(Handle* next) :PrintPlaneTemplate(next)
 {
 }
 
