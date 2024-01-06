@@ -6,13 +6,13 @@ set(CMAKE_CXX_STANDARD 20)
 
 set(GTest DesignPattern_Test)
 
-set(Sources
-    ExampleTests.cpp
+set(Sources 
+ExampleTests.cpp
 )
 
 add_executable(${GTest} ${Sources})
 
-target_link_libraries(${GTest} PUBLIC ${PROJECT_NAME}_LIB gtest_main)
+target_link_libraries(${GTest} PRIVATE ${PROJECT_NAME}_LIB gtest_main)
 
 # 指定生成的可执行文件路径
 # set(EXECUTABLE_OUTPUT_PATH ${CMAKE_CURRENT_SOURCE_DIR}/Run)

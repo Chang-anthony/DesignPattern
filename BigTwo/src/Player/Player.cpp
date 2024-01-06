@@ -1,6 +1,5 @@
-#include "../include/Player.hpp"
-#include "../include/Deck.hpp"
-
+#include "Player.hpp"
+#include "Deck.hpp"
 
 
 Player::Player()

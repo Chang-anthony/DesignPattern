@@ -1,5 +1,6 @@
-#include "../include/Card.hpp"
-#include "../include/Deck.hpp"
+#include "Card.hpp"
+#include "Deck.hpp"
+
 
 Card::Card(Rank rank,Suit suit):rank(rank),suit(suit),deck(nullptr)
 {

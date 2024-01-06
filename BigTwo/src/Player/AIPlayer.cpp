@@ -1,5 +1,5 @@
-#include "../include/AIPlayer.hpp"
-#include "../include/Card.hpp"
+#include "AIPlayer.hpp"
+#include "Card.hpp"
 #include <algorithm>
 #include <random>
 

@@ -1,4 +1,4 @@
-#include "../include/Suit.hpp"
+#include "Suit.hpp"
 
 
 std::map<Suit,std::string> suitToString

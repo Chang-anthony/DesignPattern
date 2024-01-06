@@ -1,5 +1,5 @@
-#include "../include/HumanPlayer.hpp"
-#include "../include/Card.hpp"
+#include "HumanPlayer.hpp"
+#include "Card.hpp"
 
 
 HumanPlayer::HumanPlayer():Player()

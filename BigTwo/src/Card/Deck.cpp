@@ -1,5 +1,5 @@
-#include "../include/Deck.hpp"
-#include "../include/Card.hpp"
+#include "Card.hpp"
+#include "Deck.hpp"
 #include <algorithm>
 #include <random>
 #include <chrono> //std::chrono::system_clock

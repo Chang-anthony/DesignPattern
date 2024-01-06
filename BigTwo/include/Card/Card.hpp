@@ -1,10 +1,9 @@
 #ifndef _CARD_H_
 #define _CARD_H_
 
-// enum class Rank;
-// enum class Suit;
-#include "../include/Rank.hpp"
-#include "../include/Suit.hpp"
+
+#include "Rank.hpp"
+#include "Suit.hpp"
 class Deck;
 
 class Card

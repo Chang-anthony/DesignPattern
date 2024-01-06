@@ -1,7 +1,7 @@
 #ifndef _AIPLAYER_H_
 #define _AIPLAYER_H_
 
-#include "../include/Player.hpp"
+#include "Player.hpp"
 
 class Card;
 

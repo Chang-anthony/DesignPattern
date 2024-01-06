@@ -1,4 +1,4 @@
-#include "../include/Rank.hpp"
+#include "Rank.hpp"
 
 std::map<Rank,std::string> rankToString =
 {
