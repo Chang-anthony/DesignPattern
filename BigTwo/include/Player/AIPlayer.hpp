@@ -12,6 +12,10 @@ private:
 public:
     AIPlayer(/* args */);
     ~AIPlayer();
+
+    // TODO : need to implemntation
+    void NameSelf() override;
+    std::vector<Card*> Play() override;
 };
 
 #endif /* _AIPLAYER_H_ */

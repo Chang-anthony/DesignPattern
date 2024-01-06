@@ -12,6 +12,9 @@ private:
 public:
     HumanPlayer(/* args */);
     ~HumanPlayer();
+
+    void NameSelf() override;
+    std::vector<Card*> Play() override;
 };
 
 #endif /* _HUMANPLAYER_H_ */
