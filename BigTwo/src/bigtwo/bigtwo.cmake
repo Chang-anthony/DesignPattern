@@ -1,0 +1,6 @@
+set(BIGTWO_LIB_NAME "bigtwo")
+set(BIGTWO_LIB_PATH ${CMAKE_CURRENT_LIST_DIR})
+
+set(BIGTWO_LIB_SRCS
+    ${BIGTWO_LIB_PATH}/CardPatternHandler.cpp
+)

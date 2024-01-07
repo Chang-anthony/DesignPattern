@@ -15,6 +15,7 @@ void HumanPlayer::NameSelf()
     this->SetName(name);
 }
 
+// TODO : CardPattern Play
 std::vector<Card*> HumanPlayer::Play()
 {
     return {};

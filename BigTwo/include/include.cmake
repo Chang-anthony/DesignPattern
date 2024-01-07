@@ -2,8 +2,9 @@ set(BIGTWO_LIB_NAME "BIGTWO_INCLUDE")
 set(BIGTWO_LIB_INC_PATH ${CMAKE_CURRENT_LIST_DIR})
 
 set(__BIGTWO_INCS
-    "${BIGTWO_LIB_INC_PATH}/Card"
-    "${BIGTWO_LIB_INC_PATH}/Player"
+    ${BIGTWO_LIB_INC_PATH}/Card
+    ${BIGTWO_LIB_INC_PATH}/Player
+    ${BIGTWO_LIB_INC_PATH}/bigtwo
 )
 
 # GLOB 透過cmake 語法 搜尋 path 底下的 *hpp file
