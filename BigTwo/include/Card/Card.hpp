@@ -17,6 +17,7 @@ public:
     Card(Rank rank,Suit suit,Deck* deck);
     ~Card();
 
+
     //Getter
     Rank GetRank();
     Suit GetSuit();

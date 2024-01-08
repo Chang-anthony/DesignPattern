@@ -53,3 +53,8 @@ std::string RankToName(Rank rank)
     }
     return "0";
 }
+
+int RankToNumber(Rank rank)
+{
+    return std::stoi(RankToString(rank));
+}

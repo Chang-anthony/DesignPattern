@@ -9,6 +9,11 @@
 #include <AIPlayer.hpp>
 #include <Card.hpp>
 #include <HandCard.hpp>
+#include <CardPatternHandler.hpp>
+#include <SingleHandler.hpp>
+#include <PairHandler.hpp>
+#include <FullHouseHandler.hpp>
+#include <StraightHandler.hpp>
 
 
 TEST(Deck,DeckTest)
@@ -36,6 +41,71 @@ TEST(HandCard,HandCardTEST)
     EXPECT_EQ(51,deckcards.size());
 }
 
+TEST(SingleHandler,SingleHandler_Test)
+{
+    CardPatternHandler* handler = new SingleHandler( new PairHandler( new FullHouseHandler(new StraightHandler(nullptr))));
+
+    Rank five = Rank::Five;
+    Rank A = Rank::A;
+    Rank two = Rank::Sec;
+    Rank K = Rank::K;
+
+
+    Suit Spade = Suit::Spade;
+    Suit Heart = Suit::Heart;
+    Suit Diamond = Suit::Diamond;
+    Suit Club = Suit::Club;
+
+    Card* card1 = new Card(five,Spade);
+    Card* card2 = new Card(A,Club);
+    Card* card3 = new Card(two,Heart);
+    Card* card4 = new Card(K,Diamond);
+
+    EXPECT_EQ(handler->PatternNameHandle({card1}),"單張");
+    EXPECT_EQ(handler->PatternNameHandle({card2}),"單張");
+    EXPECT_EQ(handler->PatternNameHandle({card3}),"單張");
+    EXPECT_EQ(handler->PatternNameHandle({card4}),"單張");
+    EXPECT_EQ(handler->PatternNameHandle({card2,card4}),"");
+
+    EXPECT_NE(handler->PatternNameHandle({card2,card4}),"單張");
+    EXPECT_NE(handler->PatternNameHandle({card1,card3}),"單張");
+    EXPECT_NE(handler->PatternNameHandle({card3,card2}),"單張");
+}
+
+
+TEST(PairHandler,PairHandler_Test)
+{
+    CardPatternHandler* handler = new SingleHandler( new PairHandler( new FullHouseHandler(new StraightHandler(nullptr))));
+
+    Rank five = Rank::Five;
+    Rank A = Rank::A;
+    Rank two = Rank::Sec;
+    Rank K = Rank::K;
+
+
+    Suit Spade = Suit::Spade;
+    Suit Heart = Suit::Heart;
+    Suit Diamond = Suit::Diamond;
+    Suit Club = Suit::Club;
+
+    Card* card1 = new Card(A,Spade);
+    Card* card2 = new Card(A,Club);
+    Card* card3 = new Card(two,Heart);
+    Card* card4 = new Card(two,Diamond);
+
+    Card* card5 = new Card(two,Heart);
+    Card* card6 = new Card(K,Diamond);
+
+    EXPECT_EQ(handler->PatternNameHandle({card1,card2}),"對子");
+    EXPECT_EQ(handler->PatternNameHandle({card3,card4}),"對子");
+    EXPECT_EQ(handler->PatternNameHandle({card3}),"單張");
+    EXPECT_EQ(handler->PatternNameHandle({card4}),"單張");
+    EXPECT_EQ(handler->PatternNameHandle({card2,card4}),"");
+
+    EXPECT_NE(handler->PatternNameHandle({card1,card2}),"單張");
+    EXPECT_NE(handler->PatternNameHandle({card3,card4}),"葫蘆");
+    EXPECT_NE(handler->PatternNameHandle({card3,card2}),"對子");
+}
 
 
 

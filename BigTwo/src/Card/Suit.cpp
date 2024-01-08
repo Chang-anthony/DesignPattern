@@ -32,3 +32,8 @@ std::string SuitToName(Suit suit)
         return it->second;
     return "0";
 }
+
+int SuitToNumber(Suit suit)
+{
+    return std::stoi(SuitToString(suit));
+}

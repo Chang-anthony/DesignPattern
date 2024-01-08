@@ -17,5 +17,6 @@ enum class Suit
 
 std::string SuitToString(Suit rank);
 std::string SuitToName(Suit rank);
+int SuitToNumber(Suit suit);
 
 #endif /* _SUIT_H_ */

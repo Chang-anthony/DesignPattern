@@ -5,7 +5,7 @@ class Card;
 #include <vector>
 #include <string>
 
-//TODO:need to do
+
 class CardPatternHandler
 {
 private:
@@ -16,12 +16,13 @@ public:
     ~CardPatternHandler();
 
     bool isSamePatternHandle(std::vector<Card*> pattern1,std::vector<Card*> pattern2);
-    std::string vaildPatternHandle(std::vector<Card*> cards);
+    std::string PatternNameHandle(std::vector<Card*> cards);
     bool BiggerHandle(std::vector<Card*> pattern1,std::vector<Card*> pattern2);
+    void Render(std::string name);
 
     virtual bool isBigger(std::vector<Card*> pattern1,std::vector<Card*> pattern2) = 0;
     virtual bool match(std::vector<Card*> cards) = 0;
-    virtual std::string GetPatternName(std::vector<Card*> cards) = 0;
+    virtual std::string GetPatternName() = 0;
 };
 
 #endif /* _CARDPATTERNHANDLER_H_ */

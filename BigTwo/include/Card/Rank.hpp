@@ -25,5 +25,6 @@ enum class Rank
 
 std::string RankToString(Rank rank);
 std::string RankToName(Rank rank);
+int RankToNumber(Rank rank);
 
 #endif /* _RANK_H_ */
