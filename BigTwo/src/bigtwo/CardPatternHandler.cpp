@@ -46,7 +46,7 @@ std::string CardPatternHandler::PatternNameHandle(std::vector<Card*> cards)
     {   
         //check next handler no null
         if(this->next)
-            return patternToname[this->next->PatternNameHandle(cards)];
+            return this->next->PatternNameHandle(cards);
         else
             return "";
     }
