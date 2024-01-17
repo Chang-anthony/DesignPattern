@@ -6,10 +6,12 @@ PairHandler::PairHandler(CardPatternHandler* next):CardPatternHandler(next)
 {
 }
 
-//TODO:Have problem
 bool PairHandler::isBigger(std::vector<Card*> pattern1,std::vector<Card*> pattern2)
 {
-    return false;
+    Card* card1 = pattern1[0]->isBigger(pattern1[1]) ? pattern1[0] : pattern1[1];
+    Card* card2 = pattern2[0]->isBigger(pattern2[1]) ? pattern2[0] : pattern2[1];
+
+    return card1->isBigger(card2);
 }
 
 bool PairHandler::match(std::vector<Card*> cards)

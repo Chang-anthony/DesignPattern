@@ -8,13 +8,16 @@ class StraightHandler : public CardPatternHandler
 {
 private:
     /* data */
+    bool isBigger(std::vector<Card*> pattern1,std::vector<Card*> pattern2) override;
+    bool match(std::vector<Card*> cards) override;
+    std::string GetPatternName() override;
+
 public:
     StraightHandler(CardPatternHandler* next);
     ~StraightHandler();
 
-    bool isBigger(std::vector<Card*> pattern1,std::vector<Card*> pattern2) override;
-    bool match(std::vector<Card*> cards) override;
-    std::string GetPatternName() override;
+protected:
+    Card* GetMaxCard(std::vector<Card*> cards);
 };
 
 #endif /* _STRAIGHTHANDLER_H_ */

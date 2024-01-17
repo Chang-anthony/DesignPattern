@@ -4,12 +4,27 @@
 
 Card::Card(Rank rank,Suit suit):rank(rank),suit(suit),deck(nullptr)
 {
-    
+
 }
 
 Card::Card(Rank rank,Suit suit,Deck* deck):rank(rank),suit(suit),deck(deck)
 {
 
+}
+
+bool Card::isBigger(Card* card)
+{
+    int number1 = RankToNumber(this->GetRank());
+    int number2 = RankToNumber(card->GetRank());
+    
+    if(number1 != number2)
+        return number1 > number2; 
+    else
+    {
+        int suit1 = SuitToNumber(this->GetSuit());
+        int suit2 = SuitToNumber(card->GetSuit());
+        return suit1 > suit2;
+    }
 }
 
 void Card::render()

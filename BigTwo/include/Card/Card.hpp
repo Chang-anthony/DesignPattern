@@ -29,6 +29,7 @@ public:
     void SetDeck(Deck* deck);
 
     void render();
+    bool isBigger(Card* card);
 };
 
 #endif /* _CARD_H_ */
