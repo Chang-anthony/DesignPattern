@@ -4,7 +4,7 @@ set_property(GLOBAL PROPERTY PREDEFINED_TARGETS_FOLDER "cmake")
 
 set(CMAKE_CXX_STANDARD 20)
 
-set(GTest DesignPattern_Test)
+set(GTest ${PROJECT_NAME}_Test)
 
 set(Sources 
 ExampleTests.cpp

@@ -9,6 +9,11 @@ Player::Player()
     this->name;
 }
 
+bool Player::isHandCardEmpty()
+{
+    return this->handcard->GetCards().size() == 0;
+}
+
 void Player::Deal(Deck* deck)
 {
     this->handcard->AddCard(deck->DrawCard());
@@ -36,5 +41,4 @@ std::string Player::GetName()
 
 Player::~Player()
 {
-
 }

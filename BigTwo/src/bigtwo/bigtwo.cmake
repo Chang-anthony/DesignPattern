@@ -7,4 +7,6 @@ set(BIGTWO_LIB_SRCS
     ${BIGTWO_LIB_PATH}/PairHandler.cpp
     ${BIGTWO_LIB_PATH}/StraightHandler.cpp
     ${BIGTWO_LIB_PATH}/FullHouseHandler.cpp
+    ${BIGTWO_LIB_PATH}/Bigtwo.cpp
+    ${BIGTWO_LIB_PATH}/Round.cpp
 )

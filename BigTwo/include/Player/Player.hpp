@@ -25,6 +25,7 @@ public:
     virtual void NameSelf() = 0;
     virtual std::vector<Card*> Play() = 0;
     void Deal(Deck* deck);
+    bool isHandCardEmpty();
 
     //setter
     void SetHandCard(HandCard* hand);
