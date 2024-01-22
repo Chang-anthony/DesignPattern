@@ -23,18 +23,23 @@ private:
 
     void AddRound(Round* round);
     void doDeal();
-    Round* FristPlay();
-    bool isEnd();
+    Player* FristPlay();
     Round* newRound(Player* topplayer);
-    bool CampareHandle(std::vector<Card*> cards,std::vector<Card*> topplay);
-    bool vaildHandle(std::vector<Card*> cards);
+    Round* FirstRound(Player* topplayer);
 
 public:
-    Bigtwo(Deck* deck,std::vector<Player*> players,CardPatternHandler* handler);
+    Bigtwo(Deck* deck,std::vector<Player*> players, CardPatternHandler* handler);
     ~Bigtwo();
 
     void GameStart();
     void GameEnd();
+    bool isEnd();
+    bool CampareHandle(std::vector<Card*> cards, std::vector<Card*> topplay);
+    bool vaildHandle(std::vector<Card*> cards);
+    std::string PatternNameHandle(std::vector<Card*> cards);
+
+    //helper function
+    void Render(Player* play, std::vector<Card*> cards);
 
     //getter
     std::vector<Player*> GetPlayers();

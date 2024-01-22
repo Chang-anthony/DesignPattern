@@ -1,5 +1,6 @@
-#include "HumanPlayer.hpp"
-#include "Card.hpp"
+#include <HumanPlayer.hpp>
+#include <Card.hpp>
+#include <HandCard.hpp>
 #include <utils.h>
 
 
@@ -18,6 +19,10 @@ void HumanPlayer::NameSelf()
 // TODO : CardPattern Play
 std::vector<Card*> HumanPlayer::Play()
 {
+    this->RenderHandCard();
+
+    //play 
+
     return {};
 }
 

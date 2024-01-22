@@ -18,6 +18,7 @@ private:
     /* data */
     HandCard* handcard;
     std::string name;
+
 public:
     Player();
     ~Player();
@@ -27,6 +28,7 @@ public:
     void Deal(Deck* deck);
     bool isHandCardEmpty();
 
+
     //setter
     void SetHandCard(HandCard* hand);
     void SetName(std::string name);
@@ -34,6 +36,11 @@ public:
     //getter
     HandCard* GetHandCard();
     std::string GetName();
+
+protected:
+    //helper
+    void RenderHandCard();
+    void Delete(std::vector<Card*> played);
 };
 
 #endif /* _PLAYER_H_ */

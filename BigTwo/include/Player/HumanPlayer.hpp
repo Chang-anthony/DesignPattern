@@ -1,7 +1,7 @@
 #ifndef _HUMANPLAYER_H_
 #define _HUMANPLAYER_H_
 
-#include "Player.hpp"
+#include <Player.hpp>
 
 class Card;
 
