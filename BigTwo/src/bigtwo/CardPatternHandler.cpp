@@ -34,8 +34,7 @@ bool CardPatternHandler::vaild(std::vector<Card*> cards)
 {
     if(this->match(cards))
         return true;
-    else
-    {
+    else{
         if(this->next)
             return this->next->match(cards);
         else

@@ -16,14 +16,26 @@ void HumanPlayer::NameSelf()
     this->SetName(name);
 }
 
-// TODO : CardPattern Play
+//TODO: need to test
 std::vector<Card*> HumanPlayer::Play()
 {
     this->RenderHandCard();
+    std::vector<int> want_play = utils::InputMultipleNums();
 
-    //play 
-
-    return {};
+    if(want_play.size() == 1 && want_play[0] == -1)
+        return {};
+    else{
+        if(this->verfiyInput(want_play)){
+            std::vector<Card*> plays = std::vector<Card*>();
+            for(auto input: want_play){
+                plays.push_back(this->GetHandCard()->GetCards()[input]);
+            }
+            return plays;
+        }
+        else{
+            return this->Play();
+        }
+    }
 }
 
 HumanPlayer::~HumanPlayer()

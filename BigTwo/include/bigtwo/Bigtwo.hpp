@@ -23,7 +23,7 @@ private:
 
     void AddRound(Round* round);
     void doDeal();
-    Player* FristPlay();
+    Player* FristPlayer();
     Round* newRound(Player* topplayer);
     Round* FirstRound(Player* topplayer);
 

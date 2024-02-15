@@ -27,6 +27,7 @@ public:
     virtual std::vector<Card*> Play() = 0;
     void Deal(Deck* deck);
     bool isHandCardEmpty();
+    void RemoveCardFromHand(std::vector<Card*> played);
 
 
     //setter
@@ -40,7 +41,7 @@ public:
 protected:
     //helper
     void RenderHandCard();
-    void Delete(std::vector<Card*> played);
+    bool verfiyInput(std::vector<int> want_play);
 };
 
 #endif /* _PLAYER_H_ */

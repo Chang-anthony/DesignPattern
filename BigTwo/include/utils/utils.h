@@ -68,6 +68,7 @@ public:
         return object;
     }
 
+
     template<typename T>
     static std::vector<T*> RemoveObjectFromVector(std::vector<T*> V,T* target)
     {
@@ -159,6 +160,28 @@ public:
         }
     }
 
+    static std::vector<int> InputMultipleNums()
+    {
+        std::set<int> numbers;
+        std::string input = "";
+
+        while(input.size() == 0)
+            std::getline(std::cin, input);
+
+        std::istringstream stream(input);
+        int num;
+
+        //read numbers from string stream
+        while (stream >> num)
+        {
+            /* code */
+            numbers.insert(num);
+        }
+        std::vector<int> results(numbers.begin(), numbers.end());
+
+        return results;
+    }
+
     template<typename T>
     static void ValShouldBigger(T val,int min)
     {
@@ -175,7 +198,7 @@ public:
     {
         if(val > max || val < min)
         {
-           std::ostringstream oss;//   透過 ostringstream 來建立一個整數字符串
+            std::ostringstream oss;//   透過 ostringstream 來建立一個整數字符串
             oss <<" val" << " should be " << min << " ~ " << max << ".";
             throw std::invalid_argument(oss.str());
         }

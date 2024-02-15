@@ -46,7 +46,7 @@ void Player::RenderHandCard()
 }
 
 //TODO:need to test
-void Player::Delete(std::vector<Card*> played)
+void Player::RemoveCardFromHand(std::vector<Card*> played)
 {
     std::vector<Card*> copy = this->handcard->GetCards();
     for(auto play:played)
@@ -57,6 +57,21 @@ void Player::Delete(std::vector<Card*> played)
         }),copy.end());
     }
     this->handcard->SetCards(copy);
+}
+
+bool Player::verfiyInput(std::vector<int> want_play)
+{
+    int max_size = this->handcard->GetCards().size();
+    bool verfiy = true;
+
+    for(auto input: want_play){
+        if(input >= max_size){
+            verfiy = false;
+            break;
+        }
+    }
+
+    return verfiy;
 }
 
 HandCard* Player::GetHandCard()
