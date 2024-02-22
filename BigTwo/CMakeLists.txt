@@ -20,20 +20,26 @@ FetchContent_Declare(
     googletest
     URL
     https://github.com/google/googletest/archive/609281088cfefc76f9d0ce82e1ff6c30cc3591e5.zip
-    DOWNLOAD_NO_EXTRACT TRUE
+    # DOWNLOAD_NO_EXTRACT TRUE
     # GIT_REPOSITORY https://github.com/google/googletest.git
-    # GIT_TAG        master
+    GIT_TAG        release-1.11.0
     # DOWNLOAD_NO_EXTRACT TRUE
 )
 
-set(gtest_force_shared_crt ON CACHE BOOL "" FORCE)
+# set(gtest_force_shared_crt ON CACHE BOOL "" FORCE)
 FetchContent_MakeAvailable(googletest)
-
 
 set_property(TARGET gmock PROPERTY FOLDER "gtest")
 set_property(TARGET gmock_main PROPERTY FOLDER "gtest")
 set_property(TARGET gtest PROPERTY FOLDER "gtest")
 set_property(TARGET gtest_main PROPERTY FOLDER "gtest")
+
+# 確認是否已經包含 Google Test
+if(TARGET gtest)
+    message(STATUS "Google Test found!")
+else()
+    message(FATAL_ERROR "Failed to find Google Test!")
+endif()
 
 # ======================================================
 

@@ -2,9 +2,10 @@ cmake_minimum_required(VERSION 3.13)
 set_property(GLOBAL PROPERTY USE_FOLDERS ON)
 set_property(GLOBAL PROPERTY PREDEFINED_TARGETS_FOLDER "cmake")
 
+
 set(CMAKE_CXX_STANDARD 20)
 
-set(GTest ${PROJECT_NAME}_Test)
+set(GTest Test)
 
 set(Sources 
 ExampleTests.cpp
@@ -52,17 +53,33 @@ if(GTESTON)
     #     COMMAND ${CMAKE_CURRENT_LIST_DIR}/run_tests.bat
     # )
 
+    # 檢測系統是否為 macOS
+    if(APPLE)
+        # 在 macOS 上執行 bash 腳本
+        # # 添加自定义目标，该目标依赖于构建完成后运行的自定义命令
+        add_custom_target(RunTests
+            COMMAND ${CMAKE_COMMAND} -E echo "Build completed. Running execute_process..."
+            COMMAND ${CMAKE_COMMAND} -E echo "Your additional commands here..."
+            COMMAND ${CMAKE_CURRENT_LIST_DIR}/run_tests.sh
+            # DEPENDS ${GTest}
+            # COMMAND ${CMAKE_CURRENT_SOURCE_DIR}/test/Run/DesignPattern_Test.exe
+        )
+    endif()
 
-    # # 添加自定义目标，该目标依赖于构建完成后运行的自定义命令
-    add_custom_target(RunTests
-        COMMAND ${CMAKE_COMMAND} -E echo "Build completed. Running execute_process..."
-        COMMAND ${CMAKE_COMMAND} -E echo "Your additional commands here..."
-        COMMAND ${CMAKE_CURRENT_LIST_DIR}/run_tests.bat
-        DEPENDS ${GTest}
-        # COMMAND ${CMAKE_CURRENT_SOURCE_DIR}/test/Run/DesignPattern_Test.exe
-    )
 
-    add_dependencies(${PROJECT_NAME} RunTests)
+
+    if(win32)
+        # # 添加自定义目标，该目标依赖于构建完成后运行的自定义命令
+        add_custom_target(RunTests
+            COMMAND ${CMAKE_COMMAND} -E echo "Build completed. Running execute_process..."
+            COMMAND ${CMAKE_COMMAND} -E echo "Your additional commands here..."
+            COMMAND ${CMAKE_CURRENT_LIST_DIR}/run_tests.bat
+            # DEPENDS ${GTest}
+            # COMMAND ${CMAKE_CURRENT_SOURCE_DIR}/test/Run/DesignPattern_Test.exe
+        )
+    endif()
+
+    add_dependencies(${GTest} RunTests)
 
     # add_custom_target(run_all
     #     DEPENDS RunTests
