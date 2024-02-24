@@ -1,0 +1,5 @@
+#ifndef _CHANNELSUBSCRIBER_H_
+#define _CHANNELSUBSCRIBER_H_
+
+
+#endif /* _CHANNELSUBSCRIBER_H_ */
