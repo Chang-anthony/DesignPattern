@@ -14,31 +14,37 @@ set(UTILS_PATH ${CMAKE_CURRENT_LIST_DIR}/lib/utils)
 
 # ========================================================
 # GTEST
-include(FetchContent)
-FetchContent_Declare(
-    googletest
-    URL
-    https://github.com/google/googletest/archive/609281088cfefc76f9d0ce82e1ff6c30cc3591e5.zip
-    # DOWNLOAD_NO_EXTRACT TRUE
-    # GIT_REPOSITORY https://github.com/google/googletest.git
-    GIT_TAG        release-1.11.0
-    # DOWNLOAD_NO_EXTRACT TRUE
-)
+find_package(GTEST REQUIRED)
 
-# set(gtest_force_shared_crt ON CACHE BOOL "" FORCE)
-FetchContent_MakeAvailable(googletest)
+if(NOT GTEST_FOUND)
+    message(FATAL_ERROR "Failed to find Google Test!")
+    include(FetchContent)
+    FetchContent_Declare(
+        googletest
+        URL
+        https://github.com/google/googletest/archive/609281088cfefc76f9d0ce82e1ff6c30cc3591e5.zip
+        # DOWNLOAD_NO_EXTRACT TRUE
+        # GIT_REPOSITORY https://github.com/google/googletest.git
+        GIT_TAG        release-1.11.0
+        DOWNLOAD_NO_EXTRACT TRUE
+    )
 
-set_property(TARGET gmock PROPERTY FOLDER "gtest")
-set_property(TARGET gmock_main PROPERTY FOLDER "gtest")
-set_property(TARGET gtest PROPERTY FOLDER "gtest")
-set_property(TARGET gtest_main PROPERTY FOLDER "gtest")
+    # set(gtest_force_shared_crt ON CACHE BOOL "" FORCE)
+    FetchContent_MakeAvailable(googletest)
+
+    set_property(TARGET gmock PROPERTY FOLDER "gtest")
+    set_property(TARGET gmock_main PROPERTY FOLDER "gtest")
+    set_property(TARGET gtest PROPERTY FOLDER "gtest")
+    set_property(TARGET gtest_main PROPERTY FOLDER "gtest")
+endif()
+
 
 # 確認是否已經包含 Google Test
-if(TARGET gtest)
-    message(STATUS "Google Test found!")
-else()
-    message(FATAL_ERROR "Failed to find Google Test!")
-endif()
+# if(TARGET gtest)
+#     message(STATUS "Google Test found!")
+# else()
+#     message(FATAL_ERROR "Failed to find Google Test!")
+# endif()
 
 # ======================================================
 
@@ -46,10 +52,14 @@ endif()
 # ================= main
 include(${LIB_PATH}/libary.cmake)
 
-set(${PROJECT_NAME}_SRCS)
-set(${PROJECT_NAME}_INCS)
-list(APPEND ${PROJECT_NAME}_SRCS ${LIB_SRCS})
-list(APPEND ${PROJECT_NAME}_INCS ${LIB_INCS})
+set(SRCS)
+set(INCS)
+list(APPEND SRCS ${LIB_SRCS})
+list(APPEND INCS ${LIB_INCS})
+
+set(${PROJECT_NAME}_SRCS ${SRCS})
+set(${PROJECT_NAME}_INCS ${INCS})
+
 
 include(${UTILS_PATH}/utils.cmake)
 set(COMM_INCS ${UTILS_INCS})

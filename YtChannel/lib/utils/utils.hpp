@@ -1,4 +1,3 @@
-#pragma once
 #ifndef _UTILS_H_
 #define _UTILS_H_
 
@@ -52,13 +51,13 @@ private:
     std::string msg;
 };
 
-class utils 
+class Utils 
 {
 private:
     /* data */
 public:
-    utils(/* args */){};
-    ~utils(){};
+    Utils(/* args */){};
+    ~Utils(){};
 
     template<typename T>
     static T* RequireNonNull(T* object)
