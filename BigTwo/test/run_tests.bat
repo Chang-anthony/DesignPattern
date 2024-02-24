@@ -7,10 +7,11 @@ echo default :%cd%
 echo Executable files in the current directory:
 dir /b *.exe
 
-set desiredExecutable=DesignPattern_Test.exe
+set desiredExecutable=Test.exe
 
 if exist %desiredExecutable% (
-    call DesignPattern_Test.exe
+    echo Find the executable file "%desiredExecutable%".
+    call %desiredExecutable%
 ) else (
     echo The desired executable "%desiredExecutable%" does not exist in the current directory.
 )

@@ -68,7 +68,7 @@ if(GTESTON)
 
 
 
-    if(win32)
+    if(WIN32)
         # # 添加自定义目标，该目标依赖于构建完成后运行的自定义命令
         add_custom_target(RunTests
             COMMAND ${CMAKE_COMMAND} -E echo "Build completed. Running execute_process..."
