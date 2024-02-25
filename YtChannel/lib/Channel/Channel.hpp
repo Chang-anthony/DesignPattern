@@ -4,6 +4,8 @@
 #include <iostream>
 #include <string>
 #include <vector>
+#include <thread>
+#include <mutex>
 
 class Video;
 class ChannelSubscriber;
@@ -12,6 +14,9 @@ class Channel
 {
 private:
     /* data */
+    std::thread moniterThread;
+    std::mutex mutex;
+
     std::string name;
     std::vector<Video*> videos;
     std::vector<ChannelSubscriber*> subscribers;
@@ -20,7 +25,7 @@ public:
     Channel(std::string name);
     ~Channel();
 
-    void moniter();
+    void startmoniter();
     void notifiy();
     void upload(Video* video);
     void AddSubscriber(ChannelSubscriber* subscriber);
@@ -35,6 +40,11 @@ public:
     void setName(std::string name);
     void setVideos(std::vector<Video*> videos);
     void setSubscribers(std::vector<ChannelSubscriber*> subscribers);
+protected:
+    int video_count = 0;
+    bool monitoring = false;
+    void moniter();
+    void whenUploadVideo();
 };
 
 #endif /* _CHANNEL_H_ */

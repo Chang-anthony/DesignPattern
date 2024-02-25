@@ -3,8 +3,8 @@
 
 #include <iostream>
 #include <vector>
+#include <string>
 
-class Video;
 class Channel;
 
 
@@ -12,20 +12,23 @@ class ChannelSubscriber
 {
 private:
     /* data */
+    std::string name;
     std::vector<Channel*> channels;
 public:
-    ChannelSubscriber(/* args */);
+    ChannelSubscriber(std::string name);
     ~ChannelSubscriber();
 
     void subscribe(Channel* channel);
     void unsubsribe(Channel* target);
-    virtual void received(Video* newVideo) = 0;
+    virtual void received(Channel* channel) = 0;
 
     //getter
     std::vector<Channel*> getChannels();
+    std::string getName();
 
     //setter
     void setChannels(std::vector<Channel*> channels);
+    void setName(std::string name);
 };
 
 #endif /* _CHANNELSUBSCRIBER_H_ */

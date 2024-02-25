@@ -6,5 +6,4 @@ set(__SRCS
     ${_LIB_PATH}/Channel.cpp
 )
 
-set(__INCS  ${_LIB_PATH})
 

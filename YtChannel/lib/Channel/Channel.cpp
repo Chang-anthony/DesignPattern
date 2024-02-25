@@ -3,6 +3,8 @@
 #include <Video.hpp>
 #include <ChannelSubscriber.hpp>
 #include <algorithm>
+#include <chrono>
+
 
 
 Channel::Channel(std::string name)
@@ -10,24 +12,58 @@ Channel::Channel(std::string name)
     this->setName(name);
     this->videos = std::vector<Video*>();
     this->subscribers = std::vector<ChannelSubscriber*>();
+    this->video_count = 0;
+    this->monitoring = false;
 }
 
+void Channel::startmoniter()
+{
+    this->monitoring = true;
+    this->moniterThread = std::thread(&Channel::moniter, this);
+}
+
+// Need to fix
 void Channel::moniter()
 {
 
+    while (this->monitoring)
+    {
+        try
+        {
+            whenUploadVideo();
+            std::unique_lock<std::mutex> lock(mutex);
+        }
+        catch(const std::exception& e)
+        {
+            std::cerr << e.what() << '\n';
+        }
+        
+        std::this_thread::sleep_for(std::chrono::seconds(3));
+    }
+    
+}
+
+void Channel::whenUploadVideo()
+{
+    if(this->video_count < this->videos.size())
+    {
+        this->video_count = this->videos.size();
+        this->notifiy();
+    }
 }
 
 void Channel::notifiy()
 {
-    Video* newVideo = this->videos.back();
     for(auto scriber: this->getSubscribers())
-        scriber->received(newVideo);
+        scriber->received(this);
 }
 
 void Channel::upload(Video* video)
 {
     utils::RequireNonNull(video);
+    std::cout << "頻道 " << this->getName() << "上架了一則新影片 " << video->getTitle() << "。" << std::endl;
     this->videos.push_back(video);
+    this->notifiy();
 }
 
 void Channel::AddSubscriber(ChannelSubscriber* subscriber)

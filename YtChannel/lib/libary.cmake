@@ -7,12 +7,13 @@ set(__LIB_SRCS)
 set(__LIB_INCS)
 
 include(${LIB_PATH}/Channel/channel.cmake)
-list(APPEND __LIB_INCS ${__INCS})
 list(APPEND __LIB_SRCS ${__SRCS})
 
 include(${LIB_PATH}/Subscriber/subscriber.cmake)
-list(APPEND __LIB_INCS ${__INCS})
 list(APPEND __LIB_SRCS ${__SRCS})
 
 set(LIB_SRCS ${__LIB_SRCS})
-set(LIB_INCS ${__LIB_INCS})
+set(LIB_INCS 
+    ${LIB_PATH}/Channel
+    ${LIB_PATH}/Subscriber
+)

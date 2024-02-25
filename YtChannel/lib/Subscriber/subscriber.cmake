@@ -6,5 +6,3 @@ set(__SRCS
     ${_LIB_PATH}/WaterBall.cpp
     ${_LIB_PATH}/ChannelSubscriber.cpp
 )
-
-set(__INCS ${_LIB_PATH})

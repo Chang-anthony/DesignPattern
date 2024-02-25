@@ -13,9 +13,9 @@ ExampleTests.cpp
 
 add_executable(${GTest} ${Sources})
 if(GTEST_FOUND)
-    target_link_libraries(${GTest} PRIVATE ${PROJECT_NAME}_LIB GTest::GTest GTest::Main)
+    target_link_libraries(${GTest} ${PROJECT_NAME}_LIB GTest::GTest GTest::Main)
 else()
-    target_link_libraries(${GTest} PRIVATE ${PROJECT_NAME}_LIB gtest_main)
+    target_link_libraries(${GTest} ${PROJECT_NAME}_LIB gtest_main)
 endif()
 
 add_test(
