@@ -33,7 +33,7 @@ void Video::setDescription(std::string description)
 
 void Video::setLength(int length)
 {
-    
+
     this->length = length;
 }
 
