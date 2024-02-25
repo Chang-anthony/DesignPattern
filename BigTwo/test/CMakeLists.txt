@@ -54,9 +54,18 @@ if(GTESTON)
     # )
 
     # 檢測系統是否為 macOS
-    if(APPLE)
+    if(APPLE OR UNIX)
         # 在 macOS 上執行 bash 腳本
         # # 添加自定义目标，该目标依赖于构建完成后运行的自定义命令
+        # add_custom_command(
+        #     TARGET ${GTest}
+        #     POST_BUILD #等待executable build 玩才跑以下指令
+        #     COMMAND ${CMAKE_CURRENT_LIST_DIR}/run_tests.sh
+        #     COMMENT "Running run_tests"
+        # )
+        # # 定義一個自定義目標，用來執行你的自定義命令
+        # add_custom_target(RunTests DEPENDS ${GTest})
+
         add_custom_target(RunTests
             COMMAND ${CMAKE_COMMAND} -E echo "Build completed. Running execute_process..."
             COMMAND ${CMAKE_COMMAND} -E echo "Your additional commands here..."
@@ -64,48 +73,30 @@ if(GTESTON)
             # DEPENDS ${GTest}
             # COMMAND ${CMAKE_CURRENT_SOURCE_DIR}/test/Run/DesignPattern_Test.exe
         )
+        add_dependencies(${PROJECT_NAME} RunTests)
     endif()
 
-
-
     if(WIN32)
+        message(STATUS "Run Test")
+        # add_custom_command(
+        #     TARGET ${GTest}
+        #     POST_BUILD
+        #     COMMAND ${CMAKE_CURRENT_LIST_DIR}/run_tests.bat
+        #     COMMENT "Running run_tests"
+        # )
+        # add_custom_target(RunTests DEPENDS ${GTest})
+
+        #TODO: need to know why this can run shell file when build Almost completed
         # # 添加自定义目标，该目标依赖于构建完成后运行的自定义命令
         add_custom_target(RunTests
             COMMAND ${CMAKE_COMMAND} -E echo "Build completed. Running execute_process..."
             COMMAND ${CMAKE_COMMAND} -E echo "Your additional commands here..."
             COMMAND ${CMAKE_CURRENT_LIST_DIR}/run_tests.bat
-            # DEPENDS ${GTest}
-            # COMMAND ${CMAKE_CURRENT_SOURCE_DIR}/test/Run/DesignPattern_Test.exe
+            DEPENDS ${GTest}
         )
+        add_dependencies(${PROJECT_NAME} RunTests)
     endif()
 
-    add_dependencies(${GTest} RunTests)
-
-    # add_custom_target(run_all
-    #     DEPENDS RunTests
-    # )
-
-    # 设置 "make RunTests" 命令用于运行自定义目标
-    # add_custom_target(run_tests_all
-    #     COMMAND ${CMAKE_MAKE_PROGRAM} RunTests
-    #     COMMENT "Run all tests"
-    # )
-
-    # execute_process(
-    # COMMAND ${CMAKE_CURRENT_SOURCE_DIR}/test/Run/DesignPattern_Test.exe 
-    #     RESULT_VARIABLE result
-    #     OUTPUT_VARIABLE output
-    # )
-    # message("Result: ${result}")
-    # message("Output: ${output}")
-
-    # execute_process(
-    #     COMMAND ${CMAKE_CURRENT_LIST_DIR}/run_tests.bat
-    #     OUTPUT_VARIABLE output
-    #     RESULT_VARIABLE result
-    # )
-    # message("Command output: ${output}")
-    # message("Output from batch file: ${output}")
 endif()
 
 
