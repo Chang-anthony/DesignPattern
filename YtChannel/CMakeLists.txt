@@ -17,25 +17,23 @@ set(UTILS_PATH ${CMAKE_CURRENT_LIST_DIR}/lib/utils)
 find_package(GTEST REQUIRED)
 
 if(NOT GTEST_FOUND)
-    message(FATAL_ERROR "Failed to find Google Test!")
+    message(STATUS "Start Fetch Google Test.")
     include(FetchContent)
     FetchContent_Declare(
         googletest
-        URL
-        https://github.com/google/googletest/archive/609281088cfefc76f9d0ce82e1ff6c30cc3591e5.zip
+        URL https://github.com/google/googletest/archive/refs/tags/release-1.11.0.zip
         # DOWNLOAD_NO_EXTRACT TRUE
-        # GIT_REPOSITORY https://github.com/google/googletest.git
-        GIT_TAG        release-1.11.0
-        DOWNLOAD_NO_EXTRACT TRUE
+        # GIT_TAG        release-1.11.0
+        DOWNLOAD_EXTRACT_TIMESTAMP ON
     )
 
     # set(gtest_force_shared_crt ON CACHE BOOL "" FORCE)
     FetchContent_MakeAvailable(googletest)
 
-    set_property(TARGET gmock PROPERTY FOLDER "gtest")
-    set_property(TARGET gmock_main PROPERTY FOLDER "gtest")
-    set_property(TARGET gtest PROPERTY FOLDER "gtest")
-    set_property(TARGET gtest_main PROPERTY FOLDER "gtest")
+    # set_property(TARGET gmock PROPERTY FOLDER "gtest")
+    # set_property(TARGET gmock_main PROPERTY FOLDER "gtest")
+    # set_property(TARGET gtest PROPERTY FOLDER "gtest")
+    # set_property(TARGET gtest_main PROPERTY FOLDER "gtest")
 endif()
 
 
@@ -95,11 +93,17 @@ target_link_libraries(${PROJECT_NAME} PRIVATE ${PROJECT_NAME}_LIB)
 # target_compile_features(${PROJECT_NAME} PRIVATE cxx_std_20)
 target_compile_options(${PROJECT_NAME} PRIVATE -finput-charset=UTF-8)
 
-# 設置MSVC編譯編碼
-add_compile_options("$<$<CXX_COMPILER_ID:MSVC>:/source-charset:utf-8>")
-add_compile_options("$<$<C_COMPILER_ID:MSVC>:/utf-8>")
-add_compile_options("$<$<CXX_COMPILER_ID:MSVC>:/utf-8>")
+if(WIN32)
+    # 設置MSVC編譯編碼
+    add_compile_options("$<$<CXX_COMPILER_ID:MSVC>:/source-charset:utf-8>")
+    add_compile_options("$<$<C_COMPILER_ID:MSVC>:/utf-8>")
+    add_compile_options("$<$<CXX_COMPILER_ID:MSVC>:/utf-8>")
+endif()
 
+if(APPLE OR UNIX)
+    add_compile_options(-finput-charset=UTF-8)
+    add_compile_options(-fexec-charset=UTF-8)
+endif()
 
 
 #GTEST
