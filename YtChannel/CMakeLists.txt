@@ -55,8 +55,8 @@ set(INCS)
 list(APPEND SRCS ${LIB_SRCS})
 list(APPEND INCS ${LIB_INCS})
 
-set(${PROJECT_NAME}_SRCS ${SRCS})
-set(${PROJECT_NAME}_INCS ${INCS})
+# set(${PROJECT_NAME}_SRCS ${SRCS})
+# set(${PROJECT_NAME}_INCS ${INCS})
 
 
 include(${UTILS_PATH}/utils.cmake)
@@ -66,7 +66,7 @@ set(COMM_SRCS)
 
 
 add_library(${PROJECT_NAME}_LIB STATIC
-    ${${PROJECT_NAME}_SRCS}
+    ${SRCS}
     ${COMM_SRCS}
 )
 
@@ -82,7 +82,7 @@ add_executable(${PROJECT_NAME} ${SOURCES})
 # target_include_directories(${PROJECT_NAME} PUBLIC ${BIGTWO_INCS} ${COMM_INCS})
 # 将包含目录添加为库的接口目录
 # PRIVATE main main檔連接到這個庫的時候會找不到 hpp 檔 PUBLIC 才行
-target_include_directories(${PROJECT_NAME}_LIB PUBLIC ${${PROJECT_NAME}_INCS} ${COMM_INCS})
+target_include_directories(${PROJECT_NAME}_LIB PUBLIC ${INCS} ${COMM_INCS})
 # target_include_directories(${PROJECT_NAME}_LIB PUBLIC ${INCLUDE_PATH}/Card ${INCLUDE_PATH}/Player ${UTILS_PATH})
 
 

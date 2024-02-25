@@ -1,9 +1,10 @@
 #include <Video.hpp>
-#include <utils.hpp>
 
 Video::Video(std::string title, std::string description, int length)
 {
-
+    this->setTitle(title);
+    this->setDescription(description);
+    this->setLength(length);
 }
 
 std::string Video::getTitle()
@@ -33,7 +34,7 @@ void Video::setDescription(std::string description)
 
 void Video::setLength(int length)
 {
-
+    utils::ValShouldBigger(length, 0);
     this->length = length;
 }
 

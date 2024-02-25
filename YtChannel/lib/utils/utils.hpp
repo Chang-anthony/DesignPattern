@@ -51,13 +51,13 @@ private:
     std::string msg;
 };
 
-class Utils 
+class utils 
 {
 private:
     /* data */
 public:
-    Utils(/* args */){};
-    ~Utils(){};
+    utils(/* args */){};
+    ~utils(){};
 
     template<typename T>
     static T* RequireNonNull(T* object)
@@ -265,4 +265,4 @@ public:
 
 };
 
-#endif
+#endif /* _UTILS_H_ */
