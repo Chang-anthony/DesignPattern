@@ -31,33 +31,31 @@ set(GTESTON ON)
 if(GTESTON)
     # 檢測系統是否為 macOS
     if(APPLE OR UNIX)
-        # add_custom_target(RunTests
-        #     COMMAND ${CMAKE_COMMAND} -E echo "Build completed. Running execute_process..."
-        #     COMMAND ${CMAKE_COMMAND} -E echo "Your additional commands here..."
-        #     COMMAND ${CMAKE_CURRENT_LIST_DIR}/run_tests.sh
-        #     # DEPENDS ${GTest}
-        #     # COMMAND ${CMAKE_CURRENT_SOURCE_DIR}/test/Run/DesignPattern_Test.exe
-        # )
-
         # 在 macOS 上執行 bash 腳本
         # # 添加自定义目标，该目标依赖于构建完成后运行的自定义命令
-        add_custom_command(
-            TARGET ${GTest}
-            POST_BUILD
-            COMMAND ${CMAKE_CURRENT_LIST_DIR}/run_tests.sh
-            COMMENT "Running run_tests"
-        )
+        # add_custom_command(
+        #     TARGET ${GTest}
+        #     POST_BUILD
+        #     COMMAND ${CMAKE_CURRENT_LIST_DIR}/run_tests.sh
+        #     COMMENT "Running run_tests"
+        # )
         # 定義一個自定義目標，用來執行你的自定義命令
-        add_custom_target(RunTests DEPENDS ${GTest})
+        add_custom_target(RunTests
+        COMMAND ${CMAKE_COMMAND} -E echo "Build completed. Running execute_process..."
+        COMMAND ${CMAKE_COMMAND} -E echo "Your additional commands here..."
+        COMMAND ${CMAKE_CURRENT_LIST_DIR}/run_tests.sh
+        DEPENDS ${GTest}
+        )
+        add_dependencies(${PROJECT_NAME} RunTests)
     endif()
 
     if(WIN32)
-        add_custom_command(
-            TARGET ${GTest}
-            POST_BUILD
-            COMMAND ${CMAKE_CURRENT_LIST_DIR}/run_tests.bat
-            COMMENT "Running run_tests"
-        )
+        # add_custom_command(
+        #     TARGET ${GTest}
+        #     POST_BUILD
+        #     COMMAND ${CMAKE_CURRENT_LIST_DIR}/run_tests.bat
+        #     COMMENT "Running run_tests"
+        # )
         # # 添加自定义目标，该目标依赖于构建完成后运行的自定义命令
         # add_custom_target(RunTests
         #     COMMAND ${CMAKE_COMMAND} -E echo "Build completed. Running execute_process..."
@@ -66,7 +64,13 @@ if(GTESTON)
         #     # DEPENDS ${GTest}
         #     # COMMAND ${CMAKE_CURRENT_SOURCE_DIR}/test/Run/DesignPattern_Test.exe
         # )
-        add_custom_target(RunTests DEPENDS ${GTest})
+        add_custom_target(RunTests
+        COMMAND ${CMAKE_COMMAND} -E echo "Build completed. Running execute_process..."
+        COMMAND ${CMAKE_COMMAND} -E echo "Your additional commands here..."
+        COMMAND ${CMAKE_CURRENT_LIST_DIR}/run_tests.bat
+        DEPENDS ${GTest}
+        )
+        add_dependencies(${PROJECT_NAME} RunTests)
     endif()
 endif()
 
