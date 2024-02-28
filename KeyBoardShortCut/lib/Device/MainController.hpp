@@ -4,6 +4,7 @@
 #include <iostream>
 #include <map>
 #include <vector>
+#include <stack>
 class Command;
 
 class MainController
@@ -24,6 +25,8 @@ public:
     void setCommand(char key, Command* command);
 protected:
     std::map<char, Command*> save;
+    std::stack<Command*> done;
+    std::stack<Command*> s2;
 };
 
 #endif /* _MAINCONTROLLER_H_ */

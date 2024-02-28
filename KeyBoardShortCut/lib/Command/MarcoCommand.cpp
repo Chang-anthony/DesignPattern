@@ -15,8 +15,11 @@ void MarcoCommand::execute()
 
 void MarcoCommand::undo()
 {
-    for(auto command: this->marco)
+    for(auto command: this->marco) {
+        if(!command)
+            printf("NULL");
         command->undo();
+    }
 }
 
 MarcoCommand::~MarcoCommand()

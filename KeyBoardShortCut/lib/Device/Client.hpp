@@ -18,6 +18,7 @@ private:
     Telecom* telecom;
 
     void setCommand(char key, bool ismarco);
+    void renderChooseList();
     Command* genCommand(int num);
 public:
     Client(MainController* control, Tank* tank, Telecom* telecom);

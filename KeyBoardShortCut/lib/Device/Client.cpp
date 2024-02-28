@@ -15,7 +15,7 @@
 
 Client::Client(MainController* control, Tank* tank, Telecom* telecom)
 {
-    utils::RequireNonNull(contorl);
+    utils::RequireNonNull(control);
     utils::RequireNonNull(tank);
     utils::RequireNonNull(telecom);
     this->contorl = control;
@@ -23,11 +23,33 @@ Client::Client(MainController* control, Tank* tank, Telecom* telecom)
     this->telecom = telecom;
 }
 
+void Client::renderChooseList()
+{
+    std::cout << "(0) MoveTankForward" << std::endl;
+    std::cout << "(1) MoveTankBackward" << std::endl;
+    std::cout << "(2) ConnectTelecom" << std::endl;
+    std::cout << "(3) DisconnectTelecom" << std::endl;
+    std::cout << "(4) ResetMainControlKeyboard" << std::endl;
+}
+
 void Client::control()
 {
     std::cout << "(1) 快捷鍵設置 (2) Undo (3) Redo (字母) 按下按鍵:" << std::endl;
-    int input = utils::HandleInput(1, 3);
-    switch (input) {
+    char oper;
+    std::cin >> oper;
+
+    int choose = 0;
+
+    if(oper >= 'a' && oper <= 'z')
+        this->contorl->opeator(oper);
+    else if(oper >= '0' && oper <= '9')
+        choose = std::atoi(&oper);
+    else
+        std::cout << "UnSupported Input" << std::endl;
+        
+
+    
+    switch (choose) {
         case 1: {
             std::cout << "設置巨集指令 (y/n):" << std::endl;
             char input;
@@ -36,25 +58,23 @@ void Client::control()
             std::cout << "Key: " << std::endl;
             std::cin >> Key;
             
-            if(Key >= 'a' && Key <= 'z')
-            {
-                if(input == 'y' || input == 'Y')
+            if(Key >= 'a' && Key <= 'z') {
+                if(input == 'y')
                     this->setCommand(Key, true);
-                else if (input == 'n' || input == 'N')
+                else if (input == 'n')
                     this->setCommand(Key, false);
             }
-            else
-            {
+            else {
                 std::cout << "This controller unsupport this Key." << std::endl;
             }
+            break;
         }
         case 2: {
             this->contorl->undo();
+            break;
         }
         case 3: {
             this->contorl->redo();
-        }
-        default: {
             break;
         }
     }
@@ -63,6 +83,9 @@ void Client::control()
 void Client::setCommand(char key, bool ismarco)
 {
     if(ismarco) {
+        std::cout << "要將哪幾道指令設置到快捷鍵 " << key << " 上:" << std::endl;
+        this->renderChooseList();
+
         std::vector<int> inputs = utils::InputMultipleNums();
         std::vector<Command*> marco = std::vector<Command*>();
         for(auto num : inputs) {
@@ -80,6 +103,9 @@ void Client::setCommand(char key, bool ismarco)
         this->contorl->setCommand(key, marcoCommand);
     }
     else {
+        std::cout << "要將哪一道指令設置到快捷鍵 " << key << " 上:" << std::endl;
+        this->renderChooseList();
+
         int input = utils::HandleInput(0, 4);
         Command* command = this->genCommand(input);
         this->contorl->setCommand(key, command);
@@ -107,9 +133,9 @@ Command* Client::genCommand(int num)
         case 4: {
             return new ResetCommand(this->contorl);
         }
-        default:
-            return nullptr;
     }
+
+    return nullptr;
 }
 
 Client::~Client()
