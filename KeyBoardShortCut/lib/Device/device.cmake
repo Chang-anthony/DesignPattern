@@ -5,5 +5,6 @@ set(__SRCS
     ${__LIB_PATH}/Tank.cpp
     ${__LIB_PATH}/Telecom.cpp
     ${__LIB_PATH}/MainController.cpp
+    ${__LIB_PATH}/Client.cpp
 )
 

@@ -7,5 +7,7 @@ set(__SRCS
     ${__LIB_PATH}/TankMoveBackwardCommand.cpp
     ${__LIB_PATH}/TelecomConnectCommand.cpp
     ${__LIB_PATH}/TelecomdisConnectCommand.cpp
+    ${__LIB_PATH}/ResetCommand.cpp
+    ${__LIB_PATH}/MarcoCommand.cpp
 
 )
