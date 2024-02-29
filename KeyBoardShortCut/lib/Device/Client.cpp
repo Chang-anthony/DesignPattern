@@ -32,6 +32,11 @@ void Client::renderChooseList()
     std::cout << "(4) ResetMainControlKeyboard" << std::endl;
 }
 
+void Client::control(char key)
+{
+    this->contorl->opeator(key);
+}
+
 void Client::control()
 {
     std::cout << "(1) 快捷鍵設置 (2) Undo (3) Redo (字母) 按下按鍵:" << std::endl;
@@ -131,7 +136,7 @@ Command* Client::genCommand(int num)
             return new TelecomdisConnectCommand(this->telecom);
         }
         case 4: {
-            return new ResetCommand(this->contorl);
+            return new ResetCommand(*this->contorl);
         }
     }
 

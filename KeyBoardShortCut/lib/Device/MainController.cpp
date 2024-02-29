@@ -11,16 +11,21 @@ MainController::MainController(/* args */)
 
 void MainController::opeator(char key)
 {
-    if(this->command.count(key) == 0)
+    if(this->command.size() == 0)
         return;
     std::cout << "map size:" << this->command.size() << std::endl;
-    if(this->command.size() > 0 && this->command.find(key) != this->command.end()) {
+    if(this->command.find(key) != this->command.end()) {
         this->command[key]->execute();
         this->done.push(this->command[key]);
         this->s2 = std::stack<Command*>();
     }else {
         std::cout << "The controller not have this command." << std::endl;
     }
+}
+
+void MainController::setterCommands(std::map<char, Command*> command)
+{
+    this->command = command;
 }
 
 void MainController::setCommand(char key, Command* command)
@@ -30,10 +35,10 @@ void MainController::setCommand(char key, Command* command)
 }
 
 void MainController::resetCommand()
-{
-    std::map<char, Command*> copy(this->command);
-    this->save = copy;
+{   
     this->command.clear();
+    this->command = std::map<char, Command*>();
+    std::cout << this->command.size() << std::endl;
     this->done = std::stack<Command*>();
     this->s2 = std::stack<Command*>();
 }
@@ -41,9 +46,9 @@ void MainController::resetCommand()
 void MainController::undoresetCommand()
 {
     std::cout << "Unsuported this operation" << std::endl;
-    std::map<char, Command*> copy(this->save);
-    this->command = copy;
-    this->save.clear();
+    // std::map<char, Command*> copy(this->save);
+    // this->command = copy;
+    // this->save.clear();
 }
 
 void MainController::undo()

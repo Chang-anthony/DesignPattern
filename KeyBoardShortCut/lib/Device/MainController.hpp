@@ -19,8 +19,11 @@ public:
     void opeator(char key);
     void resetCommand();
     void undoresetCommand();
+
     void undo();
     void redo();
+
+    void setterCommands(std::map<char, Command*> command);
 
     void setCommand(char key, Command* command);
 protected:

@@ -25,7 +25,7 @@ public:
     ~Client();
 
     void control();
-
+    void control(char key);
 };
 
 #endif /* _CLIENT_H_ */

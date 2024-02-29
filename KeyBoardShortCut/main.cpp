@@ -9,6 +9,7 @@
 #include <vector>
 #include "Client.hpp"
 #include "MainController.hpp"
+#include "ResetCommand.hpp"
 #include "Tank.hpp"
 #include "Telecom.hpp"
 
@@ -28,6 +29,12 @@ int main()
     MainController* control = new MainController();
 
     Client* user = new Client(control, tank, telecom);
+
+    Command* reset = new ResetCommand(*control);
+    // control->setCommand('r', reset);
+    
+    // control->opeator('r');
+    // control->opeator('r');
 
     while(true)
     {

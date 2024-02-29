@@ -3,16 +3,17 @@
 
 #include <iostream>
 #include "Command.hpp"
+#include "MainController.hpp"
 
-class MainController;
+// class MainController;
 
 class ResetCommand : public Command
 {
 private:
     /* data */
-    MainController* controller;
+    MainController controller;
 public:
-    ResetCommand(MainController* controller);
+    ResetCommand(MainController controller);
     ~ResetCommand();
 
     void execute() override;
