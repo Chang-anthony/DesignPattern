@@ -15,7 +15,6 @@
 #include <FullHouseHandler.hpp>
 #include <StraightHandler.hpp>
 
-
 TEST(Deck,DeckTest)
 {
     Deck* deck = new Deck();

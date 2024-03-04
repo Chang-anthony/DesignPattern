@@ -3,6 +3,9 @@ set_property(GLOBAL PROPERTY USE_FOLDERS ON)
 set_property(GLOBAL PROPERTY PREDEFINED_TARGETS_FOLDER "cmake")
 
 
+set(LIB_PATH ${CMAKE_CURRENT_LIST_DIR})
+
+
 set(CMAKE_CXX_STANDARD 20)
 
 set(GTest Test)
@@ -11,9 +14,24 @@ set(Sources
 ExampleTests.cpp
 )
 
+include(${LIB_PATH}/libary/test.cmake)
+set(SRCS)
+
+set(INCS ${CMAKE_CURRENT_LIST_DIR}/libary)
+list(APPEND SRCS ${__SRCS})
+
+
 add_executable(${GTest} ${Sources})
 
-target_link_libraries(${GTest} PRIVATE ${PROJECT_NAME}_LIB gtest_main)
+add_library(${GTest}_LIB STATIC
+    ${SRCS}
+)
+
+target_link_libraries(${GTest} PRIVATE ${PROJECT_NAME}_LIB ${GTest}_LIB ${GTest}_LIB gtest_main)
+target_include_directories(${GTest}_LIB PUBLIC ${BIGTWO_INCS} ${COMM_INCS} ${INCS})
+
+# target_include_directories(${PROJECT_NAME}_LIB PUBLIC ${BIGTWO_INCS} ${COMM_INCS})
+# target_link_libraries(${GTest}_LIB PRIVATE ${PROJECT_NAME}_LIB)
 
 # 指定生成的可执行文件路径
 # set(EXECUTABLE_OUTPUT_PATH ${CMAKE_CURRENT_SOURCE_DIR}/Run)
