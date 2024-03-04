@@ -147,16 +147,21 @@ public:
     static int HandleInput(int min,int max)
     {
         std::cout << "請選擇數值介於" << min << "~" << max  << "之間!!!"<< std::endl;
-        int input;
+        char input;
         std::cin >> input;
-        if( input < min || input > max)
-        {
-            return HandleInput(min,max);
+        int num = std::atoi(&input);
+
+        if(input >= '0' && input <= '9') {
+            if( num < min || num > max) {
+                return HandleInput(min,max);
+            }
+            else {
+                return num;
+            }
         }
         else
-        {
-            return input;
-        }
+            return HandleInput(min, max);
+        
     }
 
     static std::vector<int> InputMultipleNums()

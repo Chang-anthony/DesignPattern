@@ -30,7 +30,6 @@ int main()
 
     Client* user = new Client(control, tank, telecom);
 
-    Command* reset = new ResetCommand(*control);
     // control->setCommand('r', reset);
     
     // control->opeator('r');

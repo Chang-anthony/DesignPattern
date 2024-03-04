@@ -11,9 +11,9 @@ class ResetCommand : public Command
 {
 private:
     /* data */
-    MainController controller;
+    MainController* controller;
 public:
-    ResetCommand(MainController controller);
+    ResetCommand(MainController* controller);
     ~ResetCommand();
 
     void execute() override;

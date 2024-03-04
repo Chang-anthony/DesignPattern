@@ -52,8 +52,6 @@ void Client::control()
     else
         std::cout << "UnSupported Input" << std::endl;
         
-
-    
     switch (choose) {
         case 1: {
             std::cout << "設置巨集指令 (y/n):" << std::endl;
@@ -99,7 +97,6 @@ void Client::setCommand(char key, bool ismarco)
                 marco.push_back(command);
             }
             else {
-                
                 std::cout << "Can't set this marco command please retry." << std::endl;
                 return;
             }
@@ -136,7 +133,7 @@ Command* Client::genCommand(int num)
             return new TelecomdisConnectCommand(this->telecom);
         }
         case 4: {
-            return new ResetCommand(*this->contorl);
+            return new ResetCommand(this->contorl);
         }
     }
 

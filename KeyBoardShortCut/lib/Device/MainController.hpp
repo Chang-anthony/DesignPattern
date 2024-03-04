@@ -11,7 +11,7 @@ class MainController
 {
 private:
     /* data */
-    std::map<char, Command*> command;
+    std::vector<Command*> command;
 public:
     MainController(/* args */);
     ~MainController();
@@ -23,11 +23,10 @@ public:
     void undo();
     void redo();
 
-    void setterCommands(std::map<char, Command*> command);
+    void setterCommands(std::vector<Command*> command);
 
     void setCommand(char key, Command* command);
 protected:
-    std::map<char, Command*> save;
     std::stack<Command*> done;
     std::stack<Command*> s2;
 };
