@@ -17,6 +17,7 @@ public:
     Card(Rank rank,Suit suit,Deck* deck);
     ~Card();
 
+    static Card* GenCardFromChar(std::string rank, std::string suit);
 
     //Getter
     Rank GetRank();

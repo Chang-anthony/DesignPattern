@@ -12,11 +12,13 @@ enum class Suit
     Club,
     Diamond,
     Heart,
-    Spade
+    Spade,
+    None
 };
 
 std::string SuitToString(Suit rank);
 std::string SuitToName(Suit rank);
+Suit CharToSuit(std::string c);
 int SuitToNumber(Suit suit);
 
 #endif /* _SUIT_H_ */

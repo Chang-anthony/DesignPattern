@@ -17,6 +17,14 @@ std::map<Suit,std::string> suitToName
     {Suit::Spade,"Spade"}
 };
 
+std::map<std::string, Suit> charTosuit = 
+{
+    {"C", Suit::Club},
+    {"D", Suit::Diamond},
+    {"H", Suit::Heart},
+    {"S", Suit::Spade}
+};
+
 std::string SuitToString(Suit suit)
 {
     auto it = suitToString.find(suit);
@@ -31,6 +39,15 @@ std::string SuitToName(Suit suit)
     if(it != suitToString.end())
         return it->second;
     return "0";
+}
+
+Suit CharToSuit(std::string c)
+{
+    auto it = charTosuit.find(c);
+    if(it != charTosuit.end())
+        return it->second;
+    
+    return Suit::None;
 }
 
 int SuitToNumber(Suit suit)

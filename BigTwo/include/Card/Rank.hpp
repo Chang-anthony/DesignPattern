@@ -20,11 +20,13 @@ enum class Rank
     J,
     Q,
     K,
-    A
+    A,
+    None
 };
 
 std::string RankToString(Rank rank);
 std::string RankToName(Rank rank);
+Rank CharToRank(std::string c);
 int RankToNumber(Rank rank);
 
 #endif /* _RANK_H_ */

@@ -34,6 +34,23 @@ std::map<Rank,std::string> rankToName =
     {Rank::K,"K"}
 };
 
+std::map<std::string, Rank> charTorank = 
+{
+    {"A", Rank::A},
+    {"2", Rank::Sec},
+    {"3", Rank::Thr},
+    {"4", Rank::Four},
+    {"5", Rank::Five},
+    {"6", Rank::Six},
+    {"7", Rank::Seven},
+    {"8", Rank::Eight},
+    {"9", Rank::Night},
+    {"10", Rank::Ten},
+    {"J", Rank::J},
+    {"Q", Rank::Q},
+    {"K", Rank::K}
+};
+
 std::string RankToString(Rank rank)
 {
     auto it = rankToString.find(rank);
@@ -52,6 +69,15 @@ std::string RankToName(Rank rank)
         return it->second;
     }
     return "0";
+}
+
+Rank CharToRank(std::string c)
+{
+    auto it = charTorank.find(c);
+    if( it != charTorank.end())
+        return it->second;
+    
+    return Rank::None;
 }
 
 int RankToNumber(Rank rank)

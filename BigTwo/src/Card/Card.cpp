@@ -12,6 +12,17 @@ Card::Card(Rank rank,Suit suit,Deck* deck):rank(rank),suit(suit),deck(deck)
 
 }
 
+Card* Card::GenCardFromChar(std::string rank, std::string suit)
+{
+    if(CharToRank(rank) != Rank::None && CharToSuit(suit) != Suit::None)
+    {
+        Rank r = CharToRank(rank);
+        Suit s = CharToSuit(suit);
+        return new Card(r, s);
+    } else 
+        return nullptr;
+}
+
 bool Card::isBigger(Card* card)
 {
     int number1 = RankToNumber(this->GetRank());
