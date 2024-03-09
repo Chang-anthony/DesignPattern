@@ -14,6 +14,9 @@
 #include <PairHandler.hpp>
 #include <FullHouseHandler.hpp>
 #include <StraightHandler.hpp>
+#include <FileIterator.hpp>
+#include <FileLine.hpp>
+#include <Bigtwo.hpp>
 
 TEST(Deck,DeckTest)
 {
@@ -70,7 +73,6 @@ TEST(SingleHandler,SingleHandlerPatternName_Test)
     EXPECT_NE(handler->PatternNameHandle({card1,card3}),"單張");
     EXPECT_NE(handler->PatternNameHandle({card3,card2}),"單張");
 }
-
 
 TEST(PairHandler,PairHandlerPatternName_Test)
 {
@@ -215,10 +217,24 @@ TEST(StraightHandler,StraightHandlerPatternName_Test)
     EXPECT_NE(out4,"葫蘆");
 }
 
+TEST(FileIterator, FILEITERATER_TEST)
+{
+    FileLine file("C:/Users/JCCanthony/Desktop/DesignPatternCode/BigTwo/test/testSet/always-play-first-card.in");
+    for (auto i = file.begin(); i != file.end(); ++i)
+    {
+        std::cout << *i << std::endl;
+    }
+}
+
+TEST(Bigtwo, Bigtwo_TEST)
+{
+    CardPatternHandler* handler = new SingleHandler( new PairHandler( new FullHouseHandler(new StraightHandler(nullptr))));
+    
+}
 
 int main(int argc, char **argv) {
     testing::InitGoogleTest(&argc, argv);
-
+    
     return RUN_ALL_TESTS();
 }
 

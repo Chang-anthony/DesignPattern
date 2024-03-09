@@ -2,6 +2,7 @@ cmake_minimum_required(VERSION 3.12)
 set_property(GLOBAL PROPERTY USE_FOLDERS ON)
 set_property(GLOBAL PROPERTY PREDEFINED_TARGETS_FOLDER "cmake")
 
+set(EXECUTABLE_OUTPUT_PATH ${PROJECT_BINARY_DIR})
 project(BIGTWO)
 set(CMAKE_CXX_STANDARD 20)
 
@@ -10,6 +11,7 @@ set(CMAKE_CXX_STANDARD 20)
 set(INCLUDE_PATH ${CMAKE_CURRENT_LIST_DIR}/include)
 set(SRC_PATH ${CMAKE_CURRENT_LIST_DIR}/src)
 set(UTILS_PATH ${CMAKE_CURRENT_LIST_DIR}/include/utils)
+set(TEST_UTILS_PATH ${CMAKE_CURRENT_LIST_DIR}/test/libary)
 
 # ============
 
@@ -46,6 +48,7 @@ endif()
 
 # ================= main
 include(${INCLUDE_PATH}/include.cmake)
+include(${TEST_UTILS_PATH}/test.cmake)
 include(${SRC_PATH}/source.cmake)
 
 set(BIGTWO_SRCS)
@@ -54,8 +57,8 @@ list(APPEND BIGTWO_SRCS ${BIGTWO_LIB_SRCS})
 list(APPEND BIGTWO_INCS ${BIGTWO_LIB_INCS})
 
 include(${UTILS_PATH}/utils.cmake)
-set(COMM_INCS ${UTILS_INCS})
-set(COMM_SRCS)
+set(COMM_INCS ${UTILS_INCS} ${__TEST_UTILS_INCS})
+set(COMM_SRCS ${__TEST_UTILS__SRCS})
 # ==================
 
 

@@ -2,9 +2,9 @@ cmake_minimum_required(VERSION 3.13)
 set_property(GLOBAL PROPERTY USE_FOLDERS ON)
 set_property(GLOBAL PROPERTY PREDEFINED_TARGETS_FOLDER "cmake")
 
+set(EXECUTABLE_OUTPUT_PATH ${PROJECT_BINARY_DIR}) #set output executable at build file
 
 set(LIB_PATH ${CMAKE_CURRENT_LIST_DIR})
-
 
 set(CMAKE_CXX_STANDARD 20)
 
@@ -17,8 +17,8 @@ ExampleTests.cpp
 include(${LIB_PATH}/libary/test.cmake)
 set(SRCS)
 
-set(INCS ${CMAKE_CURRENT_LIST_DIR}/libary)
-list(APPEND SRCS ${__SRCS})
+set(INCS ${CMAKE_CURRENT_LIST_DIR}/libary ${CMAKE_CURRENT_LIST_DIR}/libary/FileIterator)
+list(APPEND SRCS ${__TEST_UTILS__SRCS})
 
 
 add_executable(${GTest} ${Sources})

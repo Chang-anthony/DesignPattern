@@ -11,6 +11,9 @@
 #include <utils.h>
 #include <fstream>
 #include <sstream>
+#include <FileLine.hpp>
+#include <FileIterator.hpp>
+
 
 
 static inline std::vector<std::string> readFile(std::string path) 
@@ -73,15 +76,39 @@ static inline std::vector<Card*> cardparser(std::string strs)
 //TODO: need to wirte simple test to test Round function
 int main()
 {
-    std::vector<std::string> inputs = readFile("C:/Users/JCCanthony/Desktop/DesignPatternCode/BigTwo/test/testSet/always-play-first-card.in");
+    // std::vector<std::string> inputs = readFile("./BigTwo/test/testSet/always-play-first-card.in");
     
-    std::vector<Card*> cards = cardparser(inputs[0]);
-    Deck* deck = new Deck();
-    deck->SetCards(cards);
-    
-    deck->RenderCards();
-    
+    // std::vector<Card*> cards = cardparser(inputs[0]);
+    // Deck* deck = new Deck();
+    // deck->SetCards(cards);
 
+    // deck->RenderCards();
+
+    // FileLine file("./BigTwo/test/testSet/always-play-first-card.in");
+
+
+    // C:\Users\JCCanthony\Desktop\DesignPatternCode\BigTwo\test\testSet\always-play-first-card.in
+    // FileLine file("C:/Users/JCCanthony/Desktop/DesignPatternCode/BigTwo/test/testSet/always-play-first-card.in");
+    // for (auto i = file.begin(); i != file.end(); ++i)
+    // {
+    //     std::cout << *i << std::endl;
+    // }
+
+    // for (const auto& line: file)
+    // {
+    //     /* code */
+    // }
+
+    FileIterator *test = new FileIterator("C:/Users/JCCanthony/Desktop/DesignPatternCode/BigTwo/test/testSet/always-play-first-card.in");
+    
+    while (*test)
+    {
+        std::cout << **test << std::endl;
+        ++(*test);
+    }
+    
+    
+    
     // std::cout << "Test Input Multiple Numbers" << std::endl;
     // std::vector<int> inputs = utils::InputMultipleNums();
 
@@ -90,7 +117,7 @@ int main()
     // }
     // std::cout << std::endl;
     
-    std::cout << "按下 Enter 鍵已結束遊戲" << std::endl;
-    std::system("pause");
+    // std::cout << "按下 Enter 鍵已結束遊戲" << std::endl;
+    // std::system("pause");
     return 0;
 }
