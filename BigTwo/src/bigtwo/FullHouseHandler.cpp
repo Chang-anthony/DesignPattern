@@ -49,7 +49,7 @@ bool FullHouseHandler::match(std::vector<Card*> cards)
             m[card->GetRank()]++;
         
         bool three = false;
-        bool two = true;
+        bool two = false;
         for(auto v:m)
         {
             if(v.second == 3)

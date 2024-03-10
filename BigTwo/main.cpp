@@ -171,9 +171,9 @@ int main()
     //fullhouse
     std::string test1 = "../BigTwo/test/testSet/always-play-first-card.in";
     std::string test2 = "../BigTwo/test/testSet/fullhouse.in";
-    std::cout << "test1" << std::endl;
-    TEST_BIGTWO(test1);
-    std::cout << "test2" << std::endl;
+    // std::cout << "test1" << std::endl;
+    // TEST_BIGTWO(test1);
+    // std::cout << "test2" << std::endl;
     TEST_BIGTWO(test2);
     
     std::cout << "按下 Enter 鍵已結束遊戲" << std::endl;

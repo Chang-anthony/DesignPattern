@@ -267,6 +267,7 @@ void Bigtwo::RunTest(Bigtwo* game, std::vector<std::vector<int>> plays)
     game->doDeal();
 
     Player* topplayer = game->FristPlayer();
+    std::cout << "First Player" << topplayer->GetName() << std::endl;
 
     std::pair P = game->FirstRound(topplayer, plays);
     Round* first = P.first;
@@ -278,7 +279,7 @@ void Bigtwo::RunTest(Bigtwo* game, std::vector<std::vector<int>> plays)
 
     // std::cout << plays.size() << std::endl;
 
-    while (!game->isEnd())
+    while (!game->isEnd() && plays.size() > 0)
     {
         auto map = game->newRound(topplayer, plays);
         Round* newRound = map.first;

@@ -61,6 +61,7 @@ std::pair<Player*, std::vector<std::vector<int>>> Round::takeTurn
         count++;
     }
 
+    count = count % 4;
     while (!this->game->isEnd() && plays.size() > 0){
         Player* taketurn = players[count];
         std::cout << "輪到" << taketurn->GetName() <<  "了" << std::endl;
@@ -69,7 +70,7 @@ std::pair<Player*, std::vector<std::vector<int>>> Round::takeTurn
         plays.erase(plays.begin());
 
         if(play.size() == 0){
-            std::cout << "玩家 < " << taketurn->GetName() << "> PASS" << std::endl;
+            std::cout << "玩家  " << taketurn->GetName() << "PASS" << std::endl;
             count = (count + 1) % 4;
         }
         else{

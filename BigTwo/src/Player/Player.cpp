@@ -66,7 +66,10 @@ void Player::SortHandCard()
     struct cmp{
         bool operator()(Card* A, Card* B)
         {
-            return RankToNumber(A->GetRank()) < RankToNumber(B->GetRank());
+            if(RankToNumber(A->GetRank()) == RankToNumber(B->GetRank()))
+                return SuitToNumber(A->GetSuit()) < SuitToNumber(B->GetSuit());
+            else
+                return RankToNumber(A->GetRank()) < RankToNumber(B->GetRank());
         }
     }cmp;
 

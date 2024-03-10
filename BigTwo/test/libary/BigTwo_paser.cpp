@@ -2,6 +2,7 @@
 #include <FileIterator.hpp>
 #include <Card.hpp>
 #include <sstream>
+#include <algorithm>
 
 BigTwo_paser::BigTwo_paser()
 {
@@ -21,6 +22,7 @@ std::tuple<std::vector<Card*>, std::vector<std::string>,
     lines.push_back(*it);
 
     std::vector<Card*> cards = BigTwo_paser::cardparser(lines[0]);
+    std::reverse(cards.begin(), cards.end());
     lines.erase(lines.begin());
     count++;
 
