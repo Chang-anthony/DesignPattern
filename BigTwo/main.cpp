@@ -140,12 +140,12 @@ int main()
     std::string test6 = "../BigTwo/test/testSet/straight.in";
     // std::cout << "test1" << std::endl;
     // std::cout << "test2" << std::endl;
-    // TEST_BIGTWO(test1);
+    TEST_BIGTWO(test1);
     TEST_BIGTWO(test2);
-    // TEST_BIGTWO(test3);
-    // TEST_BIGTWO(test4);
-    // TEST_BIGTWO(test5);
-    // TEST_BIGTWO(test6);
+    TEST_BIGTWO(test3);
+    TEST_BIGTWO(test4);
+    TEST_BIGTWO(test5);
+    TEST_BIGTWO(test6);
     
     std::cout << "按下 Enter 鍵已結束遊戲" << std::endl;
     std::system("pause");

@@ -23,7 +23,7 @@ Card* FullHouseHandler::GetThreeMaxCard(std::vector<Card*> cards)
 {
     std::map<int,std::vector<Card*>> m = std::map<int,std::vector<Card*>>();
     for(auto card: cards)
-        m[RankToNumber(card->GetRank())];
+        m[RankToNumber(card->GetRank())].push_back(card);
     
     std::vector<Card*> candidate = std::vector<Card*>();
     for(auto v:m)
