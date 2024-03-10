@@ -132,20 +132,47 @@ int main()
     //normal-no-error-play1 ok
     //normal-no-error-play2.in ok
     //straight.in ok
-    std::string test1 = "../BigTwo/test/testSet/always-play-first-card.in";
-    std::string test2 = "../BigTwo/test/testSet/fullhouse.in";
-    std::string test3 = "../BigTwo/test/testSet/illegal-actions.in";
-    std::string test4 = "../BigTwo/test/testSet/normal-no-error-play1.in";
+    // std::string test1 = "../BigTwo/test/testSet/always-play-first-card.in";
+    // std::string test2 = "../BigTwo/test/testSet/fullhouse.in";
+    // std::string test3 = "../BigTwo/test/testSet/illegal-actions.in";
+    // std::string test4 = "../BigTwo/test/testSet/normal-no-error-play1.in";
     std::string test5 = "../BigTwo/test/testSet/normal-no-error-play2.in";
     std::string test6 = "../BigTwo/test/testSet/straight.in";
-    // std::cout << "test1" << std::endl;
-    // std::cout << "test2" << std::endl;
-    TEST_BIGTWO(test1);
-    TEST_BIGTWO(test2);
-    TEST_BIGTWO(test3);
-    TEST_BIGTWO(test4);
-    TEST_BIGTWO(test5);
-    TEST_BIGTWO(test6);
+    // TEST_BIGTWO(test1);
+    // TEST_BIGTWO(test2);
+    // TEST_BIGTWO(test3);
+    // TEST_BIGTWO(test4);
+    // TEST_BIGTWO(test5);
+    // TEST_BIGTWO(test6);
+
+    std::tuple<std::vector<Card*>, std::vector<std::string>, 
+            std::vector<std::vector<int>>> results = BigTwo_paser::parser(test6);
+
+    std::vector<Card*> cards = std::get<0>(results);
+    std::vector<std::string> names = std::get<1>(results);
+    std::vector<std::vector<int>> plays = std::get<2>(results);
+
+    CardPatternHandler* newhandler = new SingleHandler(
+                                        new PairHandler(
+                                            new FullHouseHandler(
+                                                new StraightHandler(nullptr))));
+    Deck* deck = new Deck();
+    deck->SetCards(cards);
+    Player* player1 = new HumanPlayer();
+    Player* player2 = new HumanPlayer();
+    Player* player3 = new HumanPlayer();
+    Player* player4 = new HumanPlayer();
+
+    std::vector<Player*> players = std::vector<Player*>();
+    players.push_back(player1);
+    players.push_back(player2);
+    players.push_back(player3);
+    players.push_back(player4);
+
+    Bigtwo* game = new Bigtwo(deck, players, newhandler);
+
+    game->GameStart();
+
     
     std::cout << "按下 Enter 鍵已結束遊戲" << std::endl;
     std::system("pause");

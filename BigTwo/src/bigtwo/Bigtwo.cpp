@@ -24,12 +24,12 @@ Bigtwo::Bigtwo(Deck* deck,std::vector<Player*> players, CardPatternHandler* hand
 
 void Bigtwo::GameStart()
 {
-    this->deck->Suffle();
-    for(auto card:this->deck->GetCards()){
-        card->render();
-        std::cout << " ";
-    }
-    std::cout << std::endl;
+    // this->deck->Suffle();
+    // for(auto card:this->deck->GetCards()){
+    //     card->render();
+    //     std::cout << " ";
+    // }
+    // std::cout << std::endl;
 
     for(auto player:this->players)
         player->NameSelf();
