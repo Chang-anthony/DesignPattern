@@ -7,7 +7,9 @@ SingleHandler::SingleHandler(CardPatternHandler* next) : CardPatternHandler(next
 
 bool SingleHandler::isBigger(std::vector<Card*> pattern1,std::vector<Card*> pattern2)
 {
-    return pattern1[0]->isBigger(pattern2[0]);
+    if(this->match(pattern1) && this->match(pattern2))
+        return pattern1[0]->isBigger(pattern2[0]);
+    return false;
 }
 
 bool SingleHandler::match(std::vector<Card*> cards)

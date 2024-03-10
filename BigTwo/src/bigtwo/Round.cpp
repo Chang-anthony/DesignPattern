@@ -73,10 +73,16 @@ std::pair<Player*, std::vector<std::vector<int>>> Round::takeTurn
         std::cout << "輪到" << taketurn->GetName() <<  "了" << std::endl;
         //Play card take turn
         std::vector<Card*> play = taketurn->Play(plays[0]);
+        std::cout << "play :";
+        for (auto play:plays[0])
+        {
+            std::cout << play << " ";
+        }
+        std::cout << std::endl;
         plays.erase(plays.begin());
 
         if(play.size() == 0){
-            std::cout << "玩家  " << taketurn->GetName() << " PASS" << std::endl;
+            std::cout << "玩家 " << taketurn->GetName() << " PASS" << std::endl;
             count = (count + 1) % 4;
             this->pass--;
         }

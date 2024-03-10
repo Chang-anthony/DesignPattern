@@ -7,10 +7,13 @@ StraightHandler::StraightHandler(CardPatternHandler* next):CardPatternHandler(ne
 
 bool StraightHandler::isBigger(std::vector<Card*> pattern1,std::vector<Card*> pattern2)
 {
-    Card* card1 = this->GetMaxCard(pattern1);
-    Card* card2 = this->GetMaxCard(pattern2);
+    if(this->match(pattern1) && this->match(pattern2)) {
+        Card* card1 = this->GetMaxCard(pattern1);
+        Card* card2 = this->GetMaxCard(pattern2);
 
-    return card1->isBigger(card2);
+        return card1->isBigger(card2);
+    }
+    return false;
 }
 
 Card* StraightHandler::GetMaxCard(std::vector<Card*> cards)

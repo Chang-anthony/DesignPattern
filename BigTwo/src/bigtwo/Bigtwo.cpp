@@ -307,6 +307,13 @@ std::pair<Round*, std::vector<std::vector<int>>> Bigtwo::FirstRound(Player* topp
 
     while(!vaild && plays.size() > 0){
         std::vector<Card*> cards = topplayer->Play(plays[0]);
+        std::cout << "play :";
+        for (auto play:plays[0])
+        {
+            std::cout << play << " ";
+        }
+        std::cout << std::endl;
+        
         plays.erase(plays.begin());
 
         if(cards.size() == 0)
@@ -354,6 +361,12 @@ std::pair<Round*, std::vector<std::vector<int>>> Bigtwo::newRound(Player* toppla
 
     while(!vaild && plays.size() > 0){
         std::vector<Card*> cards = topplayer->Play(plays[0]);
+        std::cout << "play :";
+        for (auto play:plays[0])
+        {
+            std::cout << play << " ";
+        }
+        std::cout << std::endl;
         plays.erase(plays.begin());
 
         if(cards.size() == 0){

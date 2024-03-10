@@ -23,7 +23,9 @@ public:
     std::string PatternNameHandle(std::vector<Card*> cards);
     bool BiggerHandle(std::vector<Card*> pattern1,std::vector<Card*> pattern2);
     bool vaild(std::vector<Card*> cards);
-    void Render(std::string name);
+
+    //getter
+    CardPatternHandler* GetNext();
 };
 
 #endif /* _CARDPATTERNHANDLER_H_ */

@@ -12,14 +12,25 @@ std::map<std::string,std::string> patternToname =
 };
 
 
-
 CardPatternHandler::CardPatternHandler(CardPatternHandler* next):next(next)
 {
 }
 
 bool CardPatternHandler::BiggerHandle(std::vector<Card*> pattern1,std::vector<Card*> pattern2)
 {
-    return this->isBigger(pattern1,pattern2);
+    if(this->isBigger(pattern1, pattern2))
+        return true;
+    else {
+        if(this->next)
+            return this->next->BiggerHandle(pattern1, pattern2);
+        else
+            return false;
+    }
+}
+
+CardPatternHandler* CardPatternHandler::GetNext()
+{
+    return this->next;
 }
 
 bool CardPatternHandler::isSamePatternHandle(std::vector<Card*> pattern1,std::vector<Card*> pattern2)

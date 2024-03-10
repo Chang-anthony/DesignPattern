@@ -8,10 +8,15 @@ FullHouseHandler::FullHouseHandler(CardPatternHandler* next):CardPatternHandler(
 
 bool FullHouseHandler::isBigger(std::vector<Card*> pattern1,std::vector<Card*> pattern2)
 {
-    Card* card1 = this->GetThreeMaxCard(pattern1);
-    Card* card2 = this->GetThreeMaxCard(pattern2);
+    if(this->match(pattern1) && this->match(pattern2))
+    {
+        Card* card1 = this->GetThreeMaxCard(pattern1);
+        Card* card2 = this->GetThreeMaxCard(pattern2);
 
-    return card1->isBigger(card2);
+        return card1->isBigger(card2);
+    }
+
+    return false;
 }
 
 Card* FullHouseHandler::GetThreeMaxCard(std::vector<Card*> cards)
