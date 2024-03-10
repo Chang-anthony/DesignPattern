@@ -32,6 +32,8 @@ public:
     void SetBigtwo(Bigtwo* game);
 
     Player* takeTurn(std::vector<Player*> players);
+    //Test
+    std::pair<Player*, std::vector<std::vector<int>>> takeTurn(std::vector<Player*> players, std::vector<std::vector<int>> plays);
 };
 
 #endif /* _ROUND_H_ */

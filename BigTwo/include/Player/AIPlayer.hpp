@@ -15,6 +15,7 @@ public:
 
     void NameSelf() override;
     std::vector<Card*> Play() override;
+    std::vector<Card*> Play(std::vector<int> play) override;
 };
 
 #endif /* _AIPLAYER_H_ */

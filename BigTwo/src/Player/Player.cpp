@@ -35,7 +35,7 @@ void Player::SetName(std::string name)
 void Player::RenderHandCard()
 {
     for(int i = 0 ; i < this->handcard->GetCards().size() ; i++)
-        std::cout<< i << "   ";
+        std::cout<< i << "    ";
     std::cout << std::endl;
     for(auto card:this->handcard->GetCards())
     {

@@ -17,13 +17,16 @@ public:
     FileIterator(const std::string& filepath);
     ~FileIterator();
 
+    //FileIterator& operator++(int); right incrementing
     FileIterator& operator++();
     FileIterator& operator--();
     FileIterator& operator=(const FileIterator& other);
     const std::string& operator*() const;
     bool operator!=(const FileIterator& other) const;
     
-    operator bool() const;
+    bool operator!() const;
+    explicit operator bool() const;
+    bool operator()() const;
 
 protected:
     std::string prev_; // prev one line

@@ -63,8 +63,19 @@ bool FileIterator::operator!=(const FileIterator& other) const
     return file.is_open() || other.file.is_open();
 }
 
+bool FileIterator::operator!() const 
+{
+    return !file.eof() || !file.is_open();
+}
+
 FileIterator::operator bool() const 
 {
+    return !file.eof() || !file.is_open();
+}
+
+bool FileIterator::operator()() const
+{
+    std::cout << "in" << std::endl;
     return !file.eof();
 }
 

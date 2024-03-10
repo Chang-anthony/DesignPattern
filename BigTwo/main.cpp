@@ -13,8 +13,56 @@
 #include <sstream>
 #include <FileLine.hpp>
 #include <FileIterator.hpp>
+#include <BigTwo_paser.hpp>
+#include <tuple>
+#include <CardPatternHandler.hpp>
+#include <SingleHandler.hpp>
+#include <PairHandler.hpp>
+#include <FullHouseHandler.hpp>
+#include <StraightHandler.hpp>
+#include <HumanPlayer.hpp>
+#include <Bigtwo.hpp>
 
 
+void TEST_BIGTWO(std::string& input)
+{
+    //parser input file
+    std::tuple<std::vector<Card*>, std::vector<std::string>, 
+            std::vector<std::vector<int>>> results = BigTwo_paser::parser(input);
+
+    std::vector<Card*> cards = std::get<0>(results);
+    std::vector<std::string> names = std::get<1>(results);
+    std::vector<std::vector<int>> plays = std::get<2>(results);
+
+    //initial game condition
+    Deck* deck = new Deck();
+    deck->SetCards(cards);
+    std::cout << cards.size() << std::endl;
+
+    Player* player1 = new HumanPlayer();
+    Player* player2 = new HumanPlayer();
+    Player* player3 = new HumanPlayer();
+    Player* player4 = new HumanPlayer();
+
+    std::vector<Player*> players = std::vector<Player*>();
+    players.push_back(player1);
+    players.push_back(player2);
+    players.push_back(player3);
+    players.push_back(player4);
+
+    for (int i = 0; i < players.size(); i++)
+    {
+        players[i]->SetName(names[i]);
+    }
+
+    CardPatternHandler* newhandler = new SingleHandler(
+                                        new PairHandler(
+                                            new FullHouseHandler(
+                                                new StraightHandler(nullptr))));
+
+    Bigtwo* game = new Bigtwo(deck, players, newhandler);
+    game->RunTest(game, plays);
+}
 
 static inline std::vector<std::string> readFile(std::string path) 
 {
@@ -72,52 +120,50 @@ static inline std::vector<Card*> cardparser(std::string strs)
     return cards;
 }
 
+static inline void F(FileIterator& A)
+{
+    // std::cout << "in" << std::endl;
+}
 
-//TODO: need to wirte simple test to test Round function
 int main()
 {
-    // std::vector<std::string> inputs = readFile("./BigTwo/test/testSet/always-play-first-card.in");
+    //FileIterator *test = new FileIterator("C:/Users/JCCanthony/Desktop/DesignPatternCode/BigTwo/test/testSet/always-play-first-card.in");
+    //fullhouse
+    // std::tuple<std::vector<Card*>, std::vector<std::string>, 
+    //             std::vector<std::vector<int>>> results = BigTwo_paser::parser("../BigTwo/test/testSet/fullhouse.in");
     
-    // std::vector<Card*> cards = cardparser(inputs[0]);
+
+    // std::vector<Card*> cards = std::get<0>(results);
+    // std::vector<std::string> names = std::get<1>(results);
+    // std::vector<std::vector<int>> plays = std::get<2>(results);
+
+    // std::cout << "cards" << std::endl;
     // Deck* deck = new Deck();
     // deck->SetCards(cards);
-
     // deck->RenderCards();
 
-    // FileLine file("./BigTwo/test/testSet/always-play-first-card.in");
-
-
-    // C:\Users\JCCanthony\Desktop\DesignPatternCode\BigTwo\test\testSet\always-play-first-card.in
-    // FileLine file("C:/Users/JCCanthony/Desktop/DesignPatternCode/BigTwo/test/testSet/always-play-first-card.in");
-    // for (auto i = file.begin(); i != file.end(); ++i)
+    // std::cout << std::endl << "name" << std::endl;
+    // for (auto name: names)
     // {
-    //     std::cout << *i << std::endl;
+    //     std::cout << name << std::endl;
     // }
 
-    // for (const auto& line: file)
+    // std::cout << "play" << std::endl;
+    // for (auto play: plays)
     // {
-    //     /* code */
+    //     for (auto n : play)
+    //     {
+    //         std::cout << n << " ";
+    //     }
+    //     std::cout << std::endl;
     // }
 
-    FileIterator *test = new FileIterator("C:/Users/JCCanthony/Desktop/DesignPatternCode/BigTwo/test/testSet/always-play-first-card.in");
+    //always-play-first-card
+    //fullhouse
+    std::string test1 = "../BigTwo/test/testSet/always-play-first-card.in";
+    TEST_BIGTWO(test1);
     
-    while (*test)
-    {
-        std::cout << **test << std::endl;
-        ++(*test);
-    }
-    
-    
-    
-    // std::cout << "Test Input Multiple Numbers" << std::endl;
-    // std::vector<int> inputs = utils::InputMultipleNums();
-
-    // for(auto num : inputs){
-    //     std::cout << num << " ";
-    // }
-    // std::cout << std::endl;
-    
-    // std::cout << "按下 Enter 鍵已結束遊戲" << std::endl;
-    // std::system("pause");
+    std::cout << "按下 Enter 鍵已結束遊戲" << std::endl;
+    std::system("pause");
     return 0;
 }

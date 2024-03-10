@@ -4,22 +4,23 @@
 #include <iostream>
 #include <vector>
 #include <string>
+#include <tuple>
 
 class FileIterator;
+class Card;
 
 class BigTwo_paser
 {
 private:
-    /* data */
-    std::string file;
-    int count;
-    FileIterator* test;
+
 public:
-    BigTwo_paser(const std::string& file);
+    BigTwo_paser();
     ~BigTwo_paser();
 
-    const std::string& read(); 
+    static std::tuple<std::vector<Card*>, std::vector<std::string>, std::vector<std::vector<int>>> parser(const std::string& filepath);
 protected:
+    static std::vector<Card*> cardparser(std::string& str_);
+    static std::vector<std::vector<int>> playparser(std::vector<std::string>& strs);
 };
 
 #endif /* _BIGTWO_PASER_H_ */

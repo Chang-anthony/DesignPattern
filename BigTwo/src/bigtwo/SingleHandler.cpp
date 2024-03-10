@@ -1,7 +1,7 @@
 #include <SingleHandler.hpp>
 #include <Card.hpp>
 
-SingleHandler::SingleHandler(CardPatternHandler* next):CardPatternHandler(next)
+SingleHandler::SingleHandler(CardPatternHandler* next) : CardPatternHandler(next)
 {
 }
 

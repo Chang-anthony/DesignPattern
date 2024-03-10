@@ -26,10 +26,19 @@ private:
     Player* FristPlayer();
     Round* newRound(Player* topplayer);
     Round* FirstRound(Player* topplayer);
+    
+    //test
+    std::pair<Round*, std::vector<std::vector<int>>> 
+                FirstRound(Player* topplayer, std::vector<std::vector<int>> plays);
+    std::pair<Round*, std::vector<std::vector<int>>> 
+                newRound(Player* topplayer, std::vector<std::vector<int>> plays);
 
 public:
     Bigtwo(Deck* deck,std::vector<Player*> players, CardPatternHandler* handler);
     ~Bigtwo();
+
+
+    static void RunTest(Bigtwo *game, std::vector<std::vector<int>> plays);
 
     void GameStart();
     void GameEnd();

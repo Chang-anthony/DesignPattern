@@ -17,6 +17,8 @@
 #include <FileIterator.hpp>
 #include <FileLine.hpp>
 #include <Bigtwo.hpp>
+#include <BigTwo_paser.hpp>
+
 
 TEST(Deck,DeckTest)
 {
@@ -26,7 +28,6 @@ TEST(Deck,DeckTest)
     std::vector<Card*> cards2 = deck->GetCards();
     EXPECT_NE(cards[0],cards2[0]);
 }
-
 
 TEST(HandCard,HandCardTEST)
 {
@@ -219,18 +220,38 @@ TEST(StraightHandler,StraightHandlerPatternName_Test)
 
 TEST(FileIterator, FILEITERATER_TEST)
 {
-    FileLine file("C:/Users/JCCanthony/Desktop/DesignPatternCode/BigTwo/test/testSet/always-play-first-card.in");
-    for (auto i = file.begin(); i != file.end(); ++i)
+    auto f = [](std::string path){
+        std::vector<std::string> lines = std::vector<std::string>();
+        std::ifstream inputFile(path);
+        if(inputFile.is_open()) {
+            std::string line;
+            while (std::getline(inputFile, line)) {
+                lines.push_back(line);
+            }
+            inputFile.close();
+        } else {
+            std::cerr << "Unable to open file" << std::endl;
+        }
+        return lines;
+    };
+
+    std::vector<std::string> ground_truth = f("../BigTwo/test/testSet/always-play-first-card.in");
+
+    FileLine file("../BigTwo/test/testSet/always-play-first-card.in");
+    FileIterator it = file.begin();
+    int count = 0;
+    while (!it)
     {
-        std::cout << *i << std::endl;
+        EXPECT_EQ(*it, ground_truth[count++]);
+        ++it;
     }
+    
+    // for (auto i = file.begin(); i != file.end(); ++i)
+    // {
+    //     std::cout << *i << std::endl;
+    // }
 }
 
-TEST(Bigtwo, Bigtwo_TEST)
-{
-    CardPatternHandler* handler = new SingleHandler( new PairHandler( new FullHouseHandler(new StraightHandler(nullptr))));
-    
-}
 
 int main(int argc, char **argv) {
     testing::InitGoogleTest(&argc, argv);
