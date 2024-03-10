@@ -22,20 +22,24 @@ Player* Round::takeTurn(std::vector<Player*> players)
 {
     int count = 0;
     for(auto player:players){
-        if(player == this->TopPlayer)
+        if(player == this->TopPlayer){
+            count++;
             break;
+        }
         count++;
     }
+    count = count % 4;
 
-    while (!this->game->isEnd()){
+    while (!this->game->isEnd() && this->IsPass()){
         Player* taketurn = players[count];
-        std::cout << "輪到<" << taketurn->GetName() <<  ">了" << std::endl;
+        std::cout << "輪到" << taketurn->GetName() <<  "了" << std::endl;
         //Play card take turn
         std::vector<Card*> play = taketurn->Play();
 
         if(play.size() == 0){
-            std::cout << "玩家 < " << taketurn->GetName() << "> PASS" << std::endl;
+            std::cout << "玩家  " << taketurn->GetName() << " PASS" << std::endl;
             count = (count + 1) % 4;
+            this->pass--;
         }
         else{
             if(this->game->CampareHandle(play,this->TopPlay)){
@@ -45,6 +49,7 @@ Player* Round::takeTurn(std::vector<Player*> players)
                 this->TopPlay = play;
                 this->TopPlayer = taketurn;
                 count = (count + 1) % 4;
+                this->pass = 3;
             }
             else{
                 std::cout << "此牌型不合法，請再嘗試一次。" << std::endl;
@@ -73,12 +78,6 @@ std::pair<Player*, std::vector<std::vector<int>>> Round::takeTurn
         std::cout << "輪到" << taketurn->GetName() <<  "了" << std::endl;
         //Play card take turn
         std::vector<Card*> play = taketurn->Play(plays[0]);
-        std::cout << "play :";
-        for (auto play:plays[0])
-        {
-            std::cout << play << " ";
-        }
-        std::cout << std::endl;
         plays.erase(plays.begin());
 
         if(play.size() == 0){

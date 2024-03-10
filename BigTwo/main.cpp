@@ -126,55 +126,26 @@ static inline void F(FileIterator& A)
 
 int main()
 {
-    //FileIterator *test = new FileIterator("C:/Users/JCCanthony/Desktop/DesignPatternCode/BigTwo/test/testSet/always-play-first-card.in");
-    //fullhouse
-    // std::tuple<std::vector<Card*>, std::vector<std::string>, 
-    //             std::vector<std::vector<int>>> results = BigTwo_paser::parser("../BigTwo/test/testSet/fullhouse.in");
-    
-
-    // std::vector<Card*> cards = std::get<0>(results);
-    // std::vector<std::string> names = std::get<1>(results);
-    // std::vector<std::vector<int>> plays = std::get<2>(results);
-
-    // std::cout << "cards" << std::endl;
-    // Deck* deck = new Deck();
-    // deck->SetCards(cards);
-    // deck->RenderCards();
-
-    // std::cout << std::endl << "name" << std::endl;
-    // for (auto name: names)
-    // {
-    //     std::cout << name << std::endl;
-    // }
-
-    // std::cout << "play" << std::endl;
-    // for (auto play: plays)
-    // {
-    //     for (auto n : play)
-    //     {
-    //         std::cout << n << " ";
-    //     }
-    //     std::cout << std::endl;
-    // }
-
     //always-play-first-card test ok
-    //fullhouse ok
+    //fullhouse 
     //illegal-actions ok
     //normal-no-error-play1 ok
     //normal-no-error-play2.in ok
+    //straight.in ok
     std::string test1 = "../BigTwo/test/testSet/always-play-first-card.in";
     std::string test2 = "../BigTwo/test/testSet/fullhouse.in";
     std::string test3 = "../BigTwo/test/testSet/illegal-actions.in";
     std::string test4 = "../BigTwo/test/testSet/normal-no-error-play1.in";
     std::string test5 = "../BigTwo/test/testSet/normal-no-error-play2.in";
-    std::string test6 = "../BigTwo/test/testSet/straight";
+    std::string test6 = "../BigTwo/test/testSet/straight.in";
     // std::cout << "test1" << std::endl;
-    // TEST_BIGTWO(test1);
     // std::cout << "test2" << std::endl;
-    // TEST_BIGTWO(test2);
+    // TEST_BIGTWO(test1);
+    TEST_BIGTWO(test2);
     // TEST_BIGTWO(test3);
     // TEST_BIGTWO(test4);
-    TEST_BIGTWO(test5);
+    // TEST_BIGTWO(test5);
+    // TEST_BIGTWO(test6);
     
     std::cout << "按下 Enter 鍵已結束遊戲" << std::endl;
     std::system("pause");
