@@ -16,6 +16,9 @@ private:
     Bigtwo* game;
     std::vector<Card*> TopPlay;
     Player* TopPlayer;
+    int pass;
+
+    bool IsPass();
 
 public:
     Round(Player* TopPlayer,std::vector<Card*> TopPlay,Bigtwo* game);

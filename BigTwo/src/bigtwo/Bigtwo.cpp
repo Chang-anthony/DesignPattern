@@ -175,9 +175,12 @@ void Bigtwo::Render(Player* play, std::vector<Card*> cards)
 {
     std::cout << "玩家 " << play->GetName() << " 打出了 " 
     << this->PatternNameHandle(cards) << " ";
-    for(auto card:cards)
+    for(auto card:cards){
         card->render();
+        std::cout << " ";
+    }
     std::cout << std::endl;
+
     play->RemoveCardFromHand(cards);
 }
 
