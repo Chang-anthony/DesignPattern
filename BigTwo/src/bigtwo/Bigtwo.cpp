@@ -203,6 +203,12 @@ void Bigtwo::doDeal()
             player->Deal(this->deck);
         }
     }
+
+    for (auto play : this->players)
+    {
+        play->SortHandCard();
+    }
+    
 }
 
 void Bigtwo::GameEnd()
@@ -258,9 +264,7 @@ void Bigtwo::RunTest(Bigtwo* game, std::vector<std::vector<int>> plays)
     std::cout << "抽牌" << std::endl;
     game->doDeal();
 
-
     Player* topplayer = game->FristPlayer();
-    std::cout << topplayer->GetName() << std::endl;
 
     std::pair P = game->FirstRound(topplayer, plays);
     Round* first = P.first;

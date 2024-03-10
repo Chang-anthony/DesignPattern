@@ -59,6 +59,21 @@ void Player::RemoveCardFromHand(std::vector<Card*> played)
     this->handcard->SetCards(copy);
 }
 
+void Player::SortHandCard()
+{
+    std::vector<Card*> copy = this->handcard->GetCards();
+
+    struct cmp{
+        bool operator()(Card* A, Card* B)
+        {
+            return RankToNumber(A->GetRank()) < RankToNumber(B->GetRank());
+        }
+    }cmp;
+
+    std::sort(copy.begin(), copy.end(), cmp);
+    this->handcard->SetCards(copy);
+}
+
 bool Player::verfiyInput(std::vector<int> want_play)
 {
     int max_size = this->handcard->GetCards().size();

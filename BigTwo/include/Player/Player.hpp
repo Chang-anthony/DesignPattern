@@ -27,6 +27,7 @@ public:
     virtual std::vector<Card*> Play() = 0;
     virtual std::vector<Card*> Play(std::vector<int> play) = 0;
     void Deal(Deck* deck);
+    void SortHandCard();
     bool isHandCardEmpty();
     void RemoveCardFromHand(std::vector<Card*> played);
 
