@@ -65,12 +65,12 @@ bool FileIterator::operator!=(const FileIterator& other) const
 
 bool FileIterator::operator!() const 
 {
-    return !file.eof() || !file.is_open();
+    return !file.eof();
 }
 
 FileIterator::operator bool() const 
 {
-    return !file.eof() || !file.is_open();
+    return !file.eof();
 }
 
 bool FileIterator::operator()() const

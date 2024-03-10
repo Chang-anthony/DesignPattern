@@ -61,7 +61,7 @@ std::pair<Player*, std::vector<std::vector<int>>> Round::takeTurn
         count++;
     }
 
-    while (!this->game->isEnd()){
+    while (!this->game->isEnd() && plays.size() > 0){
         Player* taketurn = players[count];
         std::cout << "輪到" << taketurn->GetName() <<  "了" << std::endl;
         //Play card take turn

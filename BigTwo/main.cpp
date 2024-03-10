@@ -34,10 +34,19 @@ void TEST_BIGTWO(std::string& input)
     std::vector<std::string> names = std::get<1>(results);
     std::vector<std::vector<int>> plays = std::get<2>(results);
 
+    // for (auto play : plays)
+    // {
+    //     for (auto n : play)
+    //     {
+    //         std::cout << n << " ";
+    //     }
+
+    //     std::cout << std::endl;
+    // }
+    
     //initial game condition
     Deck* deck = new Deck();
     deck->SetCards(cards);
-    std::cout << cards.size() << std::endl;
 
     Player* player1 = new HumanPlayer();
     Player* player2 = new HumanPlayer();
@@ -158,10 +167,14 @@ int main()
     //     std::cout << std::endl;
     // }
 
-    //always-play-first-card
+    //always-play-first-card test ok
     //fullhouse
     std::string test1 = "../BigTwo/test/testSet/always-play-first-card.in";
+    std::string test2 = "../BigTwo/test/testSet/fullhouse.in";
+    std::cout << "test1" << std::endl;
     TEST_BIGTWO(test1);
+    std::cout << "test2" << std::endl;
+    TEST_BIGTWO(test2);
     
     std::cout << "按下 Enter 鍵已結束遊戲" << std::endl;
     std::system("pause");

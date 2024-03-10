@@ -18,6 +18,7 @@ std::tuple<std::vector<Card*>, std::vector<std::string>,
         lines.push_back(*it);
         ++it;
     }
+    lines.push_back(*it);
 
     std::vector<Card*> cards = BigTwo_paser::cardparser(lines[0]);
     lines.erase(lines.begin());

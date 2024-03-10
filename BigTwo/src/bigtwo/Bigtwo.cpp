@@ -270,10 +270,13 @@ void Bigtwo::RunTest(Bigtwo* game, std::vector<std::vector<int>> plays)
 
     std::pair P = game->FirstRound(topplayer, plays);
     Round* first = P.first;
+    // std::cout << P.second.size() << std::endl;
 
     std::pair result = first->takeTurn(game->GetPlayers(), P.second);
     topplayer = result.first;
     plays = result.second;
+
+    // std::cout << plays.size() << std::endl;
 
     while (!game->isEnd())
     {
