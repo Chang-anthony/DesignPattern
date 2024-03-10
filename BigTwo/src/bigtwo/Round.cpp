@@ -54,14 +54,16 @@ std::pair<Player*, std::vector<std::vector<int>>> Round::takeTurn
 {
     int count = 0;
     for(auto player:players){
-        if(player == this->TopPlayer)
+        if(player == this->TopPlayer){
+            count++;
             break;
+        }
         count++;
     }
 
     while (!this->game->isEnd()){
         Player* taketurn = players[count];
-        std::cout << "輪到<" << taketurn->GetName() <<  ">了" << std::endl;
+        std::cout << "輪到" << taketurn->GetName() <<  "了" << std::endl;
         //Play card take turn
         std::vector<Card*> play = taketurn->Play(plays[0]);
         plays.erase(plays.begin());

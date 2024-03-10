@@ -177,6 +177,8 @@ void Bigtwo::Render(Player* play, std::vector<Card*> cards)
     << this->PatternNameHandle(cards) << " ";
     for(auto card:cards)
         card->render();
+    std::cout << std::endl;
+    play->RemoveCardFromHand(cards);
 }
 
 bool Bigtwo::isEnd()
@@ -309,9 +311,9 @@ std::pair<Round*, std::vector<std::vector<int>>> Bigtwo::FirstRound(Player* topp
         {
             bool check = false;
             for(auto card:cards){
-                int rank = RankToNumber(card->GetRank());
-                int suit = SuitToNumber(card->GetSuit());
-                if(rank == 3 && suit == 1)
+                std::string rank = RankToName(card->GetRank());
+                std::string suit = SuitToName(card->GetSuit());
+                if(rank == "3" && suit == "Club")
                     check = true;
             }
 
