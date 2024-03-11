@@ -14,8 +14,7 @@ public:
     ~AIPlayer();
 
     void NameSelf() override;
-    std::vector<Card*> Play() override;
-    std::vector<Card*> Play(std::vector<int> play) override;
+    std::vector<int> action() override;
 };
 
 #endif /* _AIPLAYER_H_ */

@@ -24,8 +24,8 @@ public:
     ~Player();
 
     virtual void NameSelf() = 0;
-    virtual std::vector<Card*> Play() = 0;
-    virtual std::vector<Card*> Play(std::vector<int> play) = 0;
+    std::vector<Card*> Play();
+    std::vector<Card*> Play(std::vector<int> play);
     void Deal(Deck* deck);
     void SortHandCard();
     bool isHandCardEmpty();
@@ -44,6 +44,7 @@ protected:
     //helper
     void RenderHandCard();
     bool verfiyInput(std::vector<int> want_play);
+    virtual std::vector<int> action() = 0;
 };
 
 #endif /* _PLAYER_H_ */

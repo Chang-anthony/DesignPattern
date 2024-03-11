@@ -2,6 +2,7 @@
 #include "Card.hpp"
 #include <algorithm>
 #include <random>
+#include "utils.h"
 
 
 
@@ -17,9 +18,9 @@ void AIPlayer::NameSelf()
     this->SetName(name);
 }
 
-std::vector<Card*> AIPlayer::Play()
+std::vector<int> AIPlayer::action()
 {
-    return {};
+    return utils::InputMultipleNums();
 }
 
 AIPlayer ::~AIPlayer()

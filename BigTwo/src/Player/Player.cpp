@@ -92,6 +92,47 @@ bool Player::verfiyInput(std::vector<int> want_play)
     return verfiy;
 }
 
+std::vector<Card*> Player::Play()
+{
+    this->RenderHandCard();
+    std::vector<int> want_play = this->action();
+
+    if(want_play.size() == 1 && want_play[0] == -1)
+        return {};
+    else{
+        if(this->verfiyInput(want_play)){
+            std::vector<Card*> plays = std::vector<Card*>();
+            for(auto input: want_play){
+                plays.push_back(this->GetHandCard()->GetCards()[input]);
+            }
+            return plays;
+        }
+        else{
+            return this->Play();
+        }
+    }
+}
+
+std::vector<Card*> Player::Play(std::vector<int> play)
+{
+    this->RenderHandCard();
+    
+    if(play.size() == 1 && play[0] == -1)
+        return {};
+    else{
+        if(this->verfiyInput(play)){
+            std::vector<Card*> plays = std::vector<Card*>();
+            for(auto input: play){
+                plays.push_back(this->GetHandCard()->GetCards()[input]);
+            }
+            return plays;
+        }
+        else{
+            return {};
+        }
+    }
+}
+
 HandCard* Player::GetHandCard()
 {
     return this->handcard;
