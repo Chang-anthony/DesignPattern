@@ -34,9 +34,15 @@ public:
     void SetTopPlay(std::vector<Card*> cards);
     void SetBigtwo(Bigtwo* game);
 
+    static Round* newRound(Player* topplayer, Bigtwo *game);
+    static std::pair<Round*, std::vector<std::vector<int>>> newRound(Player* topplayer, Bigtwo *game, std::vector<std::vector<int>> plays);
+
     Player* takeTurn(std::vector<Player*> players);
     //Test
     std::pair<Player*, std::vector<std::vector<int>>> takeTurn(std::vector<Player*> players, std::vector<std::vector<int>> plays);
+
+protected:
+    static bool condition(std::vector<Card*> cards);
 };
 
 #endif /* _ROUND_H_ */

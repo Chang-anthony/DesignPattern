@@ -3,6 +3,7 @@
 #include <Card.hpp>
 #include <CardPatternHandler.hpp>
 #include <Round.hpp>
+#include <FirstRound.hpp>
 #include <HandCard.hpp>
 #include <Deck.hpp>
 #include <BigTwo_paser.hpp>
@@ -97,159 +98,33 @@ std::string Bigtwo::PatternNameHandle(std::vector<Card*> cards)
 //TODO: can use templatemethod
 std::pair<Round*, std::vector<std::vector<int>>> Bigtwo::FirstRound(Player* topplayer, std::vector<std::vector<int>> plays)
 {
-    std::cout << "新的回合開始了。" << std::endl;
-    std::cout << "輪到" << topplayer->GetName() <<  "了" << std::endl;
+    std::pair<Round*, std::vector<std::vector<int>>> result = 
+        FirstRound::newRound(topplayer, this, plays);
+    this->rounds.push_back(result.first);
 
-    bool vaild = false;
-    std::vector<Card*> topplay = std::vector<Card*>();
-
-    while(!vaild && plays.size() > 0){
-        std::vector<Card*> cards = topplayer->Play(plays[0]);
-        plays.erase(plays.begin());
-
-        if(cards.size() == 0)
-        {
-            std::cout << "你不能在新的回合中喊 PASS" << std::endl;
-        }
-
-        if(this->handler->vaild(cards))
-        {
-            bool check = false;
-            for(auto card:cards){
-                std::string rank = RankToName(card->GetRank());
-                std::string suit = SuitToName(card->GetSuit());
-                if(rank == "3" && suit == "Club")
-                    check = true;
-            }
-
-            if(check){
-                vaild = true;
-                topplay = cards;
-                this->Render(topplayer, topplay);
-            }
-            else{
-                std::cout << "此牌型不合法，請再嘗試一次。" << std::endl;
-            }
-        }
-        else{
-            std::cout << "此牌型不合法，請再嘗試一次。" << std::endl;
-        }
-    }
-
-    Round* newRound = new Round(topplayer, topplay, this);
-    this->rounds.push_back(newRound);
-
-    return std::make_pair(newRound, plays);
+    return result;
 }
 
 Round* Bigtwo::FirstRound(Player* topplayer)
 {
-    std::cout << "新的回合開始了。" << std::endl;
-    std::cout << "輪到" << topplayer->GetName() <<  "了" << std::endl;
-
-    bool vaild = false;
-    std::vector<Card*> topplay = std::vector<Card*>();
-
-    while(!vaild){
-        std::vector<Card*> cards = topplayer->Play();
-
-        if(cards.size() == 0)
-        {
-            std::cout << "你不能在新的回合中喊 PASS" << std::endl;
-        }
-
-        if(this->handler->vaild(cards))
-        {
-            bool check = false;
-            for(auto card:cards){
-                std::string rank = RankToName(card->GetRank());
-                std::string suit = SuitToName(card->GetSuit());
-                if(rank == "3" && suit == "Club")
-                    check = true;
-            }
-
-            if(check){
-                vaild = true;
-                topplay = cards;
-                this->Render(topplayer, topplay);
-            }
-            else{
-                std::cout << "此牌型不合法，請再嘗試一次。" << std::endl;
-            }
-        }
-        else{
-            std::cout << "此牌型不合法，請再嘗試一次。" << std::endl;
-        }
-    }
-
-    Round* newRound = new Round(topplayer, topplay, this);
+    Round* newRound = FirstRound::newRound(topplayer, this);
     this->rounds.push_back(newRound);
-
     return newRound;
 }
 
 Round* Bigtwo::newRound(Player* topplayer)
 {
-    std::cout << "新的回合開始了。" << std::endl;
-    std::cout << "輪到" << topplayer->GetName() <<  "了" << std::endl;
-
-    bool vaild = false;
-    std::vector<Card*> topplay = std::vector<Card*>();
-
-    while(!vaild){
-        std::vector<Card*> cards = topplayer->Play();
-
-        if(cards.size() == 0){
-            std::cout << "你不能在新的回合中喊 PASS" << std::endl;
-        }
-
-        if(this->handler->vaild(cards)){
-            vaild = true;
-            topplay = cards;
-            this->Render(topplayer, topplay);
-        }
-        else{
-            std::cout << "此牌型不合法，請再嘗試一次。" << std::endl;
-        }
-    }
-
-    Round* newRound = new Round(topplayer,topplay,this);
+    Round* newRound = Round::newRound(topplayer, this);
     this->rounds.push_back(newRound);
-
     return newRound;
 }
 
 std::pair<Round*, std::vector<std::vector<int>>> Bigtwo::newRound(Player* topplayer, std::vector<std::vector<int>> plays)
 {
-    std::cout << "新的回合開始了。" << std::endl;
-    std::cout << "輪到" << topplayer->GetName() <<  "了" << std::endl;
-
-    bool vaild = false;
-    std::vector<Card*> topplay = std::vector<Card*>();
-
-    while(!vaild && plays.size() > 0){
-        std::vector<Card*> cards = topplayer->Play(plays[0]);
-        std::cout << std::endl;
-        plays.erase(plays.begin());
-
-        if(cards.size() == 0){
-            std::cout << "你不能在新的回合中喊 PASS" << std::endl;
-        }
-
-        if(this->handler->vaild(cards)){
-            vaild = true;
-            topplay = cards;
-            this->Render(topplayer, topplay);
-        }
-        else{
-            std::cout << "此牌型不合法，請再嘗試一次。" << std::endl;
-        }
-    }
-
-    Round* newRound = new Round(topplayer,topplay,this);
-    this->rounds.push_back(newRound);
-
-    return std::make_pair(newRound, plays);
+    std::pair<Round*, std::vector<std::vector<int>>> result = 
+        Round::newRound(topplayer, this, plays);
+    this->rounds.push_back(result.first);
+    return result;
 }
 
 void Bigtwo::Render(Player* play, std::vector<Card*> cards)
