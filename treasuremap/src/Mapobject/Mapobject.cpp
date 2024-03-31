@@ -22,10 +22,17 @@ char Mapobject::GetSymbol()
 {
     return this->symbol;
 }
+
 Coord* Mapobject::GetCoord()
 {
     return this->pos;
 }
+
+Adventure* Mapobject::GetGame()
+{
+    return this->game;
+}
+
 void Mapobject::SetSymbol(char symbol)
 {
     this->symbol = symbol;
