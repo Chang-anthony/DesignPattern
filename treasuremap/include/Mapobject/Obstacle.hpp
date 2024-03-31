@@ -5,13 +5,14 @@
 #include "Mapobject.hpp"
 
 class Coord;
+class Adventure;
 
 class Obstacle : public Mapobject
 {
 private:
     /* data */
 public:
-    Obstacle(Coord* pos);
+    Obstacle(Coord* pos, Adventure* game);
     ~Obstacle();
 };
 

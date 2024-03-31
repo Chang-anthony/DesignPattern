@@ -8,14 +8,28 @@
 class Mapobject;
 class Round;
 class Charator;
+class Coord;
 
 class Adventure
 {
 private:
-    /* data */
+    std::vector<std::vector<Mapobject*>> objs;
+    Charator* charactor;
 public:
-    Adventure(/* args */);
+    Adventure(Charator* charactor);
     ~Adventure();
+
+    //function
+    void GameStart();
+    void remove(Mapobject* obj);
+    Adventure newGame();
+    bool isHaveObj(Coord* pos);
+
+protected:
+    void touched(Mapobject* obj1, Mapobject* obj2);
+    bool isEnd();
+    Round* startRound();
+    void GameEnd();
 };
 
 #endif /* _ADVENTURE_H_ */

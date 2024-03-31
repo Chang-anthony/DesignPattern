@@ -7,6 +7,7 @@
 
 class Coord;
 class State;
+class Adventure;
 
 class Treasure : public Mapobject
 {
@@ -14,7 +15,7 @@ private:
     /* data */
     Content content;
 public:
-    Treasure(Coord* pos);
+    Treasure(Coord* pos, Adventure* game);
     ~Treasure();
 
     //TODO

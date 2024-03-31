@@ -4,6 +4,7 @@
 #include <iostream>
 
 class Coord;
+class Adventure;
 
 class Mapobject
 {
@@ -11,8 +12,9 @@ private:
     /* data */
     char symbol;
     Coord* pos;
+    Adventure* game;
 public:
-    Mapobject(char symbol, Coord* pos);
+    Mapobject(char symbol, Coord* pos, Adventure* game);
     ~Mapobject();
 
     //TODO:
@@ -22,10 +24,11 @@ public:
 
     char GetSymbol();
     Coord* GetCoord();
+    Adventure* GetGame();
 
     void SetSymbol(char symbol);
     void SetCoord(int x, int y);
     void SetCoord(Coord* coord);
+    void setAdventure(Adventure* game);
 };
-
 #endif /* _MAPOBJECT_H_ */

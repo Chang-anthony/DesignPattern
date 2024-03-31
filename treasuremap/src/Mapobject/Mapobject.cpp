@@ -1,10 +1,13 @@
 #include <Mapobject.hpp>
 #include <Coord.hpp>
+#include <Adventure.hpp>
+#include <utils.h>
 
-Mapobject::Mapobject(char symbol, Coord* pos)
+Mapobject::Mapobject(char symbol, Coord* pos, Adventure* game)
 {
     SetSymbol(symbol);
     SetCoord(pos);
+    setAdventure(game);
 }
 
 bool Mapobject::IsNearBy(Mapobject* other)
@@ -31,9 +34,15 @@ void Mapobject::SetCoord(int x, int y)
 {
     this->pos = new Coord(x, y);
 }
+
 void Mapobject::SetCoord(Coord* coord)
 {
-    this->pos = coord;
+    this->pos = utils::RequireNonNull(coord);
+}
+
+void Mapobject::setAdventure(Adventure* game)
+{
+    this->game = utils::RequireNonNull(game);
 }
 
 Mapobject::~Mapobject()

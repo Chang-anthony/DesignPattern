@@ -1,8 +1,9 @@
 #include <Content.hpp>
 #include <Treasure.hpp>
 #include <Coord.hpp>
+#include <Adventure.hpp>
 
-Treasure::Treasure(Coord* pos) : Mapobject('X', pos)
+Treasure::Treasure(Coord* pos, Adventure* game) : Mapobject('X', pos, game)
 {
     this->content = randomContent();
 }
