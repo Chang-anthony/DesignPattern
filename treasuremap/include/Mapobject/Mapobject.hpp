@@ -15,6 +15,7 @@ public:
     Mapobject(char symbol, Coord* pos);
     ~Mapobject();
 
+    //TODO:
     bool IsNearBy(Mapobject* other);
 
     char GetSymbol();

@@ -28,6 +28,7 @@ add_library(${GTest}_LIB STATIC
 )
 
 if(GTEST_FOUND)
+    # include(GoogleTest)
     target_link_libraries(${GTest} PRIVATE ${PROJECT_NAME}_LIB ${GTest}_LIB ${GTest}_LIB GTest::GTest GTest::Main)
     target_include_directories(${GTest}_LIB PUBLIC ${BIGTWO_INCS} ${COMM_INCS} ${INCS})
 elseif(NOT GTEST_FOUND)
@@ -93,7 +94,7 @@ if(GTESTON)
             COMMAND ${CMAKE_COMMAND} -E echo "Build completed. Running execute_process..."
             COMMAND ${CMAKE_COMMAND} -E echo "Your additional commands here..."
             COMMAND ${CMAKE_CURRENT_LIST_DIR}/run_tests.sh
-            # DEPENDS ${GTest}
+            DEPENDS ${GTest}
             # COMMAND ${CMAKE_CURRENT_SOURCE_DIR}/test/Run/DesignPattern_Test.exe
         )
         add_dependencies(${PROJECT_NAME} RunTests)

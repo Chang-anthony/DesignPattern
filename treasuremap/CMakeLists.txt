@@ -7,10 +7,12 @@ project(TREASUREMAP)
 set(CMAKE_CXX_STANDARD 20)
 
 if(${CMAKE_C_COMPILER_ID} STREQUAL "AppleClang")
+    set(CMAKE_OSX_DEPLOYMENT_TARGET "14.1" CACHE STRING "Minimum OS X deployment version" FORCE)
     set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wno-unused-command-line-argument")
 endif()
 
-if(CMAKE_CXX_COMPILE_FEATURES STREQUAL "AppleClang")
+if(CMAKE_CXX_COMPILE_ID STREQUAL "AppleClang")
+    set(CMAKE_OSX_DEPLOYMENT_TARGET "14.1" CACHE STRING "Minimum OS X deployment version" FORCE)
     set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wno-unused-command-line-argument")
 endif()
 
