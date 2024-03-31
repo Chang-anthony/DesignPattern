@@ -1,8 +1,10 @@
 #include <Mapobject.hpp>
 #include <Coord.hpp>
 
-Mapobject::Mapobject(char symbol, Coord* pos) : symbol(symbol), pos(pos)
+Mapobject::Mapobject(char symbol, Coord* pos)
 {
+    SetSymbol(symbol);
+    SetCoord(pos);
 }
 
 bool Mapobject::IsNearBy(Mapobject* other)

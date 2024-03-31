@@ -17,6 +17,8 @@ public:
 
     //TODO:
     bool IsNearBy(Mapobject* other);
+    static Mapobject* GenObj();
+    virtual void move(int x, int y) = 0;
 
     char GetSymbol();
     Coord* GetCoord();

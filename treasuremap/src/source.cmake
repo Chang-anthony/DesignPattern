@@ -6,12 +6,11 @@ set(__SRCS)
 include(${LIB_PATH}/Mapobject/mapobject.cmake)
 list(APPEND __SRCS ${LIB_SRCS})
 
+# message("${LIB_PATH}")
+include(${LIB_PATH}/Game/game.cmake)
+list(APPEND __SRCS ${LIB_SRCS})
 
-# include(${LIB_INC_PATH}/Card/card.cmake)
-# list(APPEND __SRCS ${BIGTWO_LIB_SRCS})
-
-# include(${LIB_INC_PATH}/bigtwo/bigtwo.cmake)
-# list(APPEND __SRCS ${BIGTWO_LIB_SRCS})
-
+include(${LIB_PATH}/Role/role.cmake)
+list(APPEND __SRCS ${LIB_SRCS})
 
 set(LIB_SRCS ${__SRCS})
