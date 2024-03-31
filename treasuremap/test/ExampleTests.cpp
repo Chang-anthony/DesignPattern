@@ -1,6 +1,12 @@
 #include <iostream>
 #include <gtest/gtest.h>
-#include "gtest/gtest-spi.h"
+#include <gtest/gtest-spi.h>
+
+
+TEST(Simple_TEST, TEST)
+{
+    
+}
 
 
 int main(int argc, char **argv) {

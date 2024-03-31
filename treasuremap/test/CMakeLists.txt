@@ -11,7 +11,7 @@ set(CMAKE_CXX_STANDARD 20)
 set(GTest Test)
 
 set(Sources 
-ExampleTests.cpp
+    ExampleTests.cpp
 )
 
 include(${LIB_PATH}/libary/test.cmake)
@@ -27,8 +27,13 @@ add_library(${GTest}_LIB STATIC
     ${SRCS}
 )
 
-target_link_libraries(${GTest} PRIVATE ${PROJECT_NAME}_LIB ${GTest}_LIB ${GTest}_LIB gtest_main)
-target_include_directories(${GTest}_LIB PUBLIC ${BIGTWO_INCS} ${COMM_INCS} ${INCS})
+if(GTEST_FOUND)
+    target_link_libraries(${GTest} PRIVATE ${PROJECT_NAME}_LIB ${GTest}_LIB ${GTest}_LIB GTest::GTest GTest::Main)
+    target_include_directories(${GTest}_LIB PUBLIC ${BIGTWO_INCS} ${COMM_INCS} ${INCS})
+elseif(NOT GTEST_FOUND)
+    target_link_libraries(${GTest} PRIVATE ${PROJECT_NAME}_LIB ${GTest}_LIB ${GTest}_LIB gtest_main)
+    target_include_directories(${GTest}_LIB PUBLIC ${BIGTWO_INCS} ${COMM_INCS} ${INCS})
+endif()
 
 # target_include_directories(${PROJECT_NAME}_LIB PUBLIC ${BIGTWO_INCS} ${COMM_INCS})
 # target_link_libraries(${GTest}_LIB PRIVATE ${PROJECT_NAME}_LIB)

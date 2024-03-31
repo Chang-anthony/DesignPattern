@@ -6,6 +6,14 @@ set(EXECUTABLE_OUTPUT_PATH ${PROJECT_BINARY_DIR})
 project(TREASUREMAP)
 set(CMAKE_CXX_STANDARD 20)
 
+if(${CMAKE_C_COMPILER_ID} STREQUAL "AppleClang")
+    set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wno-unused-command-line-argument")
+endif()
+
+if(CMAKE_CXX_COMPILE_FEATURES STREQUAL "AppleClang")
+    set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wno-unused-command-line-argument")
+endif()
+
 # ============ set
 
 set(INCLUDE_PATH ${CMAKE_CURRENT_LIST_DIR}/include)
@@ -17,31 +25,34 @@ set(TEST_UTILS_PATH ${CMAKE_CURRENT_LIST_DIR}/test/libary)
 
 # ========================================================
 # GTEST
-include(FetchContent)
-FetchContent_Declare(
-    googletest
-    URL
-    https://github.com/google/googletest/archive/609281088cfefc76f9d0ce82e1ff6c30cc3591e5.zip
-    # DOWNLOAD_NO_EXTRACT TRUE
-    # GIT_REPOSITORY https://github.com/google/googletest.git
-    GIT_TAG        release-1.11.0
-    # DOWNLOAD_NO_EXTRACT TRUE
-)
+find_package(GTEST REQUIRED)
 
-# set(gtest_force_shared_crt ON CACHE BOOL "" FORCE)
-FetchContent_MakeAvailable(googletest)
+if(NOT GTEST_FOUND)
+    message(STATUS "Start Fetch Google Test.")
+    include(FetchContent)
+    FetchContent_Declare(
+        googletest
+        URL https://github.com/google/googletest/archive/refs/tags/release-1.11.0.zip
+        # DOWNLOAD_NO_EXTRACT TRUE
+        # GIT_TAG        release-1.11.0
+        DOWNLOAD_EXTRACT_TIMESTAMP ON
+    )
 
-set_property(TARGET gmock PROPERTY FOLDER "gtest")
-set_property(TARGET gmock_main PROPERTY FOLDER "gtest")
-set_property(TARGET gtest PROPERTY FOLDER "gtest")
-set_property(TARGET gtest_main PROPERTY FOLDER "gtest")
+    # set(gtest_force_shared_crt ON CACHE BOOL "" FORCE)
+    FetchContent_MakeAvailable(googletest)
 
-# 確認是否已經包含 Google Test
-if(TARGET gtest)
-    message(STATUS "Google Test found!")
-else()
-    message(FATAL_ERROR "Failed to find Google Test!")
+    # set_property(TARGET gmock PROPERTY FOLDER "gtest")
+    # set_property(TARGET gmock_main PROPERTY FOLDER "gtest")
+    # set_property(TARGET gtest PROPERTY FOLDER "gtest")
+    # set_property(TARGET gtest_main PROPERTY FOLDER "gtest")
 endif()
+
+# # 確認是否已經包含 Google Test
+# if(TARGET gtest)
+#     message(STATUS "Google Test found!")
+# else()
+#     message(FATAL_ERROR "Failed to find Google Test!")
+# endif()
 
 # ======================================================
 
@@ -94,6 +105,14 @@ target_compile_options(${PROJECT_NAME} PRIVATE -finput-charset=UTF-8)
 add_compile_options("$<$<CXX_COMPILER_ID:MSVC>:/source-charset:utf-8>")
 add_compile_options("$<$<C_COMPILER_ID:MSVC>:/utf-8>")
 add_compile_options("$<$<CXX_COMPILER_ID:MSVC>:/utf-8>")
+
+
+target_compile_options(${PROJECT_NAME} PRIVATE 
+    -Wall -Werror -Wno-unused-parameter -Wno-unused-function -Wno-unused-variable
+    -fdata-sections -ffunction-sections -fno-strict-aliasing -fno-inline -fno-common
+    -Wmissing-declarations -Wpointer-arith -Wshadow -Wfloat-equal -MD -MP
+    -g -fstack-usage
+)
 
 
 
