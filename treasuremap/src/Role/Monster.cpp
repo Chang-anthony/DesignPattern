@@ -18,6 +18,18 @@ void Monster::attack()
 {
 }
 
+bool Monster::fullHp()
+{
+    return Hp >= 1;
+}
+
+void Monster::gainHp(int Hp)
+{
+    this->Hp += Hp;
+    if(this->Hp > 1)
+        this->Hp = 1;
+}
+
 
 Monster::~Monster()
 {

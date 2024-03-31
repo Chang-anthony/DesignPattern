@@ -17,8 +17,9 @@ public:
 
     //TODO
     void Do() override;
-    void injured(int damage) override;
     void attack() override;
+    bool fullHp() override;
+    void gainHp(int Hp) override;
 };
 
 #endif /* _MONSTER_H_ */

@@ -1,18 +1,18 @@
-#ifndef _NORMALSTATE_H_
-#define _NORMALSTATE_H_
+#ifndef _ACCELERATED_H_
+#define _ACCELERATED_H_
 
 #include <iostream>
-#include "State.hpp"
+#include <State.hpp>
 
 class Role;
 
-class NormalState : public State
+class Accelerated : public State
 {
 private:
     /* data */
 public:
-    NormalState(Role* role);
-    ~NormalState();
+    Accelerated(Role* role);
+    ~Accelerated();
 
     void enterState() override;
     void exitState(State* nextState) override;
@@ -23,4 +23,4 @@ public:
     friend class Role;
 };
 
-#endif /* _NORMALSTATE_H_ */
+#endif /* _ACCELERATED_H_ */

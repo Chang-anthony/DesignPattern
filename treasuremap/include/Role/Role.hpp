@@ -12,16 +12,12 @@ class Role : public Mapobject
 {
 private:
     /* data */
-    int Hp;
-    State* state;
-
 public:
     Role(char symbol, Coord* pos, Adventure* game);
     ~Role();
 
     //TODO
     //function
-    bool fullHp();
     void lossHp(int damage);
     void action();
 
@@ -34,14 +30,26 @@ public:
     State* GetState();
     void EnterState(State* state);
 protected:
+    int Hp;
+    State* state;
+
     bool isDead();
     virtual void Do() = 0;
-    void injured(int damage);
     virtual void attack() = 0;
+    virtual void gainHp(int Hp);
+    virtual bool fullHp();
+    void injured(int damage);
 
     friend class State;
     friend class NormalState;
     friend class Invincible;
+    friend class Accelerated;
+    friend class Poisoned;
+    friend class Healing;
+    friend class Stockpile;
+    friend class Erupting;
+    friend class Teleport;
+    friend class Orderless;
 };
 
 #endif /* _ROLE_H_ */

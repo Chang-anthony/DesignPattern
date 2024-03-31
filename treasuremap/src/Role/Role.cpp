@@ -40,11 +40,6 @@ void Role::move(int x, int y)
     this->SetCoord(this->GetCoord()->GetX() + x, this->GetCoord()->GetY() + y);
 }
 
-bool Role::fullHp()
-{
-    return this->Hp > 0;
-}
-
 int Role::GetHp()
 {
     return this->Hp;
@@ -64,9 +59,6 @@ void Role::SetHp(int hp)
 void Role::EnterState(State * state)
 {
     utils::RequireNonNull(state);
-    if(this->state) {
-        this->state->exitState();
-    }
     this->state = state;
     this->state->enterState();
 }

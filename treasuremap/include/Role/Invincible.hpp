@@ -15,7 +15,7 @@ public:
     ~Invincible();
 
     void enterState() override;
-    void exitState() override;
+    void exitState(State* nextState) override;
     void action() override;
     void attacked(int damage) override;
     std::string StateName() override;

@@ -1,26 +1,26 @@
-#ifndef _NORMALSTATE_H_
-#define _NORMALSTATE_H_
+#ifndef _ORDERLESS_H_
+#define _ORDERLESS_H_
 
 #include <iostream>
 #include "State.hpp"
 
 class Role;
 
-class NormalState : public State
+class Orderless : public State
 {
 private:
     /* data */
+    void randomMove();
 public:
-    NormalState(Role* role);
-    ~NormalState();
+    Orderless(Role* role);
+    ~Orderless();
 
     void enterState() override;
     void exitState(State* nextState) override;
     void action() override;
     void attacked(int damage) override;
     std::string StateName() override;
-
-    friend class Role;
 };
 
-#endif /* _NORMALSTATE_H_ */
+
+#endif /* _ORDERLESS_H_ */

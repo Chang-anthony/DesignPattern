@@ -1,18 +1,18 @@
-#ifndef _NORMALSTATE_H_
-#define _NORMALSTATE_H_
+#ifndef _ERUPTING_H_
+#define _ERUPTING_H_
 
 #include <iostream>
 #include "State.hpp"
 
 class Role;
 
-class NormalState : public State
+class Erupting : public State
 {
 private:
     /* data */
 public:
-    NormalState(Role* role);
-    ~NormalState();
+    Erupting(Role* role);
+    ~Erupting();
 
     void enterState() override;
     void exitState(State* nextState) override;
@@ -23,4 +23,4 @@ public:
     friend class Role;
 };
 
-#endif /* _NORMALSTATE_H_ */
+#endif /* _ERUPTING_H_ */

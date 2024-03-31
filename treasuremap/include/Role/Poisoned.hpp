@@ -1,18 +1,18 @@
-#ifndef _NORMALSTATE_H_
-#define _NORMALSTATE_H_
+#ifndef _POISONED_H_
+#define _POISONED_H_
 
 #include <iostream>
-#include "State.hpp"
+#include <State.hpp>
 
 class Role;
 
-class NormalState : public State
+class Poisoned : public State
 {
 private:
     /* data */
 public:
-    NormalState(Role* role);
-    ~NormalState();
+    Poisoned(Role* role);
+    ~Poisoned();
 
     void enterState() override;
     void exitState(State* nextState) override;
@@ -23,4 +23,4 @@ public:
     friend class Role;
 };
 
-#endif /* _NORMALSTATE_H_ */
+#endif /* _POISONED_H_ */

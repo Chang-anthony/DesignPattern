@@ -1,18 +1,18 @@
-#ifndef _NORMALSTATE_H_
-#define _NORMALSTATE_H_
+#ifndef _TELEPORT_H_
+#define _TELEPORT_H_
 
 #include <iostream>
 #include "State.hpp"
 
 class Role;
 
-class NormalState : public State
+class Teleport : public State
 {
 private:
     /* data */
 public:
-    NormalState(Role* role);
-    ~NormalState();
+    Teleport(Role* role);
+    ~Teleport();
 
     void enterState() override;
     void exitState(State* nextState) override;
@@ -23,4 +23,4 @@ public:
     friend class Role;
 };
 
-#endif /* _NORMALSTATE_H_ */
+#endif /* _TELEPORT_H_ */

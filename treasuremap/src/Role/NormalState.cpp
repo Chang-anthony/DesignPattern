@@ -3,7 +3,7 @@
 #include <Adventure.hpp>
 #include <Invincible.hpp>
 
-NormalState::NormalState(Role* role) : State(0, role)
+NormalState::NormalState(Role* role) : State(role)
 {
 }
 
@@ -12,21 +12,22 @@ void NormalState::enterState()
     return;
 }
 
-void NormalState::exitState()
+void NormalState::exitState(State* nextState)
 {
     return;
 }
 
 void NormalState::action()
 {
-    this->GetRole()->Do();
+    role->Do();
 }
 
 void NormalState::attacked(int damage)
 {
-    this->GetRole()->lossHp(damage);
+    role->lossHp(damage);
     //to 無敵狀態
-    this->GetRole()->EnterState(new Invincible(this->GetRole()));
+    if(!role->isDead())
+        exitState(new Invincible(role));
 }
 
 std::string NormalState::StateName()

@@ -23,9 +23,18 @@ public:
     void GameStart();
     void remove(Mapobject* obj);
     Adventure newGame();
-    bool isHaveObj(Coord* pos);
+    bool IsNullObj(Coord* pos);
 
+    Coord* RandomCoord();
+
+    //getter
+    Charator* GetCharator();
+    //setter
+    void SetCharator(Charator* charator);
 protected:
+    const int boundx = 10;
+    const int boundy = 10;
+
     void touched(Mapobject* obj1, Mapobject* obj2);
     bool isEnd();
     Round* startRound();
