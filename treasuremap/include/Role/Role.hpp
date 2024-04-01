@@ -7,6 +7,7 @@
 class State;
 class Coord;
 class Adventure;
+class AttackType;
 
 class Role : public Mapobject
 {
@@ -29,15 +30,19 @@ public:
 
     State* GetState();
     void EnterState(State* state);
+
+    AttackType* GetAttackType();
+    void SetAttackType(AttackType* type);
 protected:
     int Hp;
     State* state;
+    AttackType* attackType;
 
     bool isDead();
     virtual void Do() = 0;
-    virtual void attack() = 0;
-    virtual void gainHp(int Hp);
-    virtual bool fullHp();
+    void attack();
+    virtual void gainHp(int Hp) = 0;
+    virtual bool fullHp() = 0;
     void injured(int damage);
 
     friend class State;
@@ -50,6 +55,7 @@ protected:
     friend class Erupting;
     friend class Teleport;
     friend class Orderless;
+    friend class AttackType;
 };
 
 #endif /* _ROLE_H_ */

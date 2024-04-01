@@ -4,6 +4,9 @@
 #include <utils.h>
 #include <Mapobject.hpp>
 #include <vector>
+#include <Charator.hpp>
+
+//TODO
 
 Adventure::Adventure(Charator* charactor)
 {

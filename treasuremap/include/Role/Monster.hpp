@@ -17,7 +17,6 @@ public:
 
     //TODO
     void Do() override;
-    void attack() override;
     bool fullHp() override;
     void gainHp(int Hp) override;
 };

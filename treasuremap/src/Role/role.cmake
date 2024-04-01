@@ -15,4 +15,9 @@ set(LIB_SRCS
     ${_LIB_PATH}/Erupting.cpp
     ${_LIB_PATH}/Teleport.cpp
     ${_LIB_PATH}/Orderless.cpp
+    ${_LIB_PATH}/Charator.cpp
+    ${_LIB_PATH}/AttackType.cpp
+    ${_LIB_PATH}/MonsterAttack.cpp
+    ${_LIB_PATH}/NormalAttack.cpp
+    ${_LIB_PATH}/FullAttack.cpp
 )

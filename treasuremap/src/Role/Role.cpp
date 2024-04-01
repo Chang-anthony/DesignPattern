@@ -4,6 +4,7 @@
 #include <utils.h>
 #include <State.hpp>
 #include <NormalState.hpp>
+#include <AttackType.hpp>
 
 Role::Role(char symbol, Coord* pos, Adventure* game): Mapobject(symbol, pos, game)
 {
@@ -40,6 +41,11 @@ void Role::move(int x, int y)
     this->SetCoord(this->GetCoord()->GetX() + x, this->GetCoord()->GetY() + y);
 }
 
+void Role::attack()
+{
+    attackType->attack();
+}
+
 int Role::GetHp()
 {
     return this->Hp;
@@ -61,6 +67,16 @@ void Role::EnterState(State * state)
     utils::RequireNonNull(state);
     this->state = state;
     this->state->enterState();
+}
+
+AttackType* Role::GetAttackType()
+{
+    return this->attackType;
+}
+
+void Role::SetAttackType(AttackType* type)
+{
+    attackType = utils::RequireNonNull(type);
 }
 
 Role::~Role()

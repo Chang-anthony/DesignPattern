@@ -4,6 +4,8 @@
 #include <Adventure.hpp>
 #include <Erupting.hpp>
 #include <Teleport.hpp>
+#include <FullAttack.hpp>
+#include <NormalAttack.hpp>
 
 //TODO
 Erupting::Erupting(Role* role) : State(role)
@@ -13,10 +15,12 @@ Erupting::Erupting(Role* role) : State(role)
 void Erupting::enterState()
 {
     //attacktype to full
+    role->SetAttackType(new FullAttack(role));
 }
 
 void Erupting::exitState(State* nextState)
 {
+    role->SetAttackType(new NormalAttack(role));
     role->EnterState(nextState);
 }
 
