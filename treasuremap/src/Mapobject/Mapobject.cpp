@@ -18,6 +18,12 @@ bool Mapobject::IsNearBy(Mapobject* other)
         return false;
 }
 
+//TODO
+Mapobject* Mapobject::GenObj(Adventure* game)
+{
+    return nullptr;
+}
+
 char Mapobject::GetSymbol()
 {
     return this->symbol;
@@ -37,6 +43,7 @@ void Mapobject::SetSymbol(char symbol)
 {
     this->symbol = symbol;
 }
+
 void Mapobject::SetCoord(int x, int y)
 {
     this->pos = new Coord(x, y);

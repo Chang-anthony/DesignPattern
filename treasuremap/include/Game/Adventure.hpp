@@ -16,29 +16,33 @@ private:
     std::vector<std::vector<Mapobject*>> objs;
     Charator* charactor;
 public:
-    Adventure(Charator* charactor);
+    Adventure();
+    Adventure(Charator* charator);
     ~Adventure();
 
     //function
     void GameStart();
     void remove(Mapobject* obj);
-    Adventure newGame();
+    static Adventure* newGame();
     bool IsNullObj(Coord* pos);
-
-    Coord* RandomCoord();
 
     //getter
     Charator* GetCharator();
+    int GetBoundX();
+    int GetBoundY();
     //setter
     void SetCharator(Charator* charator);
+
 protected:
-    const int boundx = 10;
-    const int boundy = 10;
+    static const int boundx = 10;
+    static const int boundy = 10;
 
     void touched(Mapobject* obj1, Mapobject* obj2);
     bool isEnd();
     Round* startRound();
     void GameEnd();
+    static Mapobject* RandomGenObj(Adventure* game);
+    static Adventure*  RandChartorCoord(Adventure* game);
 };
 
 #endif /* _ADVENTURE_H_ */

@@ -3,6 +3,7 @@
 #include <Invincible.hpp>
 #include <Adventure.hpp>
 #include <Teleport.hpp>
+#include <Coord.hpp>
 
 //TODO adventure teleport method
 Teleport::Teleport(Role* role) : State(role)
@@ -24,7 +25,14 @@ void Teleport::action()
     role->Do();
     round++;
     if(round > 1) {
-        Coord* newPos = role->GetGame()->RandomCoord();
+        Adventure* game = role->GetGame();
+        Coord* newPos = Coord::RandomCoord(game->GetBoundX(), game->GetBoundY());
+        while (true) {
+            if(game->IsNullObj(newPos))
+                break;
+            else
+                newPos = Coord::RandomCoord(game->GetBoundX(), game->GetBoundY());
+        }
         role->SetCoord(newPos);
         exitState(new NormalState(role));
     }

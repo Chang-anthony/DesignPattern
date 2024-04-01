@@ -1,5 +1,6 @@
 #include <Coord.hpp>
 #include <math.h>
+#include <random>
 
 
 Coord::Coord(int x, int y): x(x), y(y)
@@ -30,6 +31,20 @@ void Coord::SetX(int x)
 void Coord::SetY(int y)
 {
     this->y = y;
+}
+
+Coord* Coord::RandomCoord(int boundx, int boundy)
+{
+    std::random_device rd;
+    std::mt19937 gen(rd());
+    std::uniform_int_distribution<int> disx(0, boundx); // 0 到 10 的随机整数
+    std::uniform_int_distribution<int> disy(0, boundy); // 0 到 10 的随机整数
+
+    int x = disx(gen);
+    int y = disy(gen);
+    Coord* pos = new Coord(x, y);
+
+    return pos;
 }
 
 Coord::~Coord()

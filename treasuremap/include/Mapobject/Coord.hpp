@@ -21,6 +21,8 @@ public:
 
     void SetX(int x);
     void SetY(int y);
+
+    static Coord* RandomCoord(int boundx, int boundy);
 };
 
 #endif /* _COORD_H_ */

@@ -19,7 +19,7 @@ public:
 
     //TODO:
     bool IsNearBy(Mapobject* other);
-    static Mapobject* GenObj();
+    static Mapobject* GenObj(Adventure* game);
     virtual void move(int x, int y) = 0;
 
     char GetSymbol();
