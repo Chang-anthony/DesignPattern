@@ -3,7 +3,7 @@
 #include <Adventure.hpp>
 #include <utils.h>
 
-Mapobject::Mapobject(char symbol, Coord* pos, Adventure* game)
+Mapobject::Mapobject(std::string symbol, Coord* pos, Adventure* game)
 {
     SetSymbol(symbol);
     SetCoord(pos);
@@ -24,7 +24,7 @@ Mapobject* Mapobject::GenObj(Adventure* game)
     return nullptr;
 }
 
-char Mapobject::GetSymbol()
+std::string Mapobject::GetSymbol()
 {
     return this->symbol;
 }
@@ -39,7 +39,7 @@ Adventure* Mapobject::GetGame()
     return this->game;
 }
 
-void Mapobject::SetSymbol(char symbol)
+void Mapobject::SetSymbol(std::string symbol)
 {
     this->symbol = symbol;
 }

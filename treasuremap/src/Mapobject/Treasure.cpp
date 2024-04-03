@@ -3,7 +3,7 @@
 #include <Coord.hpp>
 #include <Adventure.hpp>
 
-Treasure::Treasure(Coord* pos, Adventure* game) : Mapobject('X', pos, game)
+Treasure::Treasure(Coord* pos, Adventure* game) : Mapobject("X", pos, game)
 {
     this->content = randomContent();
 }

@@ -10,11 +10,8 @@ class Mapobject
 {
 private:
     /* data */
-    char symbol;
-    Coord* pos;
-    Adventure* game;
 public:
-    Mapobject(char symbol, Coord* pos, Adventure* game);
+    Mapobject(std::string symbol, Coord* pos, Adventure* game);
     ~Mapobject();
 
     //TODO:
@@ -22,13 +19,17 @@ public:
     static Mapobject* GenObj(Adventure* game);
     virtual void move(int x, int y) = 0;
 
-    char GetSymbol();
+    std::string GetSymbol();
     Coord* GetCoord();
     Adventure* GetGame();
 
-    void SetSymbol(char symbol);
+    void SetSymbol(std::string symbol);
     void SetCoord(int x, int y);
     void SetCoord(Coord* coord);
     void setAdventure(Adventure* game);
+protected:
+    std::string symbol;
+    Coord* pos;
+    Adventure* game;
 };
 #endif /* _MAPOBJECT_H_ */

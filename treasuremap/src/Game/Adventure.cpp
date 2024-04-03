@@ -53,6 +53,38 @@ Adventure* Adventure::newGame()
     return Adventure::RandChartorCoord(game);
 }
 
+bool Adventure::IsOutBound(Coord* pos, std::pair<int, int> dpos)
+{   
+    int newX = pos->GetX() + dpos.first;
+    int newY = pos->GetY() + dpos.second;
+
+    bool flag = false;
+    flag = (newX >= 0) && (newX < boundx) && ( newY >= 0) && (newY < boundy);
+
+    return flag;
+}
+
+void Adventure::remove(Mapobject* obj)
+{
+    int x = obj->GetCoord()->GetX();
+    int y = obj->GetCoord()->GetY();
+
+    objs[x][y] = nullptr;
+}
+
+std::string Adventure::GetChooseSymbol(int choose)
+{
+    auto it = dirmap.find(choose);
+    return it->second;
+}
+
+std::pair<int, int> Adventure::GetDirPos(int choose)
+{
+    auto it = dirmap.find(choose);
+    std::string dir = it->second;
+    return dirTopos.find(dir)->second;
+}
+
 //Gen Monster and treasure and obstacle
 Mapobject* Adventure::RandomGenObj(Adventure* game)
 {   
@@ -75,6 +107,11 @@ Adventure* Adventure::RandChartorCoord(Adventure* game)
 bool Adventure::IsNullObj(Coord* pos)
 {
     return !objs[pos->GetX()][pos->GetY()];
+}
+
+std::vector<std::vector<Mapobject*>> Adventure::GetObjs()
+{
+    return objs;
 }
 
 Charator* Adventure::GetCharator()

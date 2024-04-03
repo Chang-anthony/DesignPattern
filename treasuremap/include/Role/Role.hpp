@@ -14,7 +14,7 @@ class Role : public Mapobject
 private:
     /* data */
 public:
-    Role(char symbol, Coord* pos, Adventure* game);
+    Role(std::string symbol, Coord* pos, Adventure* game);
     ~Role();
 
     //TODO
@@ -23,6 +23,7 @@ public:
     void action();
 
     //override from mapobject
+    void injured(int damage);
     void move(int x, int y) override;
 
     int GetHp();
@@ -43,7 +44,6 @@ protected:
     void attack();
     virtual void gainHp(int Hp) = 0;
     virtual bool fullHp() = 0;
-    void injured(int damage);
 
     friend class State;
     friend class NormalState;

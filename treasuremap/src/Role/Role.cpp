@@ -6,7 +6,7 @@
 #include <NormalState.hpp>
 #include <AttackType.hpp>
 
-Role::Role(char symbol, Coord* pos, Adventure* game): Mapobject(symbol, pos, game)
+Role::Role(std::string symbol, Coord* pos, Adventure* game): Mapobject(symbol, pos, game)
 {
     this->Hp = 0;
     this->state = new NormalState(this);
