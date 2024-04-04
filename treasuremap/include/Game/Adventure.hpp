@@ -60,7 +60,7 @@ protected:
     bool isEnd();
     Round* startRound();
     void GameEnd();
-    static Mapobject* RandomGenObj(Adventure* game);
+    static Mapobject* RandomGenObj(Adventure* game, std::string target);
     static Adventure*  RandChartorCoord(Adventure* game);
 };
 

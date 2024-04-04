@@ -6,19 +6,19 @@
 
 
 class State;
+class Role;
 
 enum Content{
     SuperStar = 0,
     Posion,
     Accelerating,
-    Healing,
+    Heal,
     Devil,
     KingRock,
     DokoDemoDoor,
 };
 
-//TODO : add State
-State* content2State(Content* content);
+State* content2State(Role* role, Content content);
 Content randomContent();
 
 #endif /* _CONTENT_H_ */

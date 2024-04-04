@@ -15,10 +15,11 @@ public:
     Monster(Coord* pos, Adventure* game);
     ~Monster();
 
-    //TODO
     void Do() override;
     bool fullHp() override;
     void gainHp(int Hp) override;
+
+    static Monster* genMonster(Coord* newPos, Adventure* game);
 };
 
 #endif /* _MONSTER_H_ */

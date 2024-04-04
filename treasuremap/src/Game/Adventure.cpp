@@ -36,12 +36,16 @@ Adventure* Adventure::newGame()
     std::random_device rd;
     std::mt19937 gen(rd());
     std::uniform_int_distribution<int> distribution(10, 15);
+    std::uniform_int_distribution<int> genchoice(0, 2);
 
     int randomNumber = distribution(gen);
+    std::vector<std::string> targets = {"M", "o", "X"};
 
     int count = 0;
     while (count < randomNumber) {
-        Mapobject* gens = Adventure::RandomGenObj(game);
+        int choice = genchoice(gen);
+        
+        Mapobject* gens = Adventure::RandomGenObj(game, targets[choice]);
         if(game->IsNullObj(gens->GetCoord())) {
             int x = gens->GetCoord()->GetX();
             int y = gens->GetCoord()->GetY();
@@ -86,9 +90,9 @@ std::pair<int, int> Adventure::GetDirPos(int choose)
 }
 
 //Gen Monster and treasure and obstacle
-Mapobject* Adventure::RandomGenObj(Adventure* game)
+Mapobject* Adventure::RandomGenObj(Adventure* game, std::string target)
 {   
-    Mapobject* obj = Mapobject::GenObj(game);
+    Mapobject* obj = Mapobject::GenObj(game, target);
     return obj;
 }
 

@@ -8,6 +8,7 @@
 class Coord;
 class State;
 class Adventure;
+class Role;
 
 class Treasure : public Mapobject
 {
@@ -18,8 +19,10 @@ public:
     Treasure(Coord* pos, Adventure* game);
     ~Treasure();
 
-    //TODO
-    State* open();
+    void move(int x, int y) override;
+
+    void open(Role* role);
+    static Treasure* genTreasure(Coord* newPos, Adventure* game);
 
     //method
     std::string NameOfContent();
@@ -35,7 +38,7 @@ protected:
         {Content::SuperStar, "無敵星星"},
         {Content::Posion, "毒藥"},
         {Content::Accelerating, "加速藥水"},
-        {Content::Healing, "補血罐"},
+        {Content::Heal, "補血罐"},
         {Content::Devil, "惡魔果實"},
         {Content::KingRock, "王者之印"},
         {Content::DokoDemoDoor, "任意門"}

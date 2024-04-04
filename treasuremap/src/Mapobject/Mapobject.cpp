@@ -2,6 +2,9 @@
 #include <Coord.hpp>
 #include <Adventure.hpp>
 #include <utils.h>
+#include <Treasure.hpp>
+#include <Monster.hpp>
+#include <Obstacle.hpp>
 
 Mapobject::Mapobject(std::string symbol, Coord* pos, Adventure* game)
 {
@@ -18,10 +21,24 @@ bool Mapobject::IsNearBy(Mapobject* other)
         return false;
 }
 
-//TODO
-Mapobject* Mapobject::GenObj(Adventure* game)
+Mapobject* Mapobject::GenObj(Adventure* game, std::string target)
 {
-    return nullptr;
+    Coord* newPos = Coord::RandomCoord(game->GetBoundX(), game->GetBoundY());
+    while (true) {
+        if(game->IsNullObj(newPos))
+            break;
+        newPos = Coord::RandomCoord(game->GetBoundX(), game->GetBoundY());
+    }
+
+    if(target == "M") {
+        return Monster::genMonster(newPos, game);
+    }
+    else if (target == "o") {
+        return Obstacle::genObstacle(newPos, game);
+    }
+    else {
+        return Treasure::genTreasure(newPos, game);
+    }
 }
 
 std::string Mapobject::GetSymbol()

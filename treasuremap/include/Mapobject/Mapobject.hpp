@@ -16,7 +16,7 @@ public:
 
     //TODO:
     bool IsNearBy(Mapobject* other);
-    static Mapobject* GenObj(Adventure* game);
+    static Mapobject* GenObj(Adventure* game, std::string target);
     virtual void move(int x, int y) = 0;
 
     std::string GetSymbol();

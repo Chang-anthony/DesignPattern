@@ -45,6 +45,11 @@ void Monster::gainHp(int Hp)
         this->Hp = 1;
 }
 
+Monster* Monster::genMonster(Coord* newPos, Adventure* game)
+{
+    return new Monster(newPos, game);
+}
+
 Monster::~Monster()
 {
 }

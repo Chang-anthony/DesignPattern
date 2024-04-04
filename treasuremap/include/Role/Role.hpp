@@ -24,6 +24,7 @@ public:
 
     //override from mapobject
     void injured(int damage);
+    //TODO touched event on adventure game
     void move(int x, int y) override;
 
     int GetHp();

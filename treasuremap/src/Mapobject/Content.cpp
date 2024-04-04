@@ -1,5 +1,15 @@
 #include "Content.hpp"
 #include <random>
+#include <State.hpp>
+#include <Poisoned.hpp>
+#include <Invincible.hpp>
+#include <Healing.hpp>
+#include <Teleport.hpp>
+#include <Erupting.hpp>
+#include <Accelerated.hpp>
+#include <Orderless.hpp>
+#include <Stockpile.hpp>
+#include <Role.hpp>
 
 
 Content randomContent()
@@ -21,7 +31,7 @@ Content randomContent()
             return Content::Accelerating;
             break;
         case 3:
-            return Content::Healing;
+            return Content::Heal;
             break;
         case 4:
             return Content::Devil;
@@ -35,5 +45,25 @@ Content randomContent()
         default:
             return randomContent();
             break;
+    }
+}
+
+State* content2State(Role* role, Content content)
+{
+    switch (content) {
+    case SuperStar:
+        return new Invincible(role);
+    case Posion:
+        return new Poisoned(role);
+    case Accelerating:
+        return new Accelerated(role);
+    case Heal:
+        return new Healing(role);
+    case Devil:
+        return new Orderless(role);
+    case KingRock:
+        return new Stockpile(role);
+    case DokoDemoDoor:
+        return new Teleport(role);
     }
 }

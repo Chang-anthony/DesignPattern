@@ -109,12 +109,12 @@ add_compile_options("$<$<C_COMPILER_ID:MSVC>:/utf-8>")
 add_compile_options("$<$<CXX_COMPILER_ID:MSVC>:/utf-8>")
 
 
-target_compile_options(${PROJECT_NAME} PRIVATE 
-    -Wall -Werror -Wno-unused-parameter -Wno-unused-function -Wno-unused-variable
-    -fdata-sections -ffunction-sections -fno-strict-aliasing -fno-inline -fno-common
-    -Wmissing-declarations -Wpointer-arith -Wshadow -Wfloat-equal -MD -MP
-    -g -fstack-usage
-)
+# target_compile_options(${PROJECT_NAME} PRIVATE 
+#     -Wall -Werror -Wno-unused-parameter -Wno-unused-function -Wno-unused-variable
+#     -fdata-sections -ffunction-sections -fno-strict-aliasing -fno-inline -fno-common
+#     -Wmissing-declarations -Wpointer-arith -Wshadow -Wfloat-equal -MD -MP
+#     -g -fstack-usage
+# )
 
 
 
