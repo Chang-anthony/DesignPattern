@@ -18,6 +18,7 @@ public:
     void Do() override;
     bool fullHp() override;
     void gainHp(int Hp) override;
+    bool orderless(int random) override;
 
     static Monster* genMonster(Coord* newPos, Adventure* game);
 };

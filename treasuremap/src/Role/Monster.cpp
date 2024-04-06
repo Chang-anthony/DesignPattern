@@ -6,6 +6,7 @@
 #include <Charator.hpp>
 #include <cstdlib>
 #include <ctime>
+#include <set>
 
 Monster::Monster(Coord* pos, Adventure* game) : Role("M", pos, game)
 {
@@ -48,6 +49,37 @@ void Monster::gainHp(int Hp)
 Monster* Monster::genMonster(Coord* newPos, Adventure* game)
 {
     return new Monster(newPos, game);
+}
+
+bool Monster::orderless(int random)
+{
+    bool flag = true;
+    std::set<int> s = std::set<int>();
+    std::vector<int> updir = std::vector<int>();
+    if(random == 1)
+        updir = {1, 3};
+    else
+        updir = {0, 2};
+
+    srand(time(nullptr));
+    int randomNumber = rand() % 2;
+    std::pair<int, int> dpos = game->GetDirPos(updir[randomNumber]);
+    s.insert(updir[randomNumber]);
+    while(flag){
+        if(s.size() == 2)
+            flag = false;
+        if(game->IsOutBound(pos, dpos))
+                break;
+        else {
+            int randomNumber = rand() % 2;
+            dpos = game->GetDirPos(updir[randomNumber]);
+            s.insert(updir[randomNumber]);
+        }
+    }
+    if(flag) 
+        move(dpos.first, dpos.second);
+
+    return flag;
 }
 
 Monster::~Monster()

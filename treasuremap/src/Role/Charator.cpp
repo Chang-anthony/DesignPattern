@@ -2,6 +2,9 @@
 #include <Adventure.hpp>
 #include <Coord.hpp>
 #include <NormalAttack.hpp>
+#include <ctime>
+#include <set>
+
 
 Charator::Charator(Coord* pos, Adventure* game) : Role("↑", pos, game)
 {
@@ -51,6 +54,38 @@ void Charator::gainHp(int Hp)
     this->Hp += Hp;
     if(this->Hp >= 300)
         this->Hp = 300;
+}
+
+//TODO: need to change to select
+bool Charator::orderless(int random)
+{
+    bool flag = true;
+    std::set<int> s = std::set<int>();
+    std::vector<int> updir = std::vector<int>();
+    if(random == 1)
+        updir = {1, 3};
+    else
+        updir = {0, 2};
+
+    srand(time(nullptr));
+    int randomNumber = rand() % 2;
+    std::pair<int, int> dpos = game->GetDirPos(updir[randomNumber]);
+    s.insert(updir[randomNumber]);
+    while(flag){
+        if(s.size() == 2)
+            flag = false;
+        if(game->IsOutBound(pos, dpos))
+                break;
+        else {
+            int randomNumber = rand() % 2;
+            dpos = game->GetDirPos(updir[randomNumber]);
+            s.insert(updir[randomNumber]);
+        }
+    }
+    if(flag) 
+        move(dpos.first, dpos.second);
+
+    return flag;
 }
 
 Charator::~Charator()

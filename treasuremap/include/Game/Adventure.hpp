@@ -27,9 +27,9 @@ private:
 
     const std::unordered_map<std::string, std::pair<int, int>> dirTopos = {
         {"↑", {0, 1}},
-        {"→", {0, -1}},
-        {"↓", {-1, 0}},
-        {"←", {1, 0}},
+        {"→", {1, 0}},
+        {"↓", {0, -1}},
+        {"←", {-1, 0}},
     };
 
     std::vector<std::vector<Mapobject*>> objs;
@@ -40,7 +40,7 @@ public:
     ~Adventure();
 
     //function
-    void GameStart();
+    static void GameStart();
     void remove(Mapobject* obj);
     static Adventure* newGame();
     bool IsNullObj(Coord* pos);

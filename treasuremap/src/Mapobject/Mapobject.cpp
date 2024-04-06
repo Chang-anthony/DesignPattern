@@ -23,11 +23,11 @@ bool Mapobject::IsNearBy(Mapobject* other)
 
 Mapobject* Mapobject::GenObj(Adventure* game, std::string target)
 {
-    Coord* newPos = Coord::RandomCoord(game->GetBoundX(), game->GetBoundY());
+    Coord* newPos = Coord::RandomCoord(game->GetBoundX()-1, game->GetBoundY()-1);
     while (true) {
         if(game->IsNullObj(newPos))
             break;
-        newPos = Coord::RandomCoord(game->GetBoundX(), game->GetBoundY());
+        newPos = Coord::RandomCoord(game->GetBoundX()-1, game->GetBoundY()-1);
     }
 
     if(target == "M") {

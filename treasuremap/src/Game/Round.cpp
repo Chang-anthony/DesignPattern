@@ -31,7 +31,7 @@ void Round::render()
     for (int i = 0; i < boundx + 1; i++) {
         std::cout << "# ";
     }
-    std::cout <<  std::endl;
+    std::cout << "#" <<  std::endl;
 
     for (auto m : objs) {
         std::cout << "# ";
@@ -47,7 +47,7 @@ void Round::render()
     for (int i = 0; i < boundx + 1; i++) {
         std::cout << "# ";
     }
-    std::cout << std::endl;
+    std::cout << "#" << std::endl;
 }
 
 void Round::operation()

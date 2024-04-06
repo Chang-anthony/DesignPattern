@@ -26,12 +26,12 @@ void Teleport::action()
     round++;
     if(round > 1) {
         Adventure* game = role->GetGame();
-        Coord* newPos = Coord::RandomCoord(game->GetBoundX(), game->GetBoundY());
+        Coord* newPos = Coord::RandomCoord(game->GetBoundX()-1, game->GetBoundY()-1);
         while (true) {
             if(game->IsNullObj(newPos))
                 break;
             else
-                newPos = Coord::RandomCoord(game->GetBoundX(), game->GetBoundY());
+                newPos = Coord::RandomCoord(game->GetBoundX()-1, game->GetBoundY()-1);
         }
         role->SetCoord(newPos);
         exitState(new NormalState(role));

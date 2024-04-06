@@ -2,8 +2,9 @@
 #include <Invincible.hpp>
 #include <NormalState.hpp>
 #include <Orderless.hpp>
+#include <random>
 
-//TODO: randomMove
+
 Orderless::Orderless(Role* role) : State(role)
 {
 }
@@ -31,6 +32,17 @@ void Orderless::attacked(int damage)
     role->lossHp(damage);
     if(!role->isDead())
         exitState(new Invincible(role));
+}
+
+//TODO: randomMove
+void Orderless::randomMove()
+{
+    std::random_device rd;
+    std::mt19937 gen(rd());
+    std::uniform_int_distribution<> dis(0, 1);
+
+    int random_number = dis(gen);
+    role->orderless(random_number);
 }
 
 std::string Orderless::StateName()

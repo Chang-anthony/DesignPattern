@@ -24,7 +24,6 @@ public:
 
     //override from mapobject
     void injured(int damage);
-    //TODO touched event on adventure game
     void move(int x, int y) override;
 
     int GetHp();
@@ -45,6 +44,7 @@ protected:
     void attack();
     virtual void gainHp(int Hp) = 0;
     virtual bool fullHp() = 0;
+    virtual bool orderless(int random) = 0;
 
     friend class State;
     friend class NormalState;

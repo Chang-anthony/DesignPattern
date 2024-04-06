@@ -30,13 +30,14 @@ void Adventure::GameStart()
     Adventure* newGame = Adventure::newGame();
     
     Round* newRound = newGame->startRound();
-    while (!isEnd())
+    while (!newGame->isEnd())
     {
+        //TODO: start round gen obj
         newRound->run();
         newRound = newGame->startRound();
     }
 
-    GameEnd();
+    newGame->GameEnd();
 }
 
 Round* Adventure::startRound()
@@ -51,7 +52,7 @@ bool Adventure::isEnd()
     bool haveMonster = false;
     for (auto mons: objs) {
         for (auto obj : mons){
-            if(obj->GetSymbol() == "M") {
+            if(obj && obj->GetSymbol() == "M") {
                 haveMonster = true;
                 break;
             }
@@ -132,6 +133,7 @@ std::string Adventure::GetChooseSymbol(int choose)
 
 std::pair<int, int> Adventure::GetDirPos(int choose)
 {
+    std::cout << "in :" << std::endl;
     auto it = dirmap.find(choose);
     std::string dir = it->second;
     return dirTopos.find(dir)->second;
@@ -146,9 +148,10 @@ Mapobject* Adventure::RandomGenObj(Adventure* game, std::string target)
 
 Adventure* Adventure::RandChartorCoord(Adventure* game)
 {
-    Coord* pos = Coord::RandomCoord(game->boundx, game->boundy);
+    Coord* pos = Coord::RandomCoord(game->boundx-1, game->boundy-1);
     if(game->IsNullObj(pos)) {
         game->charactor->SetCoord(pos);
+        game->objs[pos->GetX()][pos->GetY()] = game->charactor;
         return game;
     }
     else
