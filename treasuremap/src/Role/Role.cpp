@@ -38,7 +38,14 @@ bool Role::isDead()
 
 void Role::move(int x, int y)
 {
-    this->SetCoord(this->GetCoord()->GetX() + x, this->GetCoord()->GetY() + y);
+    Coord* newPos = new Coord(this->GetCoord()->GetX() + x, this->GetCoord()->GetY() + y);
+    if(game->IsNullObj(newPos)) {
+        this->SetCoord(this->GetCoord()->GetX() + x, this->GetCoord()->GetY() + y);
+    }
+    else {
+        Mapobject* obj2 = game->GetObjs()[newPos->GetX()][newPos->GetY()];
+        game->touched(this, obj2);
+    }
 }
 
 void Role::attack()

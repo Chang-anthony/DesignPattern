@@ -13,6 +13,7 @@ public:
     State(Role* role);
     ~State();
 
+    virtual std::string StateName() = 0;
     
 protected:
     int round;
@@ -22,9 +23,7 @@ protected:
     virtual void exitState(State* nextState) = 0;
     virtual void action() = 0;
     virtual void attacked(int damage) = 0;
-    virtual std::string StateName() = 0;
-
-
+    
     void SetRound(int round);
     void SetRole(Role* role);
     friend class Role;

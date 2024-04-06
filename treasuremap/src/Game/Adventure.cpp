@@ -5,16 +5,21 @@
 #include <Mapobject.hpp>
 #include <vector>
 #include <Charator.hpp>
+#include <TouchedHandler.hpp>
+#include <RoleObstacleTouched.hpp>
+#include <RoleTreasureTouched.hpp>
+#include <Round.hpp>
 
-//TODO
 
 Adventure::Adventure()
 {
+    this->handler = new RoleObstacleTouched(new RoleTreasureTouched(nullptr));
     this->objs = std::vector<std::vector<Mapobject*>>(boundx, std::vector<Mapobject*>(boundy, nullptr));
 }
 
 Adventure::Adventure(Charator* charator)
-{
+{   
+    this->handler = new RoleObstacleTouched(new RoleTreasureTouched(nullptr));
     this->objs = std::vector<std::vector<Mapobject*>>(boundx, std::vector<Mapobject*>(boundy, nullptr));
     SetCharator(charactor);
 }
@@ -23,8 +28,46 @@ void Adventure::GameStart()
 {
     std::cout << "冒險遊戲開始" << std::endl;
     Adventure* newGame = Adventure::newGame();
-
     
+    Round* newRound = newGame->startRound();
+    while (!isEnd())
+    {
+        newRound->run();
+        newRound = newGame->startRound();
+    }
+
+    GameEnd();
+}
+
+Round* Adventure::startRound()
+{
+    return new Round(this);
+}
+
+bool Adventure::isEnd()
+{
+    int CharatorHp = charactor->GetHp();
+
+    bool haveMonster = false;
+    for (auto mons: objs) {
+        for (auto obj : mons){
+            if(obj->GetSymbol() == "M") {
+                haveMonster = true;
+                break;
+            }
+        }
+    }
+
+    return !((haveMonster) || (CharatorHp > 0));
+}
+
+void Adventure::GameEnd()
+{
+    int CharatorHp = charactor->GetHp();
+    if(CharatorHp > 0)
+        std::cout << "恭喜玩家贏得冒險遊戲的勝利!!!" << std::endl;
+    else
+        std::cout << "非常可惜,這場遊戲玩家以死亡!!!" << std::endl;
 }
 
 Adventure* Adventure::newGame()
@@ -55,6 +98,11 @@ Adventure* Adventure::newGame()
     }
     
     return Adventure::RandChartorCoord(game);
+}
+
+void Adventure::touched(Mapobject* obj1, Mapobject* obj2)
+{
+    this->handler->handle(obj1, obj2);
 }
 
 bool Adventure::IsOutBound(Coord* pos, std::pair<int, int> dpos)

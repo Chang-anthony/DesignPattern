@@ -6,14 +6,18 @@
 #include <string>
 #include <unordered_map>
 
+
 class Mapobject;
 class Round;
 class Charator;
 class Coord;
+class TouchedHandler;
 
 class Adventure
 {
 private:
+    TouchedHandler* handler;
+
     const std::unordered_map<int, std::string> dirmap = {
         {0, "↑"},
         {1, "→"},
@@ -40,6 +44,7 @@ public:
     void remove(Mapobject* obj);
     static Adventure* newGame();
     bool IsNullObj(Coord* pos);
+    void touched(Mapobject* obj1, Mapobject* obj2);
 
     //getter
     std::vector<std::vector<Mapobject*>> GetObjs();
@@ -56,7 +61,6 @@ protected:
     static const int boundx = 10;
     static const int boundy = 10;
 
-    void touched(Mapobject* obj1, Mapobject* obj2);
     bool isEnd();
     Round* startRound();
     void GameEnd();

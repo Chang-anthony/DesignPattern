@@ -6,8 +6,9 @@
 
 class Mapobject;
 class Role;
+class Obstacle;
 
-class RoleObstacleTouched : virtual TouchedHandler
+class RoleObstacleTouched : public TouchedHandler
 {
 private:
     /* data */
@@ -17,16 +18,8 @@ public:
     ~RoleObstacleTouched();
 
     bool match(Mapobject* obj1, Mapobject* obj2) override;
-
+    void dohandle(Mapobject* obj1, Mapobject* obj2) override;
+    void Do(Role* obj1, Obstacle* obj2);
 };
-
-RoleObstacleTouched::RoleObstacleTouched(TouchedHandler* next) : TouchedHandler(next)
-{
-}
-
-RoleObstacleTouched::~RoleObstacleTouched()
-{
-}
-
 
 #endif /* _ROLEOBSTACLETOUCHED_H_ */
