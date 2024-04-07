@@ -13,13 +13,13 @@
 
 Adventure::Adventure()
 {
-    this->handler = new RoleObstacleTouched(new RoleTreasureTouched(nullptr));
+    this->handler = new RoleObstacleTouched(new RoleTreasureTouched(nullptr, this), this);
     this->objs = std::vector<std::vector<Mapobject*>>(boundx, std::vector<Mapobject*>(boundy, nullptr));
 }
 
 Adventure::Adventure(Charator* charator)
 {   
-    this->handler = new RoleObstacleTouched(new RoleTreasureTouched(nullptr));
+    this->handler = new RoleObstacleTouched(new RoleTreasureTouched(nullptr, this), this);
     this->objs = std::vector<std::vector<Mapobject*>>(boundx, std::vector<Mapobject*>(boundy, nullptr));
     SetCharator(charactor);
 }
@@ -103,7 +103,9 @@ Adventure* Adventure::newGame()
 
 void Adventure::touched(Mapobject* obj1, Mapobject* obj2)
 {
-    this->handler->handle(obj1, obj2);
+    if(obj1 && obj2) {
+        this->handler->handle(obj1, obj2);
+    }
 }
 
 bool Adventure::IsOutBound(Coord* pos, std::pair<int, int> dpos)
@@ -131,9 +133,15 @@ std::string Adventure::GetChooseSymbol(int choose)
     return it->second;
 }
 
+void Adventure::refersh(Mapobject* obj, Coord* newPos)
+{
+    objs[obj->GetCoord()->GetX()][obj->GetCoord()->GetY()] = nullptr;
+    obj->SetCoord(newPos);
+    objs[newPos->GetX()][newPos->GetY()] = obj;
+}
+
 std::pair<int, int> Adventure::GetDirPos(int choose)
 {
-    std::cout << "in :" << std::endl;
     auto it = dirmap.find(choose);
     std::string dir = it->second;
     return dirTopos.find(dir)->second;

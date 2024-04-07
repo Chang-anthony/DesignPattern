@@ -59,7 +59,7 @@ void Round::operation()
 
     for (auto m : objs) {
         for (auto obj : m) {
-            if(obj->GetSymbol() == "M") {
+            if(obj && obj->GetSymbol() == "M") {
                 Role* monster = (Role*) obj;
                 monster->action();
             }

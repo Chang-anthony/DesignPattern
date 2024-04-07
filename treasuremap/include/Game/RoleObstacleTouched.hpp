@@ -14,7 +14,7 @@ private:
     /* data */
 public:
     //TODO
-    RoleObstacleTouched(TouchedHandler* next);
+    RoleObstacleTouched(TouchedHandler* next, Adventure* game);
     ~RoleObstacleTouched();
 
     bool match(Mapobject* obj1, Mapobject* obj2) override;

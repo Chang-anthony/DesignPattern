@@ -26,10 +26,10 @@ private:
     };
 
     const std::unordered_map<std::string, std::pair<int, int>> dirTopos = {
-        {"↑", {0, 1}},
-        {"→", {1, 0}},
-        {"↓", {0, -1}},
-        {"←", {-1, 0}},
+        {"↑", {-1, 0}},
+        {"→", {0, 1}},
+        {"↓", {1, 0}},
+        {"←", {0, -1}},
     };
 
     std::vector<std::vector<Mapobject*>> objs;
@@ -45,6 +45,7 @@ public:
     static Adventure* newGame();
     bool IsNullObj(Coord* pos);
     void touched(Mapobject* obj1, Mapobject* obj2);
+    void refersh(Mapobject* obj, Coord* newPos);
 
     //getter
     std::vector<std::vector<Mapobject*>> GetObjs();

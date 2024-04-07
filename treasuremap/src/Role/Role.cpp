@@ -20,9 +20,11 @@ void Role::action()
 
 void Role::lossHp(int damage)
 {
+    std::cout << "lossHp: " << std::endl;
     this->SetHp(this->GetHp() - damage);
     if(isDead()) {
-        this->GetGame()->remove(this);
+        std::cout << "Remove :" << std::endl;
+        game->remove(this);
     }
 }
 
@@ -33,14 +35,16 @@ void Role::injured(int damage)
 
 bool Role::isDead()
 {
+    std::cout << "isDead :" << std::endl;
     return this->GetHp() <= 0;
 }
 
 void Role::move(int x, int y)
 {
+    std::vector<std::vector<Mapobject*>> objs = game->GetObjs();
     Coord* newPos = new Coord(this->GetCoord()->GetX() + x, this->GetCoord()->GetY() + y);
     if(game->IsNullObj(newPos)) {
-        this->SetCoord(this->GetCoord()->GetX() + x, this->GetCoord()->GetY() + y);
+        game->refersh(this, newPos);
     }
     else {
         Mapobject* obj2 = game->GetObjs()[newPos->GetX()][newPos->GetY()];
@@ -65,7 +69,6 @@ State* Role::GetState()
 
 void Role::SetHp(int hp)
 {
-    utils::ValShouldBigger(hp, 0);
     this->Hp = hp;
 }
 

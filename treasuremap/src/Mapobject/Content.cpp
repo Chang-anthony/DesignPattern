@@ -65,5 +65,7 @@ State* content2State(Role* role, Content content)
         return new Stockpile(role);
     case DokoDemoDoor:
         return new Teleport(role);
+    default:
+        return nullptr;
     }
 }

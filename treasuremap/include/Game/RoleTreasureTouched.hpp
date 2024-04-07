@@ -13,7 +13,7 @@ class RoleTreasureTouched : public TouchedHandler
 private:
     /* data */
 public:
-    RoleTreasureTouched(TouchedHandler* next);
+    RoleTreasureTouched(TouchedHandler* next, Adventure* game);
     ~RoleTreasureTouched();
 
     bool match(Mapobject* obj1, Mapobject* obj2) override;

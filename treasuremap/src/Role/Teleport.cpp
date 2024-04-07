@@ -33,7 +33,7 @@ void Teleport::action()
             else
                 newPos = Coord::RandomCoord(game->GetBoundX()-1, game->GetBoundY()-1);
         }
-        role->SetCoord(newPos);
+        game->refersh(role, newPos);
         exitState(new NormalState(role));
     }
 }

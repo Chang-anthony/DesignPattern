@@ -14,7 +14,7 @@ void NormalState::enterState()
 
 void NormalState::exitState(State* nextState)
 {
-    return;
+    role->EnterState(nextState);
 }
 
 void NormalState::action()
