@@ -20,7 +20,14 @@ void Invincible::action()
 {
     role->Do();
     SetRound(round + 1);
-    if(round > 2)
+    if(round >= 2)
+        exitState(new NormalState(role));
+}
+
+void Invincible::test()
+{
+    SetRound(round + 1);
+    if(round >= 2)
         exitState(new NormalState(role));
 }
 

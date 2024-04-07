@@ -18,6 +18,7 @@ public:
     void exitState(State* nextState) override;
     void action() override;
     void attacked(int damage) override;
+    void test() override;
     std::string StateName() override;
 
     friend class Role;

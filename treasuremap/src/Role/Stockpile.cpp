@@ -15,14 +15,21 @@ void Stockpile::enterState()
 
 void Stockpile::exitState(State* state)
 {
-    role->Do();
+    role->EnterState(state);
 }
 
 void Stockpile::action()
 {
     role->Do();
     round++;
-    if(round > 2)
+    if(round >= 2)
+        exitState(new Erupting(role));
+}
+
+void Stockpile::test()
+{
+    round++;
+    if(round >= 2)
         exitState(new Erupting(role));
 }
 

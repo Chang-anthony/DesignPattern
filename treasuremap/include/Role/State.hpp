@@ -23,6 +23,7 @@ protected:
     virtual void exitState(State* nextState) = 0;
     virtual void action() = 0;
     virtual void attacked(int damage) = 0;
+    virtual void test() = 0;
     
     void SetRound(int round);
     void SetRole(Role* role);

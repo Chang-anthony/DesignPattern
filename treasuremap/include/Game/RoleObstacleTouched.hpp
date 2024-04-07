@@ -13,7 +13,6 @@ class RoleObstacleTouched : public TouchedHandler
 private:
     /* data */
 public:
-    //TODO
     RoleObstacleTouched(TouchedHandler* next, Adventure* game);
     ~RoleObstacleTouched();
 

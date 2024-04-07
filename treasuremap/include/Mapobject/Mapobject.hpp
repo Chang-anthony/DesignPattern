@@ -14,7 +14,6 @@ public:
     Mapobject(std::string symbol, Coord* pos, Adventure* game);
     ~Mapobject();
 
-    //TODO:
     bool IsNearBy(Mapobject* other);
     static Mapobject* GenObj(Adventure* game, std::string target);
     virtual void move(int x, int y) = 0;

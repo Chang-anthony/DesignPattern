@@ -24,7 +24,7 @@ void Accelerated::action()
         role->Do();
     }
     round++;
-    if(round > 3)
+    if(round >= 3)
         exitState(new NormalState(role));
 }
 
@@ -32,6 +32,16 @@ void Accelerated::attacked(int damage)
 {
     role->lossHp(damage);
     if(!role->isDead())
+        exitState(new NormalState(role));
+}
+
+void Accelerated::test()
+{
+    for (int i = 0; i < 2; i++) {
+        std::cout << "Do :" << std::endl;
+    }
+    round++;
+    if(round >= 3)
         exitState(new NormalState(role));
 }
 

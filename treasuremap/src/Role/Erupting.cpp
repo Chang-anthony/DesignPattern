@@ -7,7 +7,6 @@
 #include <FullAttack.hpp>
 #include <NormalAttack.hpp>
 
-//TODO
 Erupting::Erupting(Role* role) : State(role)
 {
 }
@@ -29,7 +28,14 @@ void Erupting::action()
     role->Do();
     round++;
 
-    if(round > 3)
+    if(round >= 3)
+        exitState(new Teleport(role));
+}
+
+void Erupting::test()
+{
+    round++;
+    if(round >= 3)
         exitState(new Teleport(role));
 }
 

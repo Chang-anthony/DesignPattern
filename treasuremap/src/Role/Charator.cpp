@@ -30,9 +30,7 @@ void Charator::Do()
                 break;
             else {
                 std::cout << "您不能移動超出圖外!!!" << std::endl;
-                std::cout << "0. 上 \t 1. 右\t 2. 下\t 3. 左" << std::endl;
-                std::cin >> choice;
-                dpos = game->GetDirPos(choice);
+                Do();
             }
         }
         SetSymbol(game->GetChooseSymbol(choice));
@@ -82,7 +80,7 @@ bool Charator::orderless(int random)
             s.insert(updir[randomNumber]);
         }
     }
-    if(flag) 
+    if(flag)
         move(dpos.first, dpos.second);
 
     return flag;

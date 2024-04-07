@@ -22,7 +22,15 @@ void Healing::action()
     role->gainHp(30);
     role->Do();
     round++;
-    if(round > 5 or role->fullHp())
+    if(round >= 5 or role->fullHp())
+        exitState(new NormalState(role));
+}
+
+void Healing::test()
+{
+    role->gainHp(30);
+    round++;
+    if(round >= 5 or role->fullHp())
         exitState(new NormalState(role));
 }
 

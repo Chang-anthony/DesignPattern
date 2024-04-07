@@ -20,6 +20,7 @@ public:
     void action() override;
     void attacked(int damage) override;
     std::string StateName() override;
+    void test() override;
 };
 
 

@@ -17,10 +17,10 @@ public:
     Role(std::string symbol, Coord* pos, Adventure* game);
     ~Role();
 
-    //TODO
     //function
     void lossHp(int damage);
     void action();
+    void test();
 
     //override from mapobject
     void injured(int damage);

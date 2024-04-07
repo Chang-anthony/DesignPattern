@@ -16,14 +16,19 @@ Role::Role(std::string symbol, Coord* pos, Adventure* game): Mapobject(symbol, p
 void Role::action()
 {
     this->state->action();
+    // TODO: have easy to change to test function pattern?
+    // this->state->test();
+}
+
+void Role::test()
+{
+    this->state->test();
 }
 
 void Role::lossHp(int damage)
 {
-    std::cout << "lossHp: " << std::endl;
     this->SetHp(this->GetHp() - damage);
     if(isDead()) {
-        std::cout << "Remove :" << std::endl;
         game->remove(this);
     }
 }
@@ -35,7 +40,6 @@ void Role::injured(int damage)
 
 bool Role::isDead()
 {
-    std::cout << "isDead :" << std::endl;
     return this->GetHp() <= 0;
 }
 

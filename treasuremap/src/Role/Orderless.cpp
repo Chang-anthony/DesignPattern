@@ -23,9 +23,18 @@ void Orderless::action()
 {
     randomMove();
     round++;
-    if(round > 3)
+    if(round >= 3)
         exitState(new NormalState(role));
 }
+
+void Orderless::test()
+{
+    randomMove();
+    round++;
+    if(round >= 3)
+        exitState(new NormalState(role));
+}
+
 
 void Orderless::attacked(int damage)
 {
@@ -34,7 +43,7 @@ void Orderless::attacked(int damage)
         exitState(new Invincible(role));
 }
 
-//TODO: randomMove
+
 void Orderless::randomMove()
 {
     std::random_device rd;
@@ -42,7 +51,7 @@ void Orderless::randomMove()
     std::uniform_int_distribution<> dis(0, 1);
 
     int random_number = dis(gen);
-    role->orderless(random_number);
+    bool succesc = role->orderless(random_number);
 }
 
 std::string Orderless::StateName()

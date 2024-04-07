@@ -17,6 +17,7 @@ public:
     void enterState() override;
     void exitState(State* nextState) override;
     void action() override;
+    void test() override;
     void attacked(int damage) override;
     std::string StateName() override;
 

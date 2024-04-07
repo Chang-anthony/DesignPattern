@@ -5,7 +5,6 @@
 #include <Teleport.hpp>
 #include <Coord.hpp>
 
-//TODO adventure teleport method
 Teleport::Teleport(Role* role) : State(role)
 {
 }
@@ -24,7 +23,24 @@ void Teleport::action()
 {
     role->Do();
     round++;
-    if(round > 1) {
+    if(round >= 1) {
+        Adventure* game = role->GetGame();
+        Coord* newPos = Coord::RandomCoord(game->GetBoundX()-1, game->GetBoundY()-1);
+        while (true) {
+            if(game->IsNullObj(newPos))
+                break;
+            else
+                newPos = Coord::RandomCoord(game->GetBoundX()-1, game->GetBoundY()-1);
+        }
+        game->refersh(role, newPos);
+        exitState(new NormalState(role));
+    }
+}
+
+void Teleport::test()
+{
+    round++;
+    if(round >= 1) {
         Adventure* game = role->GetGame();
         Coord* newPos = Coord::RandomCoord(game->GetBoundX()-1, game->GetBoundY()-1);
         while (true) {

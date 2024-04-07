@@ -46,6 +46,8 @@ public:
     bool IsNullObj(Coord* pos);
     void touched(Mapobject* obj1, Mapobject* obj2);
     void refersh(Mapobject* obj, Coord* newPos);
+    bool isEnd();
+    std::vector<Mapobject*> GetSymbolObjs(std::string symbol);
 
     //getter
     std::vector<std::vector<Mapobject*>> GetObjs();
@@ -57,12 +59,12 @@ public:
     std::string GetChooseSymbol(int choose);
     std::pair<int, int> GetDirPos(int choose);
     bool IsOutBound(Coord* pos, std::pair<int, int> dpos);
+    void SetObj(Mapobject* obj);
 
 protected:
     static const int boundx = 10;
     static const int boundy = 10;
 
-    bool isEnd();
     Round* startRound();
     void GameEnd();
     static Mapobject* RandomGenObj(Adventure* game, std::string target);

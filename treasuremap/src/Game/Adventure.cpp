@@ -9,6 +9,7 @@
 #include <RoleObstacleTouched.hpp>
 #include <RoleTreasureTouched.hpp>
 #include <Round.hpp>
+#include <map>
 
 
 Adventure::Adventure()
@@ -30,9 +31,10 @@ void Adventure::GameStart()
     Adventure* newGame = Adventure::newGame();
     
     Round* newRound = newGame->startRound();
+
+
     while (!newGame->isEnd())
     {
-        //TODO: start round gen obj
         newRound->run();
         newRound = newGame->startRound();
     }
@@ -59,7 +61,7 @@ bool Adventure::isEnd()
         }
     }
 
-    return !((haveMonster) || (CharatorHp > 0));
+    return !(haveMonster) || (CharatorHp <= 0);
 }
 
 void Adventure::GameEnd()
@@ -84,21 +86,44 @@ Adventure* Adventure::newGame()
 
     int randomNumber = distribution(gen);
     std::vector<std::string> targets = {"M", "o", "X"};
+    std::vector<int> targets_count = {5, 5, 5};
+    std::map<int, std::vector<Mapobject*>> store = {
+        {0, std::vector<Mapobject*>()},
+        {1, std::vector<Mapobject*>()},
+        {2, std::vector<Mapobject*>()},
+    };
 
     int count = 0;
+    int gens_count = 0;
     while (count < randomNumber) {
-        int choice = genchoice(gen);
-        
-        Mapobject* gens = Adventure::RandomGenObj(game, targets[choice]);
-        if(game->IsNullObj(gens->GetCoord())) {
-            int x = gens->GetCoord()->GetX();
-            int y = gens->GetCoord()->GetY();
-            game->objs[x][y] = gens;
-            count++;
+        while (gens_count < 3) {
+            Mapobject* gens = Adventure::RandomGenObj(game, targets[gens_count]);
+            if(game->IsNullObj(gens->GetCoord())) {
+                int x = gens->GetCoord()->GetX();
+                int y = gens->GetCoord()->GetY();
+                game->SetObj(gens);
+                count++;
+                store[gens_count].push_back(gens);
+                if(store[gens_count].size() >= targets_count[gens_count])
+                    gens_count++;
+            }
         }
     }
     
     return Adventure::RandChartorCoord(game);
+}
+
+std::vector<Mapobject*> Adventure::GetSymbolObjs(std::string symbol)
+{
+    std::vector<Mapobject*> select;
+    for (auto sym: objs) {
+        for (auto obj : sym) {
+            if(obj && obj->GetSymbol() == symbol)
+                select.push_back(obj);
+        }
+    }
+
+    return select;
 }
 
 void Adventure::touched(Mapobject* obj1, Mapobject* obj2)
@@ -110,6 +135,7 @@ void Adventure::touched(Mapobject* obj1, Mapobject* obj2)
 
 bool Adventure::IsOutBound(Coord* pos, std::pair<int, int> dpos)
 {   
+    //TODO: need to fix up dir bound problem
     int newX = pos->GetX() + dpos.first;
     int newY = pos->GetY() + dpos.second;
 
@@ -175,6 +201,11 @@ bool Adventure::IsNullObj(Coord* pos)
 std::vector<std::vector<Mapobject*>> Adventure::GetObjs()
 {
     return objs;
+}
+
+void Adventure::SetObj(Mapobject* obj)
+{
+    objs[obj->GetCoord()->GetX()][obj->GetCoord()->GetY()] = obj;
 }
 
 Charator* Adventure::GetCharator()

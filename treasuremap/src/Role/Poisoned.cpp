@@ -25,7 +25,17 @@ void Poisoned::action()
     role->Do();
     round++;
 
-    if(round > 3)
+    if(round >= 3)
+        exitState(new NormalState(role));
+}
+
+void Poisoned::test()
+{
+    //中毒效果
+    role->lossHp(15);
+    round++;
+
+    if(round >= 3)
         exitState(new NormalState(role));
 }
 

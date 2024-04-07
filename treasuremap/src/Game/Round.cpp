@@ -5,17 +5,38 @@
 #include <Role.hpp>
 #include <State.hpp>
 #include <utils.h>
+#include <Coord.hpp>
 
 Round::Round(Adventure* game)
 {
     this->game = utils::RequireNonNull(game);
 }
 
+void Round::gen()
+{
+    int count = 1;
+    std::vector<std::string> targets = {"M", "X"};
+    srand(time(nullptr));
+    while (count > 0) {
+        int randomNumber = rand() % targets.size();
+        Mapobject* gens = Mapobject::GenObj(game, targets[randomNumber]);
+            if(game->IsNullObj(gens->GetCoord())) {
+                int x = gens->GetCoord()->GetX();
+                int y = gens->GetCoord()->GetY();
+                game->SetObj(gens);
+                count--;
+            }
+    }
+}
+
 void Round::run()
 {
+    gen();
+
     //render
     Charator* charator = game->GetCharator();
     std::cout << "主角的生命: " << charator->GetHp() << " 狀態: " << charator->GetState()->StateName() << std::endl;
+    std::cout << std::endl;
     render();
 
     //role action

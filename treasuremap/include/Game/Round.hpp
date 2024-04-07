@@ -27,6 +27,7 @@ public:
 protected:
     void render();
     void operation();
+    void gen();
 };
 
 #endif /* _ROUND_H_ */

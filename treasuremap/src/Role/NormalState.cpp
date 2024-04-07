@@ -22,6 +22,11 @@ void NormalState::action()
     role->Do();
 }
 
+void NormalState::test()
+{
+    return;
+}
+
 void NormalState::attacked(int damage)
 {
     role->lossHp(damage);
