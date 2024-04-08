@@ -25,16 +25,21 @@ void Charator::Do()
     }
     else if(choice >= 0 && choice < 4){
         std::pair<int, int> dpos = game->GetDirPos(choice);
-        while (true) {
+        bool flag = false;
+        while (!flag) {
             if(game->IsOutBound(pos, dpos))
-                break;
+                flag = true;
             else {
                 std::cout << "您不能移動超出圖外!!!" << std::endl;
-                Do();
+                break;
             }
         }
-        SetSymbol(game->GetChooseSymbol(choice));
-        move(dpos.first, dpos.second);
+        if(flag) {
+            SetSymbol(game->GetChooseSymbol(choice));
+            move(dpos.first, dpos.second);
+        }
+        else
+            Do();
     }
     else {
         std::cout << "無效操作, 請在選擇一次!!!" << std::endl;
