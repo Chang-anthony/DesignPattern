@@ -13,6 +13,7 @@
 #include <algorithm>
 #include <cmath>
 #include <set>
+#include <regex>
 
 
 class CustomException : public std::exception{
@@ -66,6 +67,16 @@ public:
         if(object == nullptr)
             throw std::invalid_argument("object can't be null.");
         return object;
+    }
+
+    static std::string StrMustMatchRegex(std::string str, std::string pattern)
+    {
+        std::regex regex_pattern(pattern);
+
+        if(std::regex_match(str, regex_pattern))
+            return str;
+        else
+            throw std::invalid_argument(str + " Not match the regex");
     }
 
 
@@ -183,7 +194,7 @@ public:
     }
 
     template<typename T>
-    static void ValShouldBigger(T val,int min)
+    static void ValShouldBigger(T val,T min)
     {
         if(val < min)
         {
@@ -194,7 +205,7 @@ public:
     }
 
     template<typename T>
-    static void ValShouldBe(T val,int min,int max)
+    static void ValShouldBe(T val,T min,T max)
     {
         if(val > max || val < min)
         {
