@@ -47,6 +47,45 @@ std::vector<DiagnosticRules*> DiagnosticRules::defaultrules()
     return rules;
 }
 
+DiagnosticRules* DiagnosticRules::GenRule(std::string name)
+{
+    if (name == "COVID-19") {
+        return new DiagnosticRules(
+            "打噴嚏,頭痛,咳嗽",
+            new Prescription(
+                "清冠一號",
+                "新冠肺炎(專業學名:COVID-19)",
+                "清冠一號",
+                "將相關藥材裝入茶包裡,使用500 mL 溫、熱水沖泡悶煮1~3 分鐘後即可飲用。"
+            )
+        );
+    }
+    else if(name == "Attractive") {
+        return new DiagnosticRules(
+            "打噴嚏,18female",
+            new Prescription(
+                "青春抑制劑",
+                "有人想你了 (專業學名:Attractive)",
+                "假鬢角、臭味",
+                "把假鬢角黏在臉的兩側，讓自己異性緣差一點，自然就不會有人想妳了。"
+            )
+        );
+    }
+    else if(name == "SleepApneaSyndrome") {
+        return new DiagnosticRules(
+            "BMI>26.0,打呼",
+            new Prescription(
+                "打呼抑制劑",
+                "睡眠呼吸中止症(專業學名:SleepApneaSyndrome)",
+                "一捲膠帶",
+                "睡覺時，撕下兩塊膠帶，將兩塊膠帶交錯黏在關閉的嘴巴上，就不會打呼了。"
+            )
+        );
+    }
+    else
+        return nullptr;
+}
+
 std::string DiagnosticRules::GetDisease()
 {
     return disease;

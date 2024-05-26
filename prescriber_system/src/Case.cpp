@@ -2,14 +2,14 @@
 #include <Prescription.hpp>
 #include "utils.h"
 
-Case::Case(std::vector<std::string> symtoms, Prescription* Prescription, float time)
+Case::Case(std::string symtoms, Prescription* Prescription, float time)
 {
     SetSymtoms(symtoms);
     SetPrescription(prescription);
     SetTime(time);
 }
 
-std::vector<std::string> Case::GetSymtoms()
+std::string Case::GetSymtoms()
 {
     return symtoms;
 }
@@ -24,7 +24,7 @@ float Case::GetTime()
     return time;
 }
 
-void Case::SetSymtoms(std::vector<std::string> symtoms)
+void Case::SetSymtoms(std::string symtoms)
 {
     this->symtoms = symtoms;
 }

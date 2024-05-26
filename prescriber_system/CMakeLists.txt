@@ -49,6 +49,15 @@ if(NOT GTEST_FOUND)
     # set_property(TARGET gtest_main PROPERTY FOLDER "gtest")
 endif()
 
+    #jsoncpp
+FetchContent_Declare(
+    jsoncpp
+    GIT_REPOSITORY https://github.com/open-source-parsers/jsoncpp.git
+    GIT_TAG        1.9.5
+)
+
+FetchContent_MakeAvailable(jsoncpp)
+
 # # 確認是否已經包含 Google Test
 # if(TARGET gtest)
 #     message(STATUS "Google Test found!")
@@ -98,6 +107,7 @@ target_include_directories(${PROJECT_NAME}_LIB PUBLIC ${INCS} ${COMM_INCS})
 
 # 链接库到可执行文件
 target_link_libraries(${PROJECT_NAME} PRIVATE ${PROJECT_NAME}_LIB)
+target_link_libraries(${PROJECT_NAME} PRIVATE jsoncpp_lib)
 
 # 設定項目的目標特性，比如 C++ 版本
 # target_compile_features(${PROJECT_NAME} PRIVATE cxx_std_20)

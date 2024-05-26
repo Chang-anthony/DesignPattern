@@ -11,21 +11,21 @@ class Case
 {
 private:
     /* data */
-    std::vector<std::string> symtoms;
+    std::string symtoms;
     Prescription* prescription;
     float time;
 
 public:
-    Case(std::vector<std::string> symtoms, Prescription* Prescription, float time);
+    Case(std::string symtoms, Prescription* Prescription, float time);
     ~Case();
 
     //getter
-    std::vector<std::string> GetSymtoms();
+    std::string GetSymtoms();
     Prescription* GetPrescription();
     float GetTime();
 
     //setter
-    void SetSymtoms(std::vector<std::string> symtoms);
+    void SetSymtoms(std::string symtoms);
     void SetPrescription(Prescription* Prescription);
     void SetTime(float time);
 };

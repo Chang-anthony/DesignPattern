@@ -8,6 +8,9 @@ set(__SRCS
     ${LIB_PATH}/Prescription.cpp
     ${LIB_PATH}/DiagnosticRules.cpp
     ${LIB_PATH}/Prescriber.cpp
+    ${LIB_PATH}/SaveDiagnositic.cpp
+    ${LIB_PATH}/SaveJson.cpp
+    ${LIB_PATH}/SaveCsv.cpp
 )
 
 

@@ -1,6 +1,7 @@
 #include <Database.hpp>
 #include <Patient.hpp>
 #include <Case.hpp>
+#include <json/json.h>
 #include "utils.h"
 
 Database::Database(/* args */)
@@ -30,7 +31,7 @@ void Database::AddPatient(Patient* patient)
 //TODO
 void Database::parser(std::string file)
 {
-
+    
 }
 
 

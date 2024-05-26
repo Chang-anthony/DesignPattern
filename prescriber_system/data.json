@@ -1,0 +1,45 @@
+{
+    "persons": [
+        {
+            "id": "A123456789",
+            "name": "JohnDoe",
+            "gender": "male",
+            "age": 30,
+            "height": 180.5,
+            "weight": 75.0,
+            "case": []
+        },
+        {
+            "id": "B987654321",
+            "name": "JaneSmith",
+            "gender": "female",
+            "age": 28,
+            "height": 165.2,
+            "weight": 60.3,
+            "case": []
+        },
+        {
+            "id": "C192837465",
+            "name": "AliceJohnson",
+            "gender": "female",
+            "age": 35,
+            "height": 170.8,
+            "weight": 68.5,
+            "case": [
+                {
+                    "symtoms": "打噴嚏,頭痛,咳嗽",
+                    "time": 3.0,
+                    "prescription":
+                    [
+                        {
+                            "name":"AliceJohnson",
+                            "potential": "新冠肺炎(專業學名:COVID-19)",
+                            "medicines": "清冠一號",
+                            "usage": "將相關藥材裝入茶包裡,使用500 mL 溫、熱水沖泡悶煮1~3 分鐘後即可飲用。"
+                        }
+                    ]
+                }
+            ]
+        }
+    ]
+}

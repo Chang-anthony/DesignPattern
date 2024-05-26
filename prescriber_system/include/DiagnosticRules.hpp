@@ -21,6 +21,7 @@ public:
     //getter
     std::string GetDisease();
     Prescription* GetPrescription();
+    static DiagnosticRules* GenRule(std::string name);
 
     //setter
     void SetDisease(std::string disease);
