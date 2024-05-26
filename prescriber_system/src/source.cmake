@@ -5,6 +5,9 @@ set(__SRCS
     ${LIB_PATH}/Database.cpp
     ${LIB_PATH}/Patient.cpp
     ${LIB_PATH}/Case.cpp
+    ${LIB_PATH}/Prescription.cpp
+    ${LIB_PATH}/DiagnosticRules.cpp
+    ${LIB_PATH}/Prescriber.cpp
 )
 
 

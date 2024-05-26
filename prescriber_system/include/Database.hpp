@@ -8,6 +8,7 @@
 #include <string>
 
 class Patient;
+class Case;
 
 class Database
 {
@@ -18,10 +19,12 @@ public:
     Database(/* args */);
     ~Database();
 
+    void AddCaseById(std::string id, Case* newCase);
     void AddPatient(Patient* patient);
     static void parser(std::string file);
 
     //getter
+    Patient* GetPatientByid(std::string id);
     std::map<std::string, Patient*> GetData();
 
     //setter
