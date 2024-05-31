@@ -33,6 +33,7 @@ public:
     int GetAge();
     float GetHeight();
     float GetWeight();
+    std::vector<Case*> GetCases();
 
     //setter
     void SetId(std::string id);
@@ -41,6 +42,7 @@ public:
     void SetAge(int age);
     void SetHeight(float height);
     void SetWeight(float weight);
+    void SetCases(std::vector<Case*> cases);
 };
 
 #endif /* _PATIENT_H_ */

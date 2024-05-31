@@ -6,9 +6,11 @@
 #include <vector>
 #include <map>
 #include <string>
+#include <json/json.h>
 
 class Patient;
 class Case;
+class Prescription;
 
 class Database
 {
@@ -21,7 +23,7 @@ public:
 
     void AddCaseById(std::string id, Case* newCase);
     void AddPatient(Patient* patient);
-    static void parser(std::string file);
+    void parser(std::string json);
 
     //getter
     Patient* GetPatientByid(std::string id);
@@ -29,6 +31,10 @@ public:
 
     //setter
     void SetData(std::map<std::string, Patient*> data);
+
+protected:
+    void JsonParser(const Json::Value& person);
+    std::vector<Case*> ParserCase(const Json::Value& Cases);
 };
 
 

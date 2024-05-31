@@ -16,6 +16,7 @@ private:
     std::string medicines;
     std::string usage;
 public:
+    Prescription();
     Prescription(std::string name, std::string potential, std::string medicines, std::string usage);
     ~Prescription();
 

@@ -1,6 +1,10 @@
 #include <Prescription.hpp>
 
 
+Prescription::Prescription()
+{
+}
+
 Prescription::Prescription(std::string name, std::string potential, std::string medicines, std::string usage)
 {
     SetName(name);

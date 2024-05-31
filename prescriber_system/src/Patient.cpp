@@ -19,6 +19,11 @@ void Patient::AddCase(Case* newCase)
     cases.push_back(newCase);
 }
 
+std::vector<Case*> Patient::GetCases()
+{
+    return cases;
+}
+
 std::string Patient::GetId()
 {
     return id;
@@ -84,6 +89,11 @@ void Patient::SetWeight(float weight)
 {
     utils::ValShouldBe(weight, (float)1.0, (float)500.0);
     this->weight = weight;
+}
+
+void Patient::SetCases(std::vector<Case*> cases)
+{
+    this->cases = cases;
 }
 
 Patient::~Patient()
