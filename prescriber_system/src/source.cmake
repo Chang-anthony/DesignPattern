@@ -11,6 +11,7 @@ set(__SRCS
     ${LIB_PATH}/SaveDiagnositic.cpp
     ${LIB_PATH}/SaveJson.cpp
     ${LIB_PATH}/SaveCsv.cpp
+    ${LIB_PATH}/PrescriberFacade.cpp
 )
 
 
