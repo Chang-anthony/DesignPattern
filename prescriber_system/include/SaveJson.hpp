@@ -12,7 +12,7 @@ public:
     SaveJson(/* args */);
     ~SaveJson();
 
-    void save(std::string path, std::string id, std::string symptom) override;
+    void save(std::string path, std::string id) override;
 };
 
 #endif /* _SAVEJSON_H_ */

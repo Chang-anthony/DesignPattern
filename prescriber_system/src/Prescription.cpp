@@ -57,6 +57,7 @@ void Prescription::SetUsage(std::string usage)
     this->usage = usage;
 }
 
+
 Prescription::~Prescription()
 {
 }

@@ -11,7 +11,7 @@ public:
     SaveCsv(/* args */);
     ~SaveCsv();
 
-    void save(std::string path, std::string id, std::string symptom) override;
+    void save(std::string path, std::string id) override;
 };
 
 #endif /* _SAVECSV_H_ */

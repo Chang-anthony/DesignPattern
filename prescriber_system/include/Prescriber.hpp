@@ -10,6 +10,9 @@
 class DiagnosticRules;
 class Case;
 class Database;
+class SaveDiagnositic;
+class Prescription;
+class Patient;
 
 class Prescriber
 {
@@ -18,9 +21,10 @@ private:
     std::vector<std::pair<std::string,std::string>> demands;
     std::vector<DiagnosticRules*> rules;
     Database* database;
+    SaveDiagnositic* strategy;
 
 public:
-    Prescriber(Database* database);
+    Prescriber(Database* database, SaveDiagnositic* strategy);
     ~Prescriber();
 
     void AddDemand(std::string id, std::string symptom);
@@ -28,17 +32,20 @@ public:
 
     void diagnosis(std::string id, std::string symptom);
     void parser(std::string file);
-    void save(std::string path, std::string id, std::string symptom);
+    void save(std::string path, std::string id);
     void store(std::string id, Case* newCase);
 
     //getter
     Database* GetDataBase();
+    SaveDiagnositic* GetStrategy();
 
     //setter
     void SetDataBase(Database* database);
+    void SetStrategy(SaveDiagnositic* strategy);
 
 protected:
-    
+    Prescription* dodiagnosis(std::string symptom, Patient* patient);
+
 };
 
 
