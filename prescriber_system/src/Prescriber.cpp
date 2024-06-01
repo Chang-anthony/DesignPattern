@@ -46,9 +46,9 @@ Prescription* Prescriber::dodiagnosis(std::string symptom, Patient* patient)
     return prescription;
 }
 
-void Prescriber::save(std::string path, std::string id)
+void Prescriber::save(std::string path, Patient* patient)
 {
-    strategy->save(path, id);
+    strategy->save(path, patient);
 }
 
 void Prescriber::AddDemand(std::string id, std::string symptom)

@@ -5,6 +5,8 @@
 #include <vector>
 #include <string>
 
+class Patient;
+
 class SaveDiagnositic
 {
 private:
@@ -13,7 +15,7 @@ public:
     SaveDiagnositic(/* args */);
     ~SaveDiagnositic();
 
-    virtual void save(std::string path, std::string id) = 0;
+    virtual void save(std::string path, Patient* id) = 0;
 };
 
 #endif /* _SAVEDIAGNOSITIC_H_ */

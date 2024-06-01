@@ -32,7 +32,7 @@ public:
 
     void diagnosis(std::string id, std::string symptom);
     void parser(std::string file);
-    void save(std::string path, std::string id);
+    void save(std::string path, Patient* id);
     void store(std::string id, Case* newCase);
 
     //getter
@@ -45,7 +45,6 @@ public:
 
 protected:
     Prescription* dodiagnosis(std::string symptom, Patient* patient);
-
 };
 
 

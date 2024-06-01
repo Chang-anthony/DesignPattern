@@ -3,6 +3,8 @@
 
 #include <SaveDiagnositic.hpp>
 
+class Patient;
+
 class SaveCsv : public SaveDiagnositic
 {
 private:
@@ -11,7 +13,8 @@ public:
     SaveCsv(/* args */);
     ~SaveCsv();
 
-    void save(std::string path, std::string id) override;
+    void save(std::string path, Patient* patient) override;
+protected:
 };
 
 #endif /* _SAVECSV_H_ */

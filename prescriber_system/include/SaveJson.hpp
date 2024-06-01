@@ -3,6 +3,7 @@
 
 
 #include <SaveDiagnositic.hpp>
+class Patient;
 
 class SaveJson : public SaveDiagnositic
 {
@@ -12,7 +13,7 @@ public:
     SaveJson(/* args */);
     ~SaveJson();
 
-    void save(std::string path, std::string id) override;
+    void save(std::string path, Patient* id) override;
 };
 
 #endif /* _SAVEJSON_H_ */
