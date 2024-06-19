@@ -2,13 +2,11 @@ cmake_minimum_required(VERSION 3.13)
 set_property(GLOBAL PROPERTY USE_FOLDERS ON)
 set_property(GLOBAL PROPERTY PREDEFINED_TARGETS_FOLDER "cmake")
 
-set(EXECUTABLE_OUTPUT_PATH ${PROJECT_BINARY_DIR}) #set output executable at build file
-
 set(LIB_PATH ${CMAKE_CURRENT_LIST_DIR})
 
 set(CMAKE_CXX_STANDARD 20)
 
-set(GTest Test)
+set(GTest SimpleTest)
 
 set(Sources 
     ExampleTests.cpp
@@ -20,11 +18,17 @@ set(SRCS)
 set(INCS ${CMAKE_CURRENT_LIST_DIR}/libary ${CMAKE_CURRENT_LIST_DIR}/libary/FileIterator)
 list(APPEND SRCS ${__TEST_UTILS__SRCS})
 
+# set(EXECUTABLE_OUTPUT_PATH ${PROJECT_BINARY_DIR}) #set output executable at build file
 
 add_executable(${GTest} ${Sources})
 
 add_library(${GTest}_LIB STATIC
     ${SRCS}
+)
+
+# 设置单个目标的输出目录（可选，通常全局设置已经足够）
+set_target_properties(${GTest} PROPERTIES
+    RUNTIME_OUTPUT_DIRECTORY ${PROJECT_BINARY_DIR}
 )
 
 if(GTEST_FOUND)

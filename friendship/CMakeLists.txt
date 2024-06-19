@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 3.12)
 set_property(GLOBAL PROPERTY USE_FOLDERS ON)
 set_property(GLOBAL PROPERTY PREDEFINED_TARGETS_FOLDER "cmake")
 
-set(EXECUTABLE_OUTPUT_PATH ${PROJECT_BINARY_DIR})
+
 project(FriendShip)
 set(CMAKE_CXX_STANDARD 20)
 
@@ -83,6 +83,7 @@ set(COMM_INCS ${UTILS_INCS} ${__TEST_UTILS_INCS})
 set(COMM_SRCS ${__TEST_UTILS__SRCS})
 # ==================
 
+set(EXECUTABLE_OUTPUT_PATH ${PROJECT_BINARY_DIR})
 
 add_library(${PROJECT_NAME}_LIB STATIC
     ${SRCS}
@@ -108,6 +109,11 @@ target_include_directories(${PROJECT_NAME}_LIB PUBLIC ${INCS} ${COMM_INCS})
 # 链接库到可执行文件
 target_link_libraries(${PROJECT_NAME} PRIVATE ${PROJECT_NAME}_LIB)
 target_link_libraries(${PROJECT_NAME} PRIVATE jsoncpp_lib)
+
+# 设置单个目标的输出目录（可选，通常全局设置已经足够）
+# set_target_properties(${PROJECT_NAME} PROPERTIES
+#     RUNTIME_OUTPUT_DIRECTORY ${PROJECT_BINARY_DIR}
+# )
 
 # 設定項目的目標特性，比如 C++ 版本
 # target_compile_features(${PROJECT_NAME} PRIVATE cxx_std_20)

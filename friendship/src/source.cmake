@@ -4,6 +4,7 @@ set(LIB_PATH ${CMAKE_CURRENT_LIST_DIR})
 set(__SRCS
     ${LIB_PATH}/Relation.cpp
     ${LIB_PATH}/Friends.cpp
+    ${LIB_PATH}/Graph.cpp
 )
 
 

@@ -9,7 +9,7 @@ echo "Executable files in the current directory:"
 # regex="Test"
 # find . -type f -executable -exec grep Test {} \; -exec {} \;
 
-desiredExecutable=Test
+desiredExecutable=SimpleTest
 
 if [ -x "$desiredExecutable" ]; then
     "./$desiredExecutable"

@@ -7,7 +7,7 @@ echo default :%cd%
 echo Executable files in the current directory:
 dir /b *.exe
 
-set desiredExecutable=Test.exe
+set desiredExecutable=SimpleTest.exe
 
 if exist %desiredExecutable% (
     echo Find the executable file "%desiredExecutable%".
