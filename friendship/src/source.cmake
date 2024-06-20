@@ -5,6 +5,8 @@ set(__SRCS
     ${LIB_PATH}/Relation.cpp
     ${LIB_PATH}/Friends.cpp
     ${LIB_PATH}/Graph.cpp
+    ${LIB_PATH}/RelationshipGraph.cpp
+    ${LIB_PATH}/RelationshipAnalyer.cpp
 )
 
 
