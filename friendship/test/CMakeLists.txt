@@ -27,9 +27,9 @@ add_library(${GTest}_LIB STATIC
 )
 
 # 设置单个目标的输出目录（可选，通常全局设置已经足够）
-set_target_properties(${GTest} PROPERTIES
-    RUNTIME_OUTPUT_DIRECTORY ${PROJECT_BINARY_DIR}
-)
+# set_target_properties(${GTest} PROPERTIES
+#     RUNTIME_OUTPUT_DIRECTORY ${PROJECT_BINARY_DIR}
+# )
 
 if(GTEST_FOUND)
     # include(GoogleTest)

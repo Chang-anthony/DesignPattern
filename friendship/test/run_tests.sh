@@ -2,7 +2,7 @@
 cd ..
 cd ..
 
-cd ./build
+cd ./build/bin
 echo "default: $(pwd)"
 echo "Executable files in the current directory:"
 

@@ -1,7 +1,7 @@
 @REM get current bat file path
 cd ..
 cd ..
-cd .\build
+cd .\build\bin
 
 echo default :%cd%
 echo Executable files in the current directory:
