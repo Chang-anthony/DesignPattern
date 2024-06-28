@@ -27,11 +27,11 @@ set(TEST_UTILS_PATH ${CMAKE_CURRENT_LIST_DIR}/test/libary)
 
 # ========================================================
 # GTEST
-find_package(GTEST REQUIRED)
+include(FetchContent)
+find_package(GTest REQUIRED)
 
 if(NOT GTEST_FOUND)
     message(STATUS "Start Fetch Google Test.")
-    include(FetchContent)
     FetchContent_Declare(
         googletest
         URL https://github.com/google/googletest/archive/refs/tags/release-1.11.0.zip

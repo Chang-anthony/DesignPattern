@@ -9,7 +9,7 @@
 
 int main()
 {
-    std::cout << "按下 Enter 鍵已結束遊戲" << std::endl;
+    std::cout << "按下 Enter鍵 已結束遊戲" << std::endl;
     std::system("pause");
     return 0;
 }

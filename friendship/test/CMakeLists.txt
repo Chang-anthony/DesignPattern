@@ -31,14 +31,26 @@ add_library(${GTest}_LIB STATIC
 #     RUNTIME_OUTPUT_DIRECTORY ${PROJECT_BINARY_DIR}
 # )
 
-if(GTEST_FOUND)
-    # include(GoogleTest)
-    target_link_libraries(${GTest} PRIVATE ${PROJECT_NAME}_LIB ${GTest}_LIB ${GTest}_LIB GTest::GTest GTest::Main)
-    target_include_directories(${GTest}_LIB PUBLIC ${BIGTWO_INCS} ${COMM_INCS} ${INCS})
-elseif(NOT GTEST_FOUND)
-    target_link_libraries(${GTest} PRIVATE ${PROJECT_NAME}_LIB ${GTest}_LIB ${GTest}_LIB gtest_main)
+if(APPLE)
+    include_directories(/usr/local/include)
+    find_library(GTEST_LIB gtest /usr/local/lib)
+    find_library(GTEST_MAIN_LIB gtest_main /usr/local/lib)
+endif()
+
+if(GTEST_LIB AND GTEST_MAIN_LIB)
+    message(STATUS "Found Google Test library in /usr/local/lib")
+    set(GTEST_FOUND TRUE)
+    set(GTEST_BOTH_LIBRARIES ${GTEST_LIB} ${GTEST_MAIN_LIB})
+    target_link_libraries(${GTest} PRIVATE ${PROJECT_NAME}_LIB ${GTest}_LIB  ${GTEST_BOTH_LIBRARIES})
+    target_include_directories(${GTest}_LIB PUBLIC ${COMM_INCS} ${INCS})
+else()
+    target_link_libraries(${GTest} PRIVATE ${PROJECT_NAME}_LIB ${GTest}_LIB ${GTest}_LIB gtest_main gtest)
     target_include_directories(${GTest}_LIB PUBLIC ${BIGTWO_INCS} ${COMM_INCS} ${INCS})
 endif()
+
+# target_link_libraries(${GTest} PRIVATE ${PROJECT_NAME}_LIB ${GTest}_LIB ${GTest}_LIB gtest_main gtest)
+# target_include_directories(${GTest}_LIB PUBLIC ${COMM_INCS} ${INCS})
+
 
 # target_include_directories(${PROJECT_NAME}_LIB PUBLIC ${BIGTWO_INCS} ${COMM_INCS})
 # target_link_libraries(${GTest}_LIB PRIVATE ${PROJECT_NAME}_LIB)
@@ -94,9 +106,16 @@ if(GTESTON)
         # # 定義一個自定義目標，用來執行你的自定義命令
         # add_custom_target(RunTests DEPENDS ${GTest})
 
+        # 设置脚本路径
+        set(SCRIPT_PATH "${CMAKE_CURRENT_LIST_DIR}/run_test.sh")
+
         add_custom_target(RunTests
             COMMAND ${CMAKE_COMMAND} -E echo "Build completed. Running execute_process..."
             COMMAND ${CMAKE_COMMAND} -E echo "Your additional commands here..."
+
+            # COMMAND ${CMAKE_COMMAND} -E chmod +x ${SCRIPT_PATH}
+            # COMMENT "Making ${SCRIPT_PATH} executable"
+
             COMMAND ${CMAKE_CURRENT_LIST_DIR}/run_tests.sh
             DEPENDS ${GTest}
             # COMMAND ${CMAKE_CURRENT_SOURCE_DIR}/test/Run/DesignPattern_Test.exe
