@@ -28,7 +28,12 @@ set(TEST_UTILS_PATH ${CMAKE_CURRENT_LIST_DIR}/test/libary)
 # ========================================================
 # GTEST
 include(FetchContent)
-find_package(GTest REQUIRED)
+
+if(APPLE OR UNIX)
+    find_package(Gtest REQUIRED)
+else()
+    find_package(GTEST REQUIRED)
+endif()
 
 if(NOT GTEST_FOUND)
     message(STATUS "Start Fetch Google Test.")
