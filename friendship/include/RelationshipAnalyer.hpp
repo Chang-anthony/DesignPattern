@@ -11,12 +11,16 @@ class RelationshipAnalyer
 {
 private:
     /* data */
+    RelationshipGraph* graph;
 public:
     RelationshipAnalyer(/* args */);
     ~RelationshipAnalyer();
 
-    RelationshipGraph* parser(std::string script);
-    virtual void isMutualFriend(std::string name1, std::string name2) = 0;
+    virtual RelationshipGraph* parser(std::vector<std::string> scripts);
+    virtual std::vector<std::string> isMutualFriend(std::string name1, std::string name2) = 0;
+    virtual bool hasConnection(const std::string& name1, const std::string& name2) = 0;
+
+protected:
 };
 
 

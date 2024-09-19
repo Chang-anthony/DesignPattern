@@ -8,20 +8,22 @@
 class Relation;
 
 class RelationshipGraph {
+
 public:
     RelationshipGraph();
+    RelationshipGraph(std::vector<Relation*> relations);
 
-    virtual bool hasConnection(const std::string& name1, const std::string& name2) = 0;
-    
+    bool hasConnection(const std::string& name1, const std::string& name2);
+    void AddRelation(Relation* relation);
+
     //getter
-    Relation* GetRelation();
-
+    std::vector<Relation*> GetRelation();
     //setter
-    void SetRelation(Relation* relation);
+    void SetRelation(std::vector<Relation*> relations);
 
     ~RelationshipGraph();
 private:
-    Relation* relation;
+    std::vector<Relation*> relations;
 };
 
 

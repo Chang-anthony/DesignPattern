@@ -8,9 +8,11 @@ class RelationshipGraph;
 
 class Graph {
 public:
+    Graph();
     Graph(const std::vector<std::vector<std::string>>& connects);
 
     //TODO: implement this method
+    std::vector<std::string> isMutualFriend(std::string name1, std::string name2);
     bool hasConnection(const std::string& name1, const std::string& name2);
 
     const std::vector<std::vector<std::string>>& GetConnections() const;

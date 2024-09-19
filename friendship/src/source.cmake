@@ -7,6 +7,7 @@ set(__SRCS
     ${LIB_PATH}/Graph.cpp
     ${LIB_PATH}/RelationshipGraph.cpp
     ${LIB_PATH}/RelationshipAnalyer.cpp
+    ${LIB_PATH}/ConnectivityAnalyerAdapter.cpp
 )
 
 
