@@ -7,8 +7,6 @@ RelationshipGraph::RelationshipGraph()
     adapter = new ConnectivityAnalyerAdapter();
 }
 
-
-
 RelationshipGraph::~RelationshipGraph() {
 
 }

@@ -6,13 +6,14 @@
 #include <RelationshipGraph.hpp>
 
 class Relation;
+class Graph;
 
 class ConnectivityAnalyerAdapter : public RelationshipGraph
 {
 private:
     /* data */
 public:
-    ConnectivityAnalyerAdapter(/* args */);
+    ConnectivityAnalyerAdapter();
     ~ConnectivityAnalyerAdapter();
 
     //TODO: implement this method
@@ -23,6 +24,9 @@ public:
 protected:
     std::string Trim(const std::string& str);
     std::pair<std::string, std::vector<std::string>> parseLine(std::string line);
+    std::vector<std::vector<std::string>> ToConnections(std::vector<Relation*> graph);
+
+    Graph* libary;
 };
 
 
