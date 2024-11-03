@@ -3,11 +3,11 @@
 
 #include <iostream>
 #include <vector>
-#include <RelationshipAnalyer.hpp>
+#include <RelationshipGraph.hpp>
 
-class RelationshipGraph;
+class Relation;
 
-class ConnectivityAnalyerAdapter : public RelationshipAnalyer
+class ConnectivityAnalyerAdapter : public RelationshipGraph
 {
 private:
     /* data */
@@ -16,9 +16,9 @@ public:
     ~ConnectivityAnalyerAdapter();
 
     //TODO: implement this method
-    RelationshipGraph* parser(std::vector<std::string> scripts) override;
-    bool hasConnection(const std::string& name1, const std::string& name2) override;
-    std::vector<std::string> isMutualFriend(std::string name1, std::string name2) override;
+    std::vector<Relation*> parser(std::vector<std::string> scripts) override;
+    bool hasConnection(std::vector<Relation*> graph, const std::string& name1, const std::string& name2) override;
+    std::vector<std::string> isMutualFriend(std::vector<Relation*> graph, std::string name1, std::string name2) override;
 
 protected:
     std::string Trim(const std::string& str);

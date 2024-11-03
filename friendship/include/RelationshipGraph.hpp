@@ -6,24 +6,20 @@
 #include <string>
 
 class Relation;
+class ConnectivityAnalyerAdapter;
 
 class RelationshipGraph {
 
 public:
     RelationshipGraph();
-    RelationshipGraph(std::vector<Relation*> relations);
 
-    bool hasConnection(const std::string& name1, const std::string& name2);
-    void AddRelation(Relation* relation);
-
-    //getter
-    std::vector<Relation*> GetRelation();
-    //setter
-    void SetRelation(std::vector<Relation*> relations);
+    virtual bool hasConnection(std::vector<Relation*> graph, const std::string& name1, const std::string& name2) = 0;
+    virtual std::vector<std::string> isMutualFriend(std::vector<Relation*> graph, std::string name1, std::string name2) = 0;
+    virtual std::vector<Relation*> parser(std::vector<std::string> scripts) = 0;
 
     ~RelationshipGraph();
 private:
-    std::vector<Relation*> relations;
+    ConnectivityAnalyerAdapter* adapter;
 };
 
 

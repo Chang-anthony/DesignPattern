@@ -38,9 +38,9 @@ std::pair<std::string, std::vector<std::string>> ConnectivityAnalyerAdapter::par
     return result;
 }
 
-RelationshipGraph* ConnectivityAnalyerAdapter::parser(std::vector<std::string> scripts)
+std::vector<Relation*> ConnectivityAnalyerAdapter::parser(std::vector<std::string> scripts)
 {
-    RelationshipGraph* graph = new RelationshipGraph();
+    std::vector<Relation*> graph = std::vector<Relation*>();
 
     for (auto line : scripts) {
         std::pair<std::string, std::vector<std::string>> result = parseLine(line);
@@ -48,12 +48,23 @@ RelationshipGraph* ConnectivityAnalyerAdapter::parser(std::vector<std::string> s
 
         Friends* friends = new Friends(result.second);
         Relation* relation = new Relation(result.first, friends);
-        graph->AddRelation(relation);
+        graph.push_back(relation);
     }
     
     return graph;
 }
 
+
+//TODO: Need to implement this method by thrid party library Graph
+bool ConnectivityAnalyerAdapter::hasConnection(std::vector<Relation*> graph, const std::string& name1, const std::string& name2)
+{
+    return false;
+}
+
+std::vector<std::string> ConnectivityAnalyerAdapter::isMutualFriend(std::vector<Relation*> graph, std::string name1, std::string name2)
+{
+    return std::vector<std::string>();
+}
 
 ConnectivityAnalyerAdapter::~ConnectivityAnalyerAdapter()
 {
