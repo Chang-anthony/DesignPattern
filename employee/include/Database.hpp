@@ -17,10 +17,10 @@ public:
     ~Database();
 
     virtual Employee* getEmployeeById(int id) = 0;
+    virtual std::vector<Employee*> getSubordinatesById(int id) = 0;
 
 protected:
     std::string fileName;
 };
-
 
 #endif /* _DATABASE_H_ */

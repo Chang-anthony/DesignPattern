@@ -18,9 +18,13 @@ public:
     ~RealDatabase();
 
     Employee* getEmployeeById(int id) override;
+    std::vector<Employee*> getSubordinatesById(int id) override;
+
 protected:
+    std::vector<std::string> lines;
     Employee* readDataByid(int id);
-    std::vector<Employee*> readSubordinates(std::vector<std::string> datas, std::vector<int> subordinatesId);
+    std::vector<Employee*> readSubordinates(std::vector<std::string> datas, std::string subordinates);
+    friend class LazyInitDatabaseProxy;
 };
 
 

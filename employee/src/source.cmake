@@ -5,6 +5,7 @@ set(__SRCS
     ${LIB_PATH}/Employee.cpp
     ${LIB_PATH}/RealEmployee.cpp
     ${LIB_PATH}/Database.cpp
+    ${LIB_PATH}/RealDatabase.cpp
 )
 
 
