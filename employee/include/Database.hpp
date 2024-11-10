@@ -12,12 +12,14 @@ class Database
 {
 private:
     /* data */
-    std::string fileName;
 public:
     Database(std::string fileName);
     ~Database();
 
     virtual Employee* getEmployeeById(int id) = 0;
+
+protected:
+    std::string fileName;
 };
 
 

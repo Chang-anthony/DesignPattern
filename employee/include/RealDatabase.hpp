@@ -20,6 +20,7 @@ public:
     Employee* getEmployeeById(int id) override;
 protected:
     Employee* readDataByid(int id);
+    std::vector<Employee*> readSubordinates(std::vector<std::string> datas, std::vector<int> subordinatesId);
 };
 
 
