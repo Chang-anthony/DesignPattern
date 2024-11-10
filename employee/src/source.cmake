@@ -4,6 +4,7 @@ set(LIB_PATH ${CMAKE_CURRENT_LIST_DIR})
 set(__SRCS
     ${LIB_PATH}/Employee.cpp
     ${LIB_PATH}/RealEmployee.cpp
+    ${LIB_PATH}/Database.cpp
 )
 
 
