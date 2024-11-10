@@ -1,8 +1,9 @@
-set(LIB_NAME "PRESCRIBER_SRC")
+set(LIB_NAME "EMPLOYEE_SRC")
 set(LIB_PATH ${CMAKE_CURRENT_LIST_DIR})
 
 set(__SRCS
-
+    ${LIB_PATH}/Employee.cpp
+    ${LIB_PATH}/RealEmployee.cpp
 )
 
 
