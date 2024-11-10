@@ -7,6 +7,7 @@ set(__SRCS
     ${LIB_PATH}/Database.cpp
     ${LIB_PATH}/RealDatabase.cpp
     ${LIB_PATH}/LazyInitDatabaseProxy.cpp
+    ${LIB_PATH}/PasswordProtectProxy.cpp
 )
 
 
