@@ -5,7 +5,7 @@
 #include <set>
 
 
-Logger::Logger(std::string name, Level* level, Layout* layout, std::vector<Exporter*> exporter)
+Logger::Logger(std::string name, Level level, Layout* layout, std::vector<Exporter*> exporter)
 {
     SetExporter(exporter);
     SetLayout(layout);
@@ -18,7 +18,7 @@ Logger::Logger(std::string name, Level* level, Layout* layout, std::vector<Expor
     }
 }
 
-Logger::Logger(Logger* parent, std::string name, Level* level, Layout* layout, std::vector<Exporter*> exporter)
+Logger::Logger(Logger* parent, std::string name, Level level, Layout* layout, std::vector<Exporter*> exporter)
 {
     SetExporter(exporter);
     SetLayout(layout);
@@ -45,9 +45,8 @@ void Logger::SetName(std::string name)
     }
 }
 
-void Logger::SetLevel(Level* level)
+void Logger::SetLevel(Level level)
 {
-    utils::RequireNonNull(level);
     this->level = level;
 }
 
@@ -68,7 +67,7 @@ std::string Logger::GetName()
     return name;
 }
 
-Level* Logger::GetLevel()
+Level Logger::GetLevel()
 {
     return level;
 }

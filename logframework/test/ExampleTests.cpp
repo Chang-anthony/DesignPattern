@@ -3,6 +3,9 @@
 #include <gtest/gtest-spi.h>
 #include <vector>
 #include <fstream>
+#include <Logger.hpp>
+#include <Level.hpp>
+#include <string>
 
 std::vector<std::string> ReadFile(std::string path);
 
@@ -26,6 +29,11 @@ std::vector<std::string> ReadFile(std::string path)
     return lines;
 }
 
+
+TEST(LevelTEST, Level) {
+    Level level = Level::DEBUG;
+    ASSERT_EQ(levelToString[level], "DEBUG");
+}
 
 int main(int argc, char **argv) {
     testing::InitGoogleTest(&argc, argv);

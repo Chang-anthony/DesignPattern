@@ -15,9 +15,9 @@ class Logger
 private:
     /* data */
 public:
-    Logger(std::string name, Level* level, 
+    Logger(std::string name, Level level, 
             Layout* layout, std::vector<Exporter*> exporter);
-    Logger(Logger* parent, std::string name, Level* level, 
+    Logger(Logger* parent, std::string name, Level level, 
             Layout* layout, std::vector<Exporter*> exporter);
     ~Logger();
 
@@ -31,20 +31,20 @@ public:
 
     //getters
     std::string GetName();
-    Level* GetLevel();
+    Level GetLevel();
     Layout* GetLayout();
     std::vector<Exporter*> GetExporter();
 
     //setters
     void SetName(std::string name);
-    void SetLevel(Level* level);
+    void SetLevel(Level level);
     void SetLayout(Layout* layout);
     void SetExporter(std::vector<Exporter*> exporter);
 
 
 protected:
     std::string name;
-    Level* level;
+    Level level;
     Layout* layout;
     std::vector<Exporter*> exporters;
     std::vector<Logger*> child;

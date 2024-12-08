@@ -15,6 +15,9 @@ public:
     ~StandardLayout();
 
     std::string format(std::string message) override;
+
+protected:
+    std::string GetCurrentTime();
 };
 
 
