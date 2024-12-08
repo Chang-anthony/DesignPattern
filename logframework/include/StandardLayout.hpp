@@ -11,7 +11,7 @@ class StandardLayout : public Layout
 private:
     /* data */
 public:
-    StandardLayout(Logger* logger);
+    StandardLayout();
     ~StandardLayout();
 
     std::string format(std::string message) override;

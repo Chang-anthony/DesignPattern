@@ -12,7 +12,7 @@ class Layout
 private:
     /* data */
 public:
-    Layout(Logger *logger);
+    Layout();
     ~Layout();
 
     virtual std::string format(std::string message) = 0;

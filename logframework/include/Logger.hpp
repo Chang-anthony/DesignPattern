@@ -4,9 +4,9 @@
 #include <iostream>
 #include <string>
 #include <vector>
+#include <Level.hpp>
 
 
-class Level;
 class Layout;
 class Exporter;
 

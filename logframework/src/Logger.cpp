@@ -1,6 +1,6 @@
 #include <Logger.hpp>
-#include <Level.hpp>
 #include <Layout.hpp>
+#include <Exporter.hpp>
 #include <utils.h>
 #include <set>
 
@@ -11,6 +11,11 @@ Logger::Logger(std::string name, Level* level, Layout* layout, std::vector<Expor
     SetLayout(layout);
     SetLevel(level);
     SetName(name);
+
+    layout->SetLogger(this);
+    for (auto exp : exporter) {
+        exp->SetLogger(this);
+    }
 }
 
 Logger::Logger(Logger* parent, std::string name, Level* level, Layout* layout, std::vector<Exporter*> exporter)
@@ -20,6 +25,10 @@ Logger::Logger(Logger* parent, std::string name, Level* level, Layout* layout, s
     SetLevel(level);
     SetName(name);
     parent->child.push_back(this);
+    layout->SetLogger(this);
+    for (auto exp : exporter) {
+        exp->SetLogger(this);
+    }
 }
 
 void Logger::SetName(std::string name)

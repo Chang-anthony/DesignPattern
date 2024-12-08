@@ -1,6 +1,6 @@
 #include <StandardLayout.hpp>
 
-StandardLayout::StandardLayout(Logger* logger) : Layout(logger)
+StandardLayout::StandardLayout() : Layout()
 {
 }
 
