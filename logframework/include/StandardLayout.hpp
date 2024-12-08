@@ -1,0 +1,21 @@
+#ifndef _STANDARDLAYOUT_H_
+#define _STANDARDLAYOUT_H_
+
+#include <iostream>
+#include <Layout.hpp>
+
+class Logger;
+
+class StandardLayout : public Layout
+{
+private:
+    /* data */
+public:
+    StandardLayout(Logger* logger);
+    ~StandardLayout();
+
+    std::string format(std::string message) override;
+};
+
+
+#endif /* _STANDARDLAYOUT_H_ */
