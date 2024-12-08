@@ -16,9 +16,9 @@ private:
     /* data */
 public:
     Logger(std::string name, Level level, 
-            Layout* layout, std::vector<Exporter*> exporter);
+            Layout* layout, Exporter* exporter);
     Logger(Logger* parent, std::string name, Level level, 
-            Layout* layout, std::vector<Exporter*> exporter);
+            Layout* layout, Exporter* exporter);
     ~Logger();
 
     //TODO: Implement the log methods
@@ -27,26 +27,26 @@ public:
     void info(std::string message);
     void warn(std::string message);
     void error(std::string message);
-    bool CheckThreshold(Level* level);
+    bool CheckThreshold(Level level);
 
     //getters
     std::string GetName();
     Level GetLevel();
     Layout* GetLayout();
-    std::vector<Exporter*> GetExporter();
+    Exporter* GetExporter();
 
     //setters
     void SetName(std::string name);
     void SetLevel(Level level);
     void SetLayout(Layout* layout);
-    void SetExporter(std::vector<Exporter*> exporter);
+    void SetExporter(Exporter* exporter);
 
 
 protected:
     std::string name;
     Level level;
     Layout* layout;
-    std::vector<Exporter*> exporters;
+    Exporter* exporter;
     std::vector<Logger*> child;
 };
 

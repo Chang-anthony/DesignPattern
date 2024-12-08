@@ -7,8 +7,8 @@
 
 enum Level {
     TRACE = 0,
-    DEBUG = 1,
-    INFO = 2,
+    INFO = 1,
+    DEBUG = 2,
     WARN = 3,
     ERROR = 4,
 };
