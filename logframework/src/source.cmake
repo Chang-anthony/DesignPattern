@@ -3,6 +3,7 @@ set(LIB_PATH ${CMAKE_CURRENT_LIST_DIR})
 
 set(__SRCS
     ${LIB_PATH}/Layout.cpp
+    ${LIB_PATH}/StandardLayout.cpp
 )
 
 
