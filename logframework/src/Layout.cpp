@@ -1,10 +1,9 @@
 #include "Layout.hpp"
+#include <Logger.hpp>
 #include <utils.h>
 
-//TODO: implement Logger class
-Layout::Layout(Logger* logger)
+Layout::Layout()
 {
-    SetLogger(logger);
 }
 
 Logger* Layout::GetLogger()

@@ -1,4 +1,5 @@
 #include <StandardLayout.hpp>
+#include <Logger.hpp>
 
 StandardLayout::StandardLayout() : Layout()
 {

@@ -6,6 +6,9 @@ set(__SRCS
     ${LIB_PATH}/StandardLayout.cpp
     ${LIB_PATH}/Logger.cpp
     ${LIB_PATH}/Exporter.cpp
+    ${LIB_PATH}/ConsoleExporter.cpp
+    ${LIB_PATH}/FileExporter.cpp
+    ${LIB_PATH}/CompositeExporter.cpp
 )
 
 
