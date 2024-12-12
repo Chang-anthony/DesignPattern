@@ -7,6 +7,7 @@ Log::Log(std::string name, Level level, Layout* layout, Exporter* exporter): Log
 
 Log::Log(Log* parent, std::string name, Level level, Layout* layout, Exporter* exporter): Logger(name, level, layout, exporter)
 {
+    this->parent = parent;
     parent->child.push_back(this);
 }
 
