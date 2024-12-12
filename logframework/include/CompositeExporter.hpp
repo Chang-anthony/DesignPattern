@@ -16,6 +16,7 @@ public:
     ~CompositeExporter();
 
     void output(std::string message) override;
+    void SetLogger(Logger* logger) override;
     void SetExporters(std::vector<Exporter*> exporters);
 };
 

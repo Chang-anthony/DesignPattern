@@ -16,7 +16,7 @@ public:
 
     virtual void output(std::string message) = 0;
 
-    void SetLogger(Logger* logger);
+    virtual void SetLogger(Logger* logger);
     Logger* GetLogger();
 
 protected:

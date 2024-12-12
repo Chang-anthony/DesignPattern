@@ -6,6 +6,14 @@ CompositeExporter::CompositeExporter(std::vector<Exporter*> exporters) : Exporte
     SetExporters(exporters);
 }
 
+void CompositeExporter::SetLogger(Logger* logger)
+{
+    Exporter::SetLogger(logger);
+    for (auto exporter : exporters) {
+        exporter->SetLogger(logger);
+    }
+}
+
 void CompositeExporter::output(std::string message)
 {
     for (auto exporter : exporters) {
