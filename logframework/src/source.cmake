@@ -9,6 +9,8 @@ set(__SRCS
     ${LIB_PATH}/ConsoleExporter.cpp
     ${LIB_PATH}/FileExporter.cpp
     ${LIB_PATH}/CompositeExporter.cpp
+    ${LIB_PATH}/Log.cpp
+    ${LIB_PATH}/Level.cpp
 )
 
 

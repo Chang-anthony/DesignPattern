@@ -5,6 +5,7 @@
 #include <ctime>
 #include <iostream>
 #include <sstream>
+#include <Level.hpp>
 
 StandardLayout::StandardLayout() : Layout()
 {

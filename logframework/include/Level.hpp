@@ -13,20 +13,7 @@ enum Level {
     ERROR = 4,
 };
 
-std::map<std::string, Level> stringToLevel = {
-    {"TRACE", TRACE},
-    {"DEBUG", DEBUG},
-    {"INFO", INFO},
-    {"WARN", WARN},
-    {"ERROR", ERROR},
-};
-
-std::map<Level, std::string> levelToString = {
-    {TRACE, "TRACE"},
-    {DEBUG, "DEBUG"},
-    {INFO, "INFO"},
-    {WARN, "WARN"},
-    {ERROR, "ERROR"},
-};
+extern std::map<std::string, Level> stringToLevel;
+extern std::map<Level, std::string> levelToString;
 
 #endif /* _LEVEL_H_ */

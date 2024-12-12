@@ -9,6 +9,7 @@
 
 class Layout;
 class Exporter;
+class Log;
 
 class Logger
 {
@@ -17,11 +18,8 @@ private:
 public:
     Logger(std::string name, Level level, 
             Layout* layout, Exporter* exporter);
-    Logger(Logger* parent, std::string name, Level level, 
-            Layout* layout, Exporter* exporter);
     ~Logger();
 
-    //TODO: Implement the log methods
     void trace(std::string message);
     void debug(std::string message);
     void info(std::string message);
@@ -47,7 +45,7 @@ protected:
     Level level;
     Layout* layout;
     Exporter* exporter;
-    std::vector<Logger*> child;
+    Log* parent;
 };
 
 

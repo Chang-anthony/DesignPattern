@@ -1,6 +1,7 @@
 #include <Logger.hpp>
 #include <Layout.hpp>
 #include <Exporter.hpp>
+#include <Log.hpp>
 #include <utils.h>
 #include <set>
 
@@ -12,17 +13,6 @@ Logger::Logger(std::string name, Level level, Layout* layout, Exporter* exporter
     SetLevel(level);
     SetName(name);
 
-    layout->SetLogger(this);
-    exporter->SetLogger(this);
-}
-
-Logger::Logger(Logger* parent, std::string name, Level level, Layout* layout, Exporter* exporter)
-{
-    SetExporter(exporter);
-    SetLayout(layout);
-    SetLevel(level);
-    SetName(name);
-    parent->child.push_back(this);
     layout->SetLogger(this);
     exporter->SetLogger(this);
 }
@@ -71,9 +61,6 @@ bool Logger::CheckThreshold(Level level)
 void Logger::SetName(std::string name)
 {
     std::set<std::string> names;
-    for (auto logger : child) {
-        names.insert(logger->name);
-    }
 
     if (names.find(name) != names.end()) {
         throw std::invalid_argument("Name already exists");
