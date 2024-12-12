@@ -28,7 +28,11 @@ std::string StandardLayout::GetCurrentTime()
     auto now_ms = std::chrono::duration_cast<std::chrono::milliseconds>(now.time_since_epoch()) % 1000;
 
     std::tm local_tm;
-    localtime_r(&now_time_t, &local_tm);
+    #ifdef _WIN32
+        localtime_s(&local_tm, &now_time_t);
+    #else
+        localtime_r(&now_time_t, &local_tm);
+    #endif
 
     std::ostringstream oss;
     oss << std::put_time(&local_tm, "%Y-%m-%d %H:%M:%S") << "." 
