@@ -3,8 +3,7 @@
 
 #include <vector>
 #include <string>
-
-class RelationshipGraph;
+#include <set>
 
 class Graph {
 public:
@@ -21,6 +20,8 @@ public:
     ~Graph();
 private:
     std::vector<std::vector<std::string>> connections;
+
+    bool dfs(const std::string& name1, const std::string& name2, std::set<std::string>& visited);
 };
 
 #endif /* _GRAPH_H_ */

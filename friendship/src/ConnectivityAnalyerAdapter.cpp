@@ -5,10 +5,14 @@
 #include <iostream>
 #include <sstream>
 #include <map>
+#include <Graph.hpp>
+#include <utils.h>
 
+Graph* lib = new Graph();
 
-ConnectivityAnalyerAdapter::ConnectivityAnalyerAdapter(/* args */)
+ConnectivityAnalyerAdapter::ConnectivityAnalyerAdapter()
 {
+    this->libary = lib;
 }
 
 
@@ -58,12 +62,31 @@ std::vector<Relation*> ConnectivityAnalyerAdapter::parser(std::vector<std::strin
 //TODO: Need to implement this method by thrid party library Graph
 bool ConnectivityAnalyerAdapter::hasConnection(std::vector<Relation*> graph, const std::string& name1, const std::string& name2)
 {
-    return false;
+    std::vector<std::vector<std::string>> connections = ToConnections(graph);
+    libary->SetConnections(connections);
+    return this->libary->hasConnection(name1, name2);
 }
+
 
 std::vector<std::string> ConnectivityAnalyerAdapter::isMutualFriend(std::vector<Relation*> graph, std::string name1, std::string name2)
 {
-    return std::vector<std::string>();
+    std::vector<std::vector<std::string>> connections = ToConnections(graph);
+    libary->SetConnections(connections);
+    return this->libary->isMutualFriend(name1, name2);
+}
+
+std::vector<std::vector<std::string>> ConnectivityAnalyerAdapter::ToConnections(std::vector<Relation*> graph)
+{
+    std::vector<std::vector<std::string>> connections;
+
+    for (auto relation : graph) {
+        for (auto m: relation->GetRelations()) {
+            connections.push_back({m.first});
+            connections.back().insert(connections.back().end(), m.second->GetFriends().begin(), m.second->GetFriends().end());
+        }
+    }
+
+    return connections;
 }
 
 ConnectivityAnalyerAdapter::~ConnectivityAnalyerAdapter()
