@@ -7,6 +7,12 @@
 #include <vector>
 #include <fstream>
 #include <Skill.hpp>
+#include <BasicAttack.hpp>
+#include <Poison.hpp>
+#include <Waterball.hpp>
+#include <Fireball.hpp>
+#include <SelfHealing.hpp>
+
 
 
 int main()

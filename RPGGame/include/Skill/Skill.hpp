@@ -5,6 +5,11 @@
 #include <vector>
 #include <iostream>
 
+// Macro definitions
+#define TARGET_ENEMY_ALL -1
+#define TARGET_FRIEND_SELF 0
+#define TARGET_FRIEND_ALL -1 // Target all friends
+
 class Role;
 
 class Skill
