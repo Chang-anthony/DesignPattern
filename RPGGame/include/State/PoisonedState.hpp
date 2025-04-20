@@ -1,5 +1,5 @@
-#ifndef POISONEDSTATE_HPP
-#define POISONEDSTATE_HPP
+#ifndef _POISONEDSTATE_H_
+#define _POISONEDSTATE_H_
 
 #include "State.hpp"
 #include <iostream>
@@ -12,4 +12,4 @@ public:
     void decision() override;
 };
 
-#endif // POISONEDSTATE_HPP
+#endif /* _POISONEDSTATE_H_ */

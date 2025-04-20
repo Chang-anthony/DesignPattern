@@ -4,6 +4,9 @@
 
 State::State() : round(0), role(nullptr) {} // Default constructor
 
+State::State(Role* role) :
+    round(0), role(utils::RequireNonNull(role)) {} // Constructor with Role parameter
+
 State::~State() {}
 
 int State::getRound() const {
