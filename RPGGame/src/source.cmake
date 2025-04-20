@@ -15,6 +15,9 @@ list(APPEND __SRCS ${LIB_SRCS})
 
 include(${LIB_PATH}/State/state.cmake)
 list(APPEND __SRCS ${LIB_SRCS})
+
+include(${LIB_PATH}/Game/game.cmake)
+list(APPEND __SRCS ${LIB_SRCS})
 # include(${LIB_PATH}/Mapobject/mapobject.cmake)
 # list(APPEND __SRCS ${LIB_SRCS})
 # message("${LIB_PATH}")
