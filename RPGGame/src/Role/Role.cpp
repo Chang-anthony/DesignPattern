@@ -1,15 +1,17 @@
 #include "Role.hpp"
 #include "Skill.hpp"
 #include "SkillObserver.hpp"
+#include "../State/State.hpp"
+#include "../State/NormalState.hpp"
 #include <iostream>
 #include "../utils/utils.h"
 
 //TODO: Implement the State class and its methods
 Role::Role(int hp, int mp, int str, const std::string& name)
-    : hp(hp), mp(mp), str(str), name(name), state(nullptr) {}
+    : hp(hp), mp(mp), str(str), name(name), state(new NormalState()) {} // Default state is NormalState
 
 Role::Role(int hp, int mp, int str, const std::string& name, const std::vector<Skill*>& skills)
-    : hp(hp), mp(mp), str(str), name(name), state(nullptr), skills(skills) {}
+    : hp(hp), mp(mp), str(str), name(name), state(new NormalState()), skills(skills) {} // Default state is NormalState
 
 Role::~Role() {
     delete state;
@@ -38,16 +40,12 @@ bool Role::checkActionLossMp(int mpCost) {
 }
 
 void Role::setState(State* newState) {
+    if (state) {
+        state->exitState();
+        delete state;
+    }
     state = utils::RequireNonNull(newState);
-    // Uncomment and modify the following lines if state transitions are needed
-    // if (state) {
-    //     state->exitState();
-    //     delete state;
-    // }
-    // state = newState;
-    // if (state) {
-    //     state->enterState();
-    // }
+    state->entryState(newState);
 }
 
 State* Role::getState() const {

@@ -4,8 +4,8 @@
 #include <string>
 #include <vector>
 #include "../Observer/SkillObserver.hpp"
+#include "../State/State.hpp" // Include State header
 
-class State; // Forward declaration
 class Skill; // Forward declaration
 
 class Role {
@@ -14,7 +14,7 @@ private:
     int mp;
     int str;
     std::string name;
-    State* state;
+    State* state; // One-to-one association with State
     std::vector<Skill*> skills;
     std::vector<SkillObserver*> observers; // Association with SkillObserver
 
