@@ -1,4 +1,4 @@
-set(__LIB_NAME "Skill")
+set(__LIB_NAME "Role")
 set(__LIB_PATH ${CMAKE_CURRENT_LIST_DIR})
 
 file(GLOB LIB_SRCS

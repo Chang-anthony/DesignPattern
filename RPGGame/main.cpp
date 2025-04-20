@@ -12,6 +12,7 @@
 #include <Waterball.hpp>
 #include <Fireball.hpp>
 #include <SelfHealing.hpp>
+#include <Role.hpp>
 
 
 

@@ -6,6 +6,9 @@ set(__SRCS
 
 include(${LIB_PATH}/Skill/skill.cmake)
 list(APPEND __SRCS ${LIB_SRCS})
+
+include(${LIB_PATH}/Role/role.cmake)
+list(APPEND __SRCS ${LIB_SRCS})
 # include(${LIB_PATH}/Mapobject/mapobject.cmake)
 # list(APPEND __SRCS ${LIB_SRCS})
 # message("${LIB_PATH}")
