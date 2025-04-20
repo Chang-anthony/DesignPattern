@@ -3,6 +3,7 @@
 
 #include <string>
 #include <vector>
+#include "../Observer/SkillObserver.hpp"
 
 class State; // Forward declaration
 class Skill; // Forward declaration
@@ -15,6 +16,7 @@ private:
     std::string name;
     State* state;
     std::vector<Skill*> skills;
+    std::vector<SkillObserver*> observers; // Association with SkillObserver
 
 public:
     Role(int hp, int mp, int str, const std::string& name);
@@ -32,6 +34,10 @@ public:
     int getMp() const;
     int getStr() const;
     const std::string& getName() const;
+
+    void addObserver(SkillObserver* observer);
+    void removeObserver(SkillObserver* observer);
+    void notifyObservers();
 };
 
 #endif // ROLE_HPP

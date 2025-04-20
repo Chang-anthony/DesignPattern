@@ -1,8 +1,8 @@
 #include "Role.hpp"
-#include "State.hpp"
 #include "Skill.hpp"
+#include "SkillObserver.hpp"
 #include <iostream>
-#include <utils/utils.h>
+#include "../utils/utils.h"
 
 //TODO: Implement the State class and its methods
 Role::Role(int hp, int mp, int str, const std::string& name)
@@ -77,4 +77,19 @@ int Role::getStr() const {
 
 const std::string& Role::getName() const {
     return name;
+}
+
+void Role::addObserver(SkillObserver* observer) {
+    utils::RequireNonNull(observer);
+    observers.push_back(observer);
+}
+
+void Role::removeObserver(SkillObserver* observer) {
+    observers = utils::RemoveObjectFromVector(observers, observer);
+}
+
+void Role::notifyObservers() {
+    for (SkillObserver* observer : observers) {
+        observer->UntilDie();
+    }
 }
