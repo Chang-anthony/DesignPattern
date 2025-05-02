@@ -7,6 +7,7 @@ set(__INCS
     ${LIB_INC_PATH}/Observer
     ${LIB_INC_PATH}/State
     ${LIB_INC_PATH}/Game
+    ${LIB_INC_PATH}/OnePunchHandler
 )
 
 # GLOB 透過cmake 語法 搜尋 path 底下的 *hpp file
