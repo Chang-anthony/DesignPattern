@@ -1,7 +1,6 @@
 #include "NormalState.hpp"
 
 NormalState::NormalState() : State() {
-    setRole(nullptr);
     name = "NormalState";
 }
 

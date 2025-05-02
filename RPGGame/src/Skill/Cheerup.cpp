@@ -4,7 +4,7 @@
 #include "CheerupedState.hpp"
 #include "Role.hpp"
 
-Cheerup::Cheerup() {
+Cheerup::Cheerup() : Skill() {
     setName("Cheerup");
     setMp(100);
     setTargetEnemy(0);

@@ -11,7 +11,6 @@ OnePunchHandler::OnePunchHandler(OnePunchHandler* nextHandler) {
 OnePunchHandler::~OnePunchHandler() {}
 
 void OnePunchHandler::setNext(OnePunchHandler* nextHandler) {
-    utils::RequireNonNull(nextHandler);
     next = nextHandler;
 }
 

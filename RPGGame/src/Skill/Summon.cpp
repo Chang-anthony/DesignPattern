@@ -6,7 +6,7 @@
 #include "Slime.hpp"
 #include "Troop.hpp"
 
-Summon::Summon() {
+Summon::Summon()  : Skill() {
     setName("Summon");
     setMp(150);
     setTargetEnemy(0);

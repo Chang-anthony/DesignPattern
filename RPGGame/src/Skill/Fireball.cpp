@@ -2,7 +2,7 @@
 #include <iostream>
 #include "Role.hpp"
 
-Fireball::Fireball() {
+Fireball::Fireball()  : Skill(){
     setName("Fireball");
     setMp(50);
     setTargetEnemy(TARGET_ENEMY_ALL);

@@ -3,7 +3,7 @@
 #include "Role.hpp"
 #include "PoisonedState.hpp"
 
-Poison::Poison() {
+Poison::Poison()  : Skill() {
     setName("Poison");
     setMp(80);
     setTargetEnemy(1);

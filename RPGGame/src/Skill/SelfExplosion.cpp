@@ -2,7 +2,7 @@
 #include <iostream>
 #include "Role.hpp"
 
-SelfExplosion::SelfExplosion() {
+SelfExplosion::SelfExplosion() : Skill() {
     setName("SelfExplosion");
     setMp(200);
     setTargetEnemy(TARGET_ENEMY_ALL);

@@ -4,7 +4,7 @@
 #include "PetrochemicaledState.hpp"
 
 
-Petrochemical::Petrochemical()
+Petrochemical::Petrochemical() : Skill()
 {
     setName("Petrochemical");
     setMp(100);

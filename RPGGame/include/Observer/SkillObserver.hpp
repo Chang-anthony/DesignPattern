@@ -14,7 +14,7 @@ public:
     virtual void UntilDie() = 0; // Pure virtual function
 
     void setRole(Role* associatedRole);
-    Role* getRole() const;
+    Role* getRole();
 };
 
 #endif /* _SKILLOBSERVER_H_ */

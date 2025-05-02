@@ -5,7 +5,7 @@
 #include "CurserObserver.hpp"
 #include "SkillObserver.hpp"
 
-Curse::Curse() {
+Curse::Curse() : Skill(){
     setName("Curse");
     setMp(100);
     setTargetEnemy(1);
@@ -13,16 +13,20 @@ Curse::Curse() {
 }
 
 void Curse::attack(Role* actor, std::vector<Role*> targets) {
-
     for (auto target : targets) {
         std::vector<SkillObserver*> observers = target->getObservers();
+        bool flag = false;
+
         for (auto obs : observers) {
-            Role* actor = obs->getRole();
-            if (actor != actor) {
-                //check the observer have this actor
-                CurserObserver* observer = new CurserObserver(actor);
-                target->addObserver(observer);
+            Role* pastActor = obs->getRole();
+            if (actor == pastActor) {
+                flag = true;
+                break;
             }
+        }
+
+        if (!flag) {
+            target->addObserver(new CurserObserver(actor));
         }
     }
 }

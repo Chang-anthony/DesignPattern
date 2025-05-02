@@ -7,14 +7,14 @@
 #include <iostream>
 #include "Role.hpp"
 
-OnePunch::OnePunch()
+OnePunch::OnePunch() : Skill()
 {
     setName("OnePunch");
     setMp(180);
     setTargetEnemy(1); // Target one enemy
     setTargetFriend(0); // No friend targeted
 
-    handler = new NormalHandler(new CheerupHandler(new PoisonPetrochemicalHandler(new HpHandler(nullptr))));
+    handler = new HpHandler(new PoisonPetrochemicalHandler(new CheerupHandler(new NormalHandler(nullptr))));
 }
 
 

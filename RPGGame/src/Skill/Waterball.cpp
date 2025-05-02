@@ -2,7 +2,7 @@
 #include <iostream>
 #include "Role.hpp"
 
-Waterball::Waterball() {
+Waterball::Waterball() : Skill() {
     setName("Waterball");
     setMp(50);
     setTargetEnemy(1);

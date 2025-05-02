@@ -11,6 +11,6 @@ void SkillObserver::setRole(Role* associatedRole) {
     actor = associatedRole;
 }
 
-Role* SkillObserver::getRole() const {
+Role* SkillObserver::getRole() {
     return actor;
 }

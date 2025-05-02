@@ -2,7 +2,7 @@
 #include <iostream>
 #include "Role.hpp"
 
-BasicAttack::BasicAttack()
+BasicAttack::BasicAttack() : Skill()
 {
     setName("BasicAttack");
     setMp(0);

@@ -2,7 +2,7 @@
 #include <iostream>
 #include "Role.hpp"
 
-SelfHealing::SelfHealing() {
+SelfHealing::SelfHealing() : Skill() {
     setName("SelfHealing");
     setMp(50);
     setTargetEnemy(0);

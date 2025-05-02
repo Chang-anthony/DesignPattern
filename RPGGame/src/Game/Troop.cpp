@@ -2,7 +2,7 @@
 #include "Battle.hpp"
 #include "Role.hpp"
 #include <iostream>
-#include "../utils/utils.h"
+#include "utils.h"
 
 Troop::Troop() {}
 
@@ -11,7 +11,20 @@ Troop::~Troop() {}
 void Troop::addRole(Role* role) {
     utils::RequireNonNull(role);
     roles.emplace_back(role);
+    role->setTroop(this); // Set the troop for the role
 }
+
+
+std::vector<Role*> Troop::getRoles() const {
+    return roles;
+}
+
+void Troop::removeRole(Role* role) {
+    utils::RequireNonNull(role);
+    roles = utils::RemoveObjectFromVector(roles, role);
+    role->setTroop(nullptr); // Clear the troop reference in the role
+}
+
 
 bool Troop::Annihilated() const {
     for (const auto& role : roles) {
