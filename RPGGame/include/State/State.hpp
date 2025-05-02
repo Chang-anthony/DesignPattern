@@ -1,6 +1,8 @@
 #ifndef STATE_HPP
 #define STATE_HPP
 
+#include <string>
+
 class Role; // Forward declaration
 
 class State {
@@ -19,6 +21,8 @@ public:
     Role* getRole() const;
     void setRole(Role* role);
 
+    std::string getName() const; // Getter for className
+
     void entryState(State* newState);
     void exitState();
 
@@ -26,6 +30,9 @@ public:
     virtual void decision() = 0; // Pure virtual function
 
     friend class Role; // Add Role as a friend class
+
+protected:
+    std::string name; // Class name
 };
 
 #endif // STATE_HPP

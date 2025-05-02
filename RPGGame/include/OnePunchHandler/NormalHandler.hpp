@@ -4,14 +4,15 @@
 #include "OnePunchHandler.hpp"
 #include <iostream>
 
+
 class NormalHandler : public OnePunchHandler {
 public:
     NormalHandler();
     NormalHandler(OnePunchHandler* nextHandler);
     ~NormalHandler();
 
-    bool match() const override; // Override match function
-    void doHandle() override;    // Override doHandle function
+    bool match(Role* target) override; // Override match function
+    void doHandle(Role* target) override;    // Override doHandle function
 };
 
 #endif // NORMALHANDLER_HPP

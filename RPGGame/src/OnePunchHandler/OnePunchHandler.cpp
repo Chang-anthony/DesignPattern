@@ -1,5 +1,6 @@
 #include "OnePunchHandler.hpp"
-#include "utils/utils.h"
+#include "utils.h"
+#include "Role.hpp"
 
 OnePunchHandler::OnePunchHandler() : next(nullptr) {}
 
@@ -19,15 +20,10 @@ OnePunchHandler* OnePunchHandler::getNext() const {
 }
 
 
-//TODO: need implementation this two function 
-void OnePunchHandler::handle() {
-    if (match()) {
-        doHandle();
+void OnePunchHandler::handle(Role* target) {
+    if (match(target)) {
+        doHandle(target);
     } else if (next) {
-        next->handle();
+        next->handle(target);
     }
-}
-
-bool OnePunchHandler::match() const {
-    return true; // Default implementation, can be overridden by derived classes
 }

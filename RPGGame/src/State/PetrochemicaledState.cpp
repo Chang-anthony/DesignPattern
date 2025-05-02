@@ -1,6 +1,8 @@
 #include "PetrochemicaledState.hpp"
 
-PetrochemicaledState::PetrochemicaledState() : State() {}
+PetrochemicaledState::PetrochemicaledState() : State() {
+    name = "PetrochemicaledState";
+}
 
 PetrochemicaledState::~PetrochemicaledState() {}
 

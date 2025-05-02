@@ -2,10 +2,10 @@
 #include <iostream>
 #include "utils.h"
 
-State::State() : round(0), role(nullptr) {} // Default constructor
+State::State() : round(0), role(nullptr), name("") {} // Default constructor
 
 State::State(Role* role) :
-    round(0), role(utils::RequireNonNull(role)) {} // Constructor with Role parameter
+    round(0), role(utils::RequireNonNull(role)), name("State") {} // Constructor with Role parameter
 
 State::~State() {}
 
@@ -24,6 +24,10 @@ Role* State::getRole() const {
 void State::setRole(Role* role) {
     utils::RequireNonNull(role);
     this->role = role;
+}
+
+std::string State::getName() const {
+    return name;
 }
 
 void State::entryState(State* newState) {

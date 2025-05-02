@@ -16,9 +16,12 @@ OnePunch::OnePunch()
     handler = new NormalHandler(new CheerupHandler(new PoisonPetrochemicalHandler(new HpHandler(nullptr))));
 }
 
+
+//TODO:
 void OnePunch::attack(std::vector<Role*> roles)
 {
-    // TODO: Implement full attack algorithm for OnePunch
-    std::cout << "OnePunch executed on one enemy with 180 MP." << std::endl;
+    for (auto role : roles) {
+        handler->handle(role);
+    }
 }
 

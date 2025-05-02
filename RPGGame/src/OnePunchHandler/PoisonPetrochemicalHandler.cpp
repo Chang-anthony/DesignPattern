@@ -1,4 +1,6 @@
 #include "PoisonPetrochemicalHandler.hpp"
+#include "Role.hpp"
+#include "State.hpp"
 
 PoisonPetrochemicalHandler::PoisonPetrochemicalHandler() {}
 
@@ -7,13 +9,14 @@ PoisonPetrochemicalHandler::PoisonPetrochemicalHandler(OnePunchHandler* nextHand
 
 PoisonPetrochemicalHandler::~PoisonPetrochemicalHandler() {}
 
-bool PoisonPetrochemicalHandler::match() const {
-    // Logic to determine if this handler should handle the request
-    std::cout << "PoisonPetrochemicalHandler: Checking if it matches..." << std::endl;
-    return true; // Default to true for demonstration purposes
+bool PoisonPetrochemicalHandler::match(Role* target) {
+
+    return target->getState()->getName() == "PoisonedState" ||
+           target->getState()->getName() == "PetrochemicaledState";
 }
 
-void PoisonPetrochemicalHandler::doHandle() {
-    // Logic to handle the request
-    std::cout << "PoisonPetrochemicalHandler: Handling the poison or petrochemical state." << std::endl;
+void PoisonPetrochemicalHandler::doHandle(Role* target) {
+    for (size_t i = 0; i < 3; i++) {
+        target->damage(80);
+    }
 }

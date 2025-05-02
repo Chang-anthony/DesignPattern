@@ -1,6 +1,8 @@
 #include "CheerupedState.hpp"
 
-CheerupedState::CheerupedState() : State() {}
+CheerupedState::CheerupedState() : State() {
+    name = "CheerupedState";
+}
 
 CheerupedState::~CheerupedState() {}
 

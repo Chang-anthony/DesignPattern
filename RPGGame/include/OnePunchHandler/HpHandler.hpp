@@ -12,8 +12,8 @@ public:
     HpHandler(OnePunchHandler* nextHandler);
     ~HpHandler();
 
-    bool match() const override; // Override match function
-    void doHandle() override;    // Override doHandle function
+    bool match(Role* target) override; // Override match function
+    void doHandle(Role* target) override;    // Override doHandle function
 };
 
 #endif // HPHANDLER_HPP

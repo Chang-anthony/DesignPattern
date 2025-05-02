@@ -1,6 +1,8 @@
 #include "PoisonedState.hpp"
 
-PoisonedState::PoisonedState() : State() {}
+PoisonedState::PoisonedState() : State() {
+    name = "PoisonedState";
+}
 
 PoisonedState::~PoisonedState() {}
 

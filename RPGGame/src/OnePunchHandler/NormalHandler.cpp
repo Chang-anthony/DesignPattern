@@ -1,4 +1,6 @@
 #include "NormalHandler.hpp"
+#include "Role.hpp"
+#include "State.hpp"
 
 NormalHandler::NormalHandler() {}
 
@@ -7,13 +9,12 @@ NormalHandler::NormalHandler(OnePunchHandler* nextHandler) : OnePunchHandler(nex
 NormalHandler::~NormalHandler() {}
 
 //TODO:
-bool NormalHandler::match() const {
+bool NormalHandler::match(Role* target) {
     // Logic to determine if this handler should handle the request
-    std::cout << "NormalHandler: Checking if it matches..." << std::endl;
-    return true; // Default to true for demonstration purposes
+
+    return target->getState()->getName() == "NormalState";
 }
 
-void NormalHandler::doHandle() {
-    // Logic to handle the request
-    std::cout << "NormalHandler: Handling the request." << std::endl;
+void NormalHandler::doHandle(Role* target) {
+    target->damage(100);
 }
