@@ -1,16 +1,18 @@
 #include "Cheerup.hpp"
 #include <iostream>
+#include "State.hpp"
+#include "CheerupedState.hpp"
+#include "Role.hpp"
 
-Cheerup::Cheerup()
-{
+Cheerup::Cheerup() {
     setName("Cheerup");
     setMp(100);
-    setTargetEnemy(0); // No enemy targeted
-    setTargetFriend(3); // Target 3 friends
+    setTargetEnemy(0);
+    setTargetFriend(3);
 }
 
-void Cheerup::attack(std::vector<Role*> roles)
-{
-    // TODO: Implement full attack algorithm for Cheerup
-    std::cout << "Cheerup executed on 3 allies with 100 MP." << std::endl;
+void Cheerup::attack(Role* actor, std::vector<Role*> targets) {
+    for (auto target : targets) {
+        target->setState(new CheerupedState());
+    }
 }

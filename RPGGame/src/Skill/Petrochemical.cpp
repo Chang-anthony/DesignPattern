@@ -1,5 +1,8 @@
 #include "Petrochemical.hpp"
 #include <iostream>
+#include "Role.hpp"
+#include "PetrochemicaledState.hpp"
+
 
 Petrochemical::Petrochemical()
 {
@@ -9,7 +12,9 @@ Petrochemical::Petrochemical()
     setTargetFriend(0);
 }
 
-void Petrochemical::attack(std::vector<Role*> roles)
+void Petrochemical::attack(Role* actor, std::vector<Role*> targets)
 {
-    std::cout << "Petrochemical executed on one enemy with 100 MP." << std::endl;
+    for (auto target : targets) {
+        target->setState(new PetrochemicaledState());
+    }
 }

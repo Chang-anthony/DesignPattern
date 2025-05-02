@@ -1,16 +1,19 @@
 #include "Poison.hpp"
 #include <iostream>
+#include "Role.hpp"
+#include "PoisonedState.hpp"
 
-Poison::Poison()
-{
+Poison::Poison() {
     setName("Poison");
     setMp(80);
     setTargetEnemy(1);
     setTargetFriend(0);
 }
 
-void Poison::attack(std::vector<Role*> roles)
-{
-    // TODO: Implement full attack algorithm for Poison
-    std::cout << "Poison executed on one enemy with 80 MP." << std::endl;
+void Poison::attack(Role* actor, std::vector<Role*> targets) {
+
+    for (auto target : targets) {  
+        /* code */
+        target->setState(new PoisonedState());
+    }
 }

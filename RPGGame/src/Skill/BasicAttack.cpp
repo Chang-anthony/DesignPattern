@@ -1,5 +1,6 @@
 #include "BasicAttack.hpp"
 #include <iostream>
+#include "Role.hpp"
 
 BasicAttack::BasicAttack()
 {
@@ -9,8 +10,8 @@ BasicAttack::BasicAttack()
     setTargetFriend(0);
 }
 
-//TODO: Implement the attack method
-void BasicAttack::attack(std::vector<Role*> roles)
-{
-    std::cout << "BasicAttack executed on target enemy." << std::endl;
+void BasicAttack::attack(Role* actor, std::vector<Role*> targets) {
+    for (auto role: targets) {
+        role->damage(actor->getStr());
+    }
 }

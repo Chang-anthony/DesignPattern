@@ -73,8 +73,25 @@ int Role::getStr() const {
     return str;
 }
 
+void Role::lossMp(int mpCost) {
+    mp -= mpCost;
+    if (mp < 0) mp = 0;
+}
+
+void Role::gainMp(int mpGain) {
+    mp += mpGain;
+}
+
+void Role::gainHp(int hpGain) {
+    hp += hpGain;
+}
+
 const std::string& Role::getName() const {
     return name;
+}
+
+std::vector<SkillObserver*> Role::getObservers() {
+    return observers;
 }
 
 void Role::addObserver(SkillObserver* observer) {
@@ -90,4 +107,13 @@ void Role::notifyObservers() {
     for (SkillObserver* observer : observers) {
         observer->UntilDie();
     }
+}
+
+void Role::setTroop(Troop* troop) {
+    utils::RequireNonNull(troop);
+    this->troop = troop;
+}
+
+Troop* Role::getTroop() const {
+    return troop;
 }

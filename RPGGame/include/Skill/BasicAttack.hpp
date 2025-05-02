@@ -3,13 +3,15 @@
 
 #include "Skill.hpp"
 
+class Role; // Forward declaration
+
 class BasicAttack : public Skill
 {
 public:
     BasicAttack();
     ~BasicAttack() = default;
 
-    void attack(std::vector<Role*> roles) override;
+    void attack(Role* actor, std::vector<Role*> roles) override;
 };
 
 #endif /* _BASICATTACK_H_ */

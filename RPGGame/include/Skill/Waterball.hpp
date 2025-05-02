@@ -6,11 +6,10 @@
 
 class Role; // Forward declaration
 
-class Waterball : public Skill
-{
+class Waterball : public Skill {
 public:
     Waterball();
-    void attack(std::vector<Role*> roles) override;
+    void attack(Role* actor, std::vector<Role*> targets) override;
 };
 
 #endif // WATERBALL_HPP

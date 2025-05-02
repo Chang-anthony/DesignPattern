@@ -5,11 +5,10 @@ class Role; // Forward declaration
 
 class SkillObserver {
 protected:
-    Role* role; // Association with Role
+    Role* actor; // Association with Role
 
 public:
-    SkillObserver() : role(nullptr) {}
-    SkillObserver(Role* associatedRole);
+    SkillObserver(Role* actor);
     virtual ~SkillObserver() = default;
 
     virtual void UntilDie() = 0; // Pure virtual function

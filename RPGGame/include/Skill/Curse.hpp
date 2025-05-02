@@ -6,11 +6,10 @@
 
 class Role; // Forward declaration
 
-class Curse : public Skill
-{
+class Curse : public Skill {
 public:
     Curse();
-    void attack(std::vector<Role*> roles) override;
+    void attack(Role* actor, std::vector<Role*> targets) override;
 };
 
 #endif // CURSE_HPP

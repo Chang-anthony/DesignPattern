@@ -1,16 +1,18 @@
 #include "SelfExplosion.hpp"
 #include <iostream>
+#include "Role.hpp"
 
-SelfExplosion::SelfExplosion()
-{
+SelfExplosion::SelfExplosion() {
     setName("SelfExplosion");
     setMp(200);
-    setTargetEnemy(TARGET_ENEMY_ALL); // Target all enemies
-    setTargetFriend(TARGET_FRIEND_ALL); // Target all friends
+    setTargetEnemy(TARGET_ENEMY_ALL);
+    setTargetFriend(TARGET_FRIEND_ALL);
 }
 
-void SelfExplosion::attack(std::vector<Role*> roles)
-{
-    // TODO: Implement full attack algorithm for SelfExplosion
-    std::cout << "SelfExplosion executed on all enemies and allies with 200 MP." << std::endl;
+void SelfExplosion::attack(Role* actor, std::vector<Role*> targets) {
+    for (auto target : targets) {
+        /* code */
+        target->damage(150);
+    }
+    actor->damage(actor->getHp()); // Actor self-damage
 }

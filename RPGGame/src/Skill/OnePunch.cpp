@@ -5,6 +5,7 @@
 #include "PoisonPetrochemicalHandler.hpp"
 #include "HpHandler.hpp"
 #include <iostream>
+#include "Role.hpp"
 
 OnePunch::OnePunch()
 {
@@ -17,8 +18,7 @@ OnePunch::OnePunch()
 }
 
 
-//TODO:
-void OnePunch::attack(std::vector<Role*> roles)
+void OnePunch::attack(Role* actor, std::vector<Role*> roles)
 {
     for (auto role : roles) {
         handler->handle(role);

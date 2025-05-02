@@ -1,16 +1,22 @@
 #include "Summon.hpp"
 #include <iostream>
+#include "SkillObserver.hpp"
+#include "Role.hpp"
+#include "SummonObserver.hpp"
+#include "Slime.hpp"
+#include "Troop.hpp"
 
-Summon::Summon()
-{
+Summon::Summon() {
     setName("Summon");
     setMp(150);
-    setTargetEnemy(0); // No enemy targeted
-    setTargetFriend(0); // No friend targeted
+    setTargetEnemy(0);
+    setTargetFriend(0);
 }
 
-void Summon::attack(std::vector<Role*> roles)
-{
-    // TODO: Implement full attack algorithm for Summon
-    std::cout << "Summon executed on all allies with 150 MP." << std::endl;
+void Summon::attack(Role* actor, std::vector<Role*> targets) {
+    Troop* troop = actor->getTroop();
+    Slime* slime = new Slime(100, 0, 50, "Slime");
+    SummonObserver* observer = new SummonObserver(actor);
+    slime->addObserver(observer);
+    troop->addRole(slime);
 }

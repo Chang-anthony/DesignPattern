@@ -10,7 +10,7 @@ class Cheerup : public Skill
 {
 public:
     Cheerup();
-    void attack(std::vector<Role*> roles) override;
+    void attack(Role* actor, std::vector<Role*> targets) override;
 };
 
 #endif /* _CHEERUP_H_ */

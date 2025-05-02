@@ -10,7 +10,7 @@ class Petrochemical : public Skill
 {
 public:
     Petrochemical();
-    void attack(std::vector<Role*> roles) override;
+    void attack(Role* actor, std::vector<Role*> roles) override;
 };
 
 #endif // PETROCHEMICAL_HPP

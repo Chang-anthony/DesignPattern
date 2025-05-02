@@ -3,8 +3,14 @@
 
 #include "SkillObserver.hpp"
 
+class Role; // Forward declaration
 class CurserObserver : public SkillObserver {
+
+private:
+
 public:
+    CurserObserver(Role* actor);
+
     void UntilDie() override;
 };
 

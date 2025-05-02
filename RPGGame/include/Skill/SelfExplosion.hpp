@@ -6,11 +6,10 @@
 
 class Role; // Forward declaration
 
-class SelfExplosion : public Skill
-{
+class SelfExplosion : public Skill {
 public:
     SelfExplosion();
-    void attack(std::vector<Role*> roles) override;
+    void attack(Role* actor, std::vector<Role*> targets) override;
 };
 
 #endif // SELFEXPLOSION_HPP

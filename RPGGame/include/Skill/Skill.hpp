@@ -4,6 +4,7 @@
 #include <string>
 #include <vector>
 #include <iostream>
+#include "../Role/Role.hpp"
 
 // Macro definitions
 #define TARGET_ENEMY_ALL -1
@@ -36,7 +37,8 @@ public:
     void setTargetEnemy(int targetEnemy);
     void setTargetFriend(int targetFriend);
 
-    virtual void attack(std::vector<Role*> roles) = 0;
+    // Update the virtual function to accept two parameters
+    virtual void attack(Role* actor, std::vector<Role*> targets) = 0;
 };
 
 #endif /* _SKILL_H_ */

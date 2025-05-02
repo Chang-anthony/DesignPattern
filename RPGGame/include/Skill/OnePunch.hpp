@@ -11,7 +11,7 @@ class OnePunch : public Skill
 {
 public:
     OnePunch();
-    void attack(std::vector<Role*> roles) override;
+    void attack(Role* actor, std::vector<Role*> roles) override;
 
 protected:
     OnePunchHandler* handler;

@@ -2,15 +2,15 @@
 #include "../Role/Role.hpp"
 #include <utils.h>
 
-SkillObserver::SkillObserver(Role* associatedRole) {
-    setRole(associatedRole);
+SkillObserver::SkillObserver(Role* actor) {
+    setRole(actor);
 }
 
 void SkillObserver::setRole(Role* associatedRole) {
     utils::RequireNonNull(associatedRole);
-    role = associatedRole;
+    actor = associatedRole;
 }
 
 Role* SkillObserver::getRole() const {
-    return role;
+    return actor;
 }

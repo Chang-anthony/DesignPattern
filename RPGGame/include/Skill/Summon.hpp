@@ -6,11 +6,10 @@
 
 class Role; // Forward declaration
 
-class Summon : public Skill
-{
+class Summon : public Skill {
 public:
     Summon();
-    void attack(std::vector<Role*> roles) override;
+    void attack(Role* actor, std::vector<Role*> targets) override;
 };
 
 #endif // SUMMON_HPP

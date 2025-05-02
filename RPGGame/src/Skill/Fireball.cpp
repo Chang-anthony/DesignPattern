@@ -1,15 +1,16 @@
 #include "Fireball.hpp"
 #include <iostream>
+#include "Role.hpp"
 
-Fireball::Fireball()
-{
+Fireball::Fireball() {
     setName("Fireball");
     setMp(50);
     setTargetEnemy(TARGET_ENEMY_ALL);
     setTargetFriend(0);
 }
 
-void Fireball::attack(std::vector<Role*> roles)
-{
-    std::cout << "Fireball executed on all enemies with 50 MP." << std::endl;
+void Fireball::attack(Role* actor, std::vector<Role*> targets) {
+    for (auto target : targets) {
+        target->damage(50); // Example damage value
+    }
 }
