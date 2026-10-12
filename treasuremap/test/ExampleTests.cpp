@@ -16,6 +16,15 @@
 #include <Charator.hpp>
 #include <Coord.hpp>
 #include <Healing.hpp>
+#ifdef _WIN32
+#ifndef WIN32_LEAN_AND_MEAN
+#define WIN32_LEAN_AND_MEAN
+#endif
+#ifndef NOMINMAX
+#define NOMINMAX
+#endif
+#include <windows.h>
+#endif
 
 
 TEST(Poisoned, Poisoned_TEST)
@@ -197,6 +206,10 @@ TEST(Adventure, Adventure_TEST)
 
 
 int main(int argc, char **argv) {
+#ifdef _WIN32
+    // 原始碼是 UTF-8，將 console 輸出改為 UTF-8 才能正確顯示中文
+    SetConsoleOutputCP(CP_UTF8);
+#endif
     testing::InitGoogleTest(&argc, argv);
     
     return RUN_ALL_TESTS();

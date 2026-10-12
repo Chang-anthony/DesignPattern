@@ -11,7 +11,7 @@ set desiredExecutable=Test.exe
 
 if exist %desiredExecutable% (
     echo Find the executable file "%desiredExecutable%".
-    call %desiredExecutable%
+    call .\%desiredExecutable%
 ) else (
     echo The desired executable "%desiredExecutable%" does not exist in the current directory.
 )

@@ -10,7 +10,7 @@ dir /b *.exe
 set desiredExecutable=DesignPattern_Test.exe
 
 if exist %desiredExecutable% (
-    call DesignPattern_Test.exe
+    call .\%desiredExecutable%
 ) else (
     echo The desired executable "%desiredExecutable%" does not exist in the current directory.
 )

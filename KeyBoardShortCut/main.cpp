@@ -12,6 +12,15 @@
 #include "ResetCommand.hpp"
 #include "Tank.hpp"
 #include "Telecom.hpp"
+#ifdef _WIN32
+#ifndef WIN32_LEAN_AND_MEAN
+#define WIN32_LEAN_AND_MEAN
+#endif
+#ifndef NOMINMAX
+#define NOMINMAX
+#endif
+#include <windows.h>
+#endif
 
 void signalHandler(int signum) {
     std::cout << "Interrupt signal (" << signum << ") received.\n";
@@ -22,6 +31,10 @@ void signalHandler(int signum) {
 
 int main()
 {
+#ifdef _WIN32
+    // 原始碼是 UTF-8，將 console 輸出改為 UTF-8 才能正確顯示中文
+    SetConsoleOutputCP(CP_UTF8);
+#endif
     signal(SIGINT, signalHandler);
 
     Tank* tank = new Tank();

@@ -135,10 +135,12 @@ if(GTESTON)
 
         #TODO: need to know why this can run shell file when build Almost completed
         # # 添加自定义目标，该目标依赖于构建完成后运行的自定义命令
+        # 直接執行剛 build 好的 test exe（路徑由 CMake 給，不依賴 cd 與目前目錄）
+        # run_tests.bat 留給手動執行（裡面有 pause，會卡住 build）
         add_custom_target(RunTests
-            COMMAND ${CMAKE_COMMAND} -E echo "Build completed. Running execute_process..."
-            COMMAND ${CMAKE_COMMAND} -E echo "Your additional commands here..."
-            COMMAND ${CMAKE_CURRENT_LIST_DIR}/run_tests.bat
+            COMMAND ${CMAKE_COMMAND} -E echo "Build completed. Running $<TARGET_FILE_NAME:${GTest}>..."
+            COMMAND $<TARGET_FILE:${GTest}>
+            WORKING_DIRECTORY $<TARGET_FILE_DIR:${GTest}>
             DEPENDS ${GTest}
         )
         add_dependencies(${PROJECT_NAME} RunTests)
