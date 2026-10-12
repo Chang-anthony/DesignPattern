@@ -24,6 +24,7 @@ C++ practice projects for object-oriented analysis (OOA) and the classic GoF des
   - [employee](#employee--proxy)
   - [logframework](#logframework--composite--strategy)
   - [RPGGame](#rpggame--state--observer--chain-of-responsibility--strategy)
+- [Diagrams](#diagrams)
 - [Pattern concepts](#pattern-concepts)
 
 ---
@@ -87,6 +88,8 @@ cd test && ./run_tests.sh     # or run_tests.bat on Windows; runs build/Test
 
 ### OOA_Training — object-oriented analysis basics
 
+📐 **Diagrams:** [`OOA_Training/diagrams.md`](OOA_Training/diagrams.md) — class + sequence diagrams
+
 Fifteen small exercises that translate a domain description into classes and relationships before any pattern is used. Each numbered folder is its own CMake project.
 
 ```
@@ -116,6 +119,8 @@ OOA_Training/
 
 ### WaterBallSchool — OOA domain model
 
+📐 **Diagrams:** [`WaterBallSchool/diagrams.md`](WaterBallSchool/diagrams.md) — class + sequence diagrams
+
 ```
 WaterBallSchool/include/
 ├── Journey.h           # a course: chapters, adventurers, tour groups
@@ -130,6 +135,8 @@ WaterBallSchool/include/
 
 ### ShowDown — OOA
 
+📐 **Diagrams:** [`ShowDown/diagrams.md`](ShowDown/diagrams.md) — class + sequence diagrams
+
 ```
 ShowDown/include/
 ├── Showdown.hpp          # game flow
@@ -141,6 +148,8 @@ ShowDown/include/
 **Concept:** model a card game from a requirement spec. Human vs AI players differ only in how they choose, so they share a `Player` base.
 
 ### MatchSystem — Strategy (+ Decorator)
+
+📐 **Diagrams:** [`MatchSystem/diagrams.md`](MatchSystem/diagrams.md) — class + sequence diagrams
 
 ```
 MatchSystem/include/
@@ -155,6 +164,8 @@ MatchSystem/include/
 
 ### CardGameFramework — Template Method
 
+📐 **Diagrams:** [`CardGameFramework/diagrams.md`](CardGameFramework/diagrams.md) — class + sequence diagrams
+
 ```
 CardGameFramework/include/
 ├── CardFramework/   CardGame (abstract), Card, Deck, Hand, Player   # reusable skeleton
@@ -165,6 +176,8 @@ CardGameFramework/include/
 **Concept:** `CardGame::GameStart()` fixes the order of the game (deal → rounds → end → winner). The varying steps — `Round()`, `DrawCardEnd()`, `IsGameEnd()`, `GetWinner()` — are pure virtual hooks implemented by `Showdown` and `Uno`. Two different games reuse one algorithm skeleton.
 
 ### Collision — Chain of Responsibility
+
+📐 **Diagrams:** [`Collision/diagrams.md`](Collision/diagrams.md) — class + sequence diagrams
 
 ```
 Collision/include/
@@ -178,6 +191,8 @@ Collision/include/
 
 ### Mat3D — Chain of Responsibility + Template Method
 
+📐 **Diagrams:** [`Mat3D/diagrams.md`](Mat3D/diagrams.md) — class + sequence diagrams
+
 ```
 Mat3D/include/
 ├── Mat3D.hpp                 # 3D char matrix (m × n × r)
@@ -189,6 +204,8 @@ Mat3D/include/
 **Concept:** the chain selects which plane to print (`"MN"`, `"MR"`, `"NR"`); the template class owns the shared printing loop and each concrete handler only supplies plane-specific indexing. Shows how two patterns compose: CoR picks *who*, Template Method defines *how*.
 
 ### BigTwo — Chain of Responsibility + Template Method + Strategy
+
+📐 **Diagrams:** [`BigTwo/diagrams.md`](BigTwo/diagrams.md) — class + sequence diagrams
 
 ```
 BigTwo/include/
@@ -206,6 +223,8 @@ test/testSet/   *.in / *.out golden files (straight, fullhouse, illegal-actions,
 
 ### YtChannel — Observer
 
+📐 **Diagrams:** [`YtChannel/diagrams.md`](YtChannel/diagrams.md) — class + sequence diagrams
+
 ```
 YtChannel/lib/
 ├── Channel/     Channel.hpp (subject), Video.hpp
@@ -215,6 +234,8 @@ YtChannel/lib/
 **Concept:** `Channel` keeps a list of `ChannelSubscriber*`. When a video is uploaded it calls `notifiy()`, and each subscriber reacts in its own way (`Waterball` likes the video, `Fireball` unsubscribes). The channel never knows concrete subscriber types. A monitor thread with a mutex watches for uploads.
 
 ### KeyBoardShortCut — Command
+
+📐 **Diagrams:** [`KeyBoardShortCut/diagrams.md`](KeyBoardShortCut/diagrams.md) — class + sequence diagrams
 
 ```
 KeyBoardShortCut/lib/
@@ -226,6 +247,8 @@ KeyBoardShortCut/lib/
 **Concept:** each key is bound to a `Command` object instead of a hard-coded function. `MainController` keeps two stacks to support **undo/redo**. `MarcoCommand` (macro) holds a list of commands and runs them as one — a Composite of commands. `ResetCommand` clears key bindings and can itself be undone.
 
 ### treasuremap — State + Strategy + Chain of Responsibility
+
+📐 **Diagrams:** [`treasuremap/diagrams.md`](treasuremap/diagrams.md) — class + sequence diagrams
 
 ```
 treasuremap/include/
@@ -242,6 +265,8 @@ treasuremap/include/
 
 ### prescriber_system — Facade (+ Strategy)
 
+📐 **Diagrams:** [`prescriber_system/diagrams.md`](prescriber_system/diagrams.md) — class + sequence diagrams
+
 ```
 prescriber_system/include/
 ├── PrescriberFacade.hpp      # single entry: diagnosis(id, symptoms, saveOpt, outputPath)
@@ -254,6 +279,8 @@ data.json                     # patient data
 **Concept:** loading the database, loading rules, running the prescriber and saving the result involve many classes. `PrescriberFacade` hides that subsystem behind one method, so the client only calls `diagnosis(...)`. Output format is selected with bit flags (`SAVE_AS_JSON`, `SAVE_AS_CSV`) and implemented as interchangeable savers.
 
 ### friendship — Adapter
+
+📐 **Diagrams:** [`friendship/diagrams.md`](friendship/diagrams.md) — class + sequence diagrams
 
 ```
 friendship/include/
@@ -269,6 +296,8 @@ script.txt                           # input relationships
 
 ### employee — Proxy
 
+📐 **Diagrams:** [`employee/diagrams.md`](employee/diagrams.md) — class + sequence diagrams
+
 ```
 employee/include/
 ├── Database.hpp                  # subject interface: getEmployeeById, getSubordinatesById
@@ -283,17 +312,21 @@ data.data                         # employee records
 
 ### logframework — Composite + Strategy
 
+📐 **Diagrams:** [`logframework/diagrams.md`](logframework/diagrams.md) — class + sequence diagrams
+
 ```
 logframework/include/
 ├── Logger.hpp ← Log.hpp          # loggers form a parent/child tree (GetLog(name), child list)
-├── Level.hpp                     # TRACE < DEBUG < INFO < WARN < ERROR, threshold check
+├── Level.hpp                     # TRACE(0) < INFO(1) < DEBUG(2) < WARN(3) < ERROR(4), threshold check
 ├── Layout.hpp ← StandardLayout   # Strategy: how a message is formatted
 └── Exporter.hpp ← ConsoleExporter / FileExporter / CompositeExporter   # Composite
 ```
 
-**Concept:** an `Exporter` decides where a message goes. `CompositeExporter` contains a list of exporters and is also an `Exporter`, so the logger can send to console + file without knowing it is sending to many. Formatting is a pluggable `Layout`. Child loggers inherit settings from their parent.
+**Concept:** an `Exporter` decides where a message goes. `CompositeExporter` contains a list of exporters and is also an `Exporter`, so the logger can send to console + file without knowing it is sending to many. Formatting is a pluggable `Layout`. Loggers are linked into a parent/child tree (`root` → `app.game` → `app.game.ai`), each with its own level, layout and exporter.
 
 ### RPGGame — State + Observer + Chain of Responsibility + Strategy
+
+📐 **Diagrams:** [`RPGGame/diagrams.md`](RPGGame/diagrams.md) — class + sequence diagrams
 
 *Work in progress (current development branch).*
 
@@ -313,6 +346,26 @@ RPGGame/include/
 - **Observer** – `Summon` and `Curse` register observers on a role; when that role dies, the observers react (reactions are still stubs).
 - **Chain of Responsibility** – `OnePunch` has different effects depending on the target (high HP, poisoned/petrified, cheered up, normal); each case is a handler.
 - **Strategy** – human input vs AI decision (`IAction`), and each skill is its own class with a common `Skill` interface.
+
+---
+
+## Diagrams
+
+Every project folder has a `diagrams.md` with Mermaid diagrams (GitHub and VS Code with a Mermaid extension render them directly):
+
+- **Class diagram** – classes, key fields/methods and relationships (inheritance, composition, association).
+- **Sequence diagram** – the main runtime flow, showing how the pattern’s participants call each other.
+- **State diagram** – where the State pattern is used (`treasuremap`).
+
+`OOA_Training/diagrams.md` is an index of the 15 exercises plus a UML relationship cheat sheet.
+
+### Adding a new project folder
+
+1. Create the folder with the usual layout (`CMakeLists.txt`, `main.cpp`, `include/`, `src/`, `test/`).
+2. Copy [`DIAGRAM_TEMPLATE.md`](DIAGRAM_TEMPLATE.md) to `<NewProject>/diagrams.md` and replace the example diagrams.
+3. Add the project to the [Pattern index](#pattern-index) and add a section under [Projects](#projects) with the folder tree, the concept, and the diagrams link.
+
+> Do not name the folder `UML/` — it is listed in `.gitignore`.
 
 ---
 
