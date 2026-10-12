@@ -61,7 +61,7 @@ classDiagram
 ```mermaid
 sequenceDiagram
     autonumber
-    participant C as Client
+    participant C as main
     participant PP as PasswordProtectProxy
     participant LP as LazyInitDatabaseProxy (base part)
     participant RD as RealDatabase
@@ -77,11 +77,14 @@ sequenceDiagram
             LP->>RD: new RealDatabase(fileName)
             RD->>F: read all lines
         end
-        LP->>RD: lines[id - 1]
-        LP->>LP: parse id / name / age
+        LP->>RD: getEmployeeById(id)
+        RD->>RD: parse lines[id] + subordinates
+        RD-->>LP: Employee
         LP-->>PP: Employee
         PP-->>C: Employee
     end
 ```
+
+> `main.cpp` demo: query id 4 without `PASSWORD` (→ nullptr), set `PASSWORD=1qaz2wsx` and query id 4 again (prints the subordinate tree), then `getSubordinatesById(5)`.
 
 > Both proxies keep the `Database` interface, so the client cannot tell whether it talks to the real database or a proxy.

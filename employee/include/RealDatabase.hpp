@@ -23,7 +23,7 @@ public:
 protected:
     std::vector<std::string> lines;
     Employee* readDataByid(int id);
-    std::vector<Employee*> readSubordinates(std::vector<std::string> datas, std::string subordinates);
+    std::vector<Employee*> readSubordinates(const std::vector<std::string>& datas, const std::string& subordinates);
     friend class LazyInitDatabaseProxy;
 };
 

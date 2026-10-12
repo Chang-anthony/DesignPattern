@@ -18,6 +18,11 @@ public:
     Employee(int id, std::string name, int age);
     Employee(int id, std::string name, int age, std::vector<Employee*> subordinates);
     ~Employee();
+
+    int getId() const;
+    std::string getName() const;
+    int getAge() const;
+    std::vector<Employee*> getSubordinates() const;
 };
 
 

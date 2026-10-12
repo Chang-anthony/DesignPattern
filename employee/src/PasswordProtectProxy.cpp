@@ -3,7 +3,13 @@
 
 PasswordProtectProxy::PasswordProtectProxy(std::string fileName) : LazyInitDatabaseProxy(fileName)
 {
-    
+    hasGivenPassword = false;
+}
+
+PasswordProtectProxy::PasswordProtectProxy(std::string fileName, std::string password) : LazyInitDatabaseProxy(fileName)
+{
+    hasGivenPassword = true;
+    givenPassword = password;
 }
 
 Employee* PasswordProtectProxy::getEmployeeById(int id)
@@ -24,6 +30,10 @@ std::vector<Employee*> PasswordProtectProxy::getSubordinatesById(int id)
 
 bool PasswordProtectProxy::authenticate()
 {
+    if (hasGivenPassword) {
+        return givenPassword == "1qaz2wsx";
+    }
+
     const char* password = std::getenv("PASSWORD");
 
     return password != nullptr && std::string(password) == "1qaz2wsx";

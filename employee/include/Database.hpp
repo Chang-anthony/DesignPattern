@@ -14,7 +14,7 @@ private:
     /* data */
 public:
     Database(std::string fileName);
-    ~Database();
+    virtual ~Database();
 
     virtual Employee* getEmployeeById(int id) = 0;
     virtual std::vector<Employee*> getSubordinatesById(int id) = 0;
