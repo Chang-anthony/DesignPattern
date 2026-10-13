@@ -2,27 +2,14 @@
 #include "utils.h"
 #include "Role.hpp"
 
-OnePunchHandler::OnePunchHandler() : next(nullptr) {}
-
-OnePunchHandler::OnePunchHandler(OnePunchHandler* nextHandler) {
-    setNext(nextHandler);
-}
+OnePunchHandler::OnePunchHandler() {}
 
 OnePunchHandler::~OnePunchHandler() {}
 
-void OnePunchHandler::setNext(OnePunchHandler* nextHandler) {
-    next = nextHandler;
-}
-
-OnePunchHandler* OnePunchHandler::getNext() const {
-    return next;
-}
-
-
-void OnePunchHandler::handle(Role* target) {
-    if (match(target)) {
-        doHandle(target);
-    } else if (next) {
-        next->handle(target);
+bool OnePunchHandler::handle(Role* actor, Role* target) {
+    if (match(actor, target)) {
+        doHandle(actor, target);
+        return true;
     }
+    return false;
 }

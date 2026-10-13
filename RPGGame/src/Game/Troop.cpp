@@ -4,7 +4,13 @@
 #include <iostream>
 #include "utils.h"
 
-Troop::Troop() {}
+Troop::Troop() : id(1) {}
+
+Troop::Troop(int id) : id(id) {}
+
+int Troop::getId() const {
+    return id;
+}
 
 Troop::~Troop() {}
 

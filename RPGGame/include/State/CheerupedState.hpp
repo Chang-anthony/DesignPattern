@@ -10,6 +10,9 @@ public:
     ~CheerupedState();
 
     void decision() override;
+
+    // 受到鼓舞：每次造成傷害額外 +50（D13、D15、D16）
+    void doDamage(Role* target, int n) override;
 };
 
 #endif // CHEERUPEDSTATE_HPP

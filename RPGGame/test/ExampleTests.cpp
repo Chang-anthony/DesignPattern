@@ -8,6 +8,10 @@
 #include "Fireball.hpp"
 #include "Waterball.hpp"
 #include "OnePunch.hpp"
+#include "HpHandler.hpp"
+#include "PoisonPetrochemicalHandler.hpp"
+#include "CheerupHandler.hpp"
+#include "NormalHandler.hpp"
 #include "SelfExplosion.hpp"
 #include "SelfHealing.hpp"
 #include "Poison.hpp"
@@ -78,7 +82,8 @@ TEST(SkillTest, WaterballTest) {
 
 }
 TEST(SkillTest, OnePunchTest) {
-    Skill* skill = new OnePunch();
+    // 處理鏈由 Client 組好後注入（D21、D23）
+    Skill* skill = new OnePunch({new HpHandler(), new PoisonPetrochemicalHandler(), new CheerupHandler(), new NormalHandler()});
     EXPECT_EQ(skill->getMp(), 180); // Assuming OnePunch requires 15 MP
 
     Role* actor = new Hero(500, 500, 50, "h");

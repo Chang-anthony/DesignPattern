@@ -11,7 +11,7 @@ private:
 public:
     CurserObserver(Role* actor);
 
-    void UntilDie() override;
+    void UntilDie(Role* dead) override;
 };
 
 #endif // CURSEROBSERVER_HPP

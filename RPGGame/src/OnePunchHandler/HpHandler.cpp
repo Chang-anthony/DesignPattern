@@ -1,17 +1,15 @@
 #include "HpHandler.hpp"
 #include "Role.hpp"
+#include "State.hpp"
 
 HpHandler::HpHandler(){}
 
-HpHandler::HpHandler(OnePunchHandler* nextHandler)
-    : OnePunchHandler(nextHandler) { }
-
 HpHandler::~HpHandler() {}
 
-bool HpHandler::match(Role* target) {
+bool HpHandler::match(Role* actor, Role* target) {
     return target->getHp() >= 500;
 }
 
-void HpHandler::doHandle(Role* target) {
-    target->damage(300);
+void HpHandler::doHandle(Role* actor, Role* target) {
+    actor->getState()->doDamage(target, 300);
 }

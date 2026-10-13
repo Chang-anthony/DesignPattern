@@ -9,11 +9,10 @@ private:
 
 public:
     HpHandler();
-    HpHandler(OnePunchHandler* nextHandler);
     ~HpHandler();
 
-    bool match(Role* target) override; // Override match function
-    void doHandle(Role* target) override;    // Override doHandle function
+    bool match(Role* actor, Role* target) override; // Override match function
+    void doHandle(Role* actor, Role* target) override;    // Override doHandle function
 };
 
 #endif // HPHANDLER_HPP

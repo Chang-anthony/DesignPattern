@@ -1,20 +1,18 @@
 #include "NormalHandler.hpp"
 #include "Role.hpp"
 #include "State.hpp"
+#include "NormalState.hpp"
 
 NormalHandler::NormalHandler() {}
 
-NormalHandler::NormalHandler(OnePunchHandler* nextHandler) : OnePunchHandler(nextHandler) {}
-
 NormalHandler::~NormalHandler() {}
 
-//TODO:
-bool NormalHandler::match(Role* target) {
+bool NormalHandler::match(Role* actor, Role* target) {
     // Logic to determine if this handler should handle the request
 
-    return target->getState()->getName() == "NormalState";
+    return dynamic_cast<NormalState*>(target->getState()) != nullptr;
 }
 
-void NormalHandler::doHandle(Role* target) {
-    target->damage(100);
+void NormalHandler::doHandle(Role* actor, Role* target) {
+    actor->getState()->doDamage(target, 100);
 }

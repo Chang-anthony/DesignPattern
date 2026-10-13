@@ -15,7 +15,7 @@
 - 討論後若 Anthony 決定修改設計，才依他的決定更新 `diagrams.md`。
 
 ### 1.2 實作
-- **目前階段：架構設計已完成（A1–A11 結案，2026-10-12）**，等 Anthony 決定是否進入實作。全部設計完才進入實作，期間不修改程式碼。
+- **目前階段：實作中（2026-10-13 起）**。Anthony 決定本專案的演算法都不自己寫，由 Claude 實作。**原則：Anthony 原本寫好、能用的程式照原本的保留，只改設計決策要求變動的地方，不重寫**。目前只做「技能周邊」（見 §7），State 流程、`AIAction`、`Battle`、`RPG` 等維持原本的 TODO。
 - 實作階段：一般、簡單的邏輯由 Claude 直接實作；Anthony 會指定**他要自己動手**的區塊，這些區塊 Claude 只講概念與步驟、寫框架（宣告、簽名、空本體 + `// TODO:`），寫完再 review。
 
 ### 1.3 紀錄
@@ -42,17 +42,17 @@
 
 ---
 
-## 3. 目前設計快照（2026-10-12）
+## 3. 目前程式快照（2026-10-13，技能周邊完成後）
 
 | 區塊 | 現況 |
 |---|---|
-| `Game/` | `RPG`、`Battle`、`Troop`；`Battle::startBattle()`、`RPG::makeAction()` 尚未實作 |
-| `Role/` | `Role` ← `Hero` / `AI`(含 `seed`) / `NonHero` ← `Slime`；`IAction` ← `AIAction`（尚未實作） |
-| `Skill/` | `Skill`（`targetEnemy` / `targetFriend` 整數 + 巨集）← 11 個子類別（含 `BasicAttack`），`attack(actor, targets)` 已有簡單實作 |
-| `State/` | `State` ← 4 種狀態；`decision()` 全部是 stub |
-| `Observer/` | `SkillObserver` ← `SummonObserver` / `CurserObserver`；`UntilDie()` 是 stub |
-| `OnePunchHandler/` | CoR：`Hp → PoisonPetrochemical → Cheerup → Normal`，鏈在 `OnePunch` 建構子內建立 |
-| 測試 | `test/ExampleTests.cpp`：每個技能的 gtest 單元測試；尚無 need.txt 那種輸入/輸出比對測試 |
+| `Skill/` | ✅ 保留原本的 `attack()`、`setName` / `setMp` 寫法；名稱改中文（D27）；移除 `targetEnemy` / `targetFriend` 與巨集，改為 `getCandidates()`（D29、D33）；新增 `announce()`（§7 I1）；傷害改走 `actor->getState()->doDamage()`（D16） |
+| `OnePunchHandler/` | ✅ 移除 `next` 指標，改由 `OnePunch` 以 `vector` 注入（D21、D23）；`handle / match / doHandle` 帶入 `actor`（D22）；用 `dynamic_cast` 判斷狀態（D25） |
+| `Observer/` | ✅ `UntilDie(Role* dead)`（pull model，D18）；`SummonObserver` +30、`CurserObserver` + 剩餘 MP，施放者已死就不給 |
+| `State/` | ✅ 新增 `doDamage` / `damage`（D16）、受到鼓舞 +50、計時狀態回合數 3（D11）；移除 `entryState` / `exitState` 裡的除錯輸出（會混進遊戲輸出）；⬜ `decision()` 維持原本的 stub |
+| `Role/` | ✅ `damage()` 改為 `lossHp()`：歸零當下印死亡並通知觀察者（D17）；建立時自動加入普通攻擊（D28）；`setState` 設定狀態的 role；新增 `getDisplayName()`；⬜ `checkActionLossMp`（D9）、英雄識別（D6）、`Hero` / `AI` 移除（D4）、`IAction` / `AIAction` 維持原樣 |
+| `Game/` | ✅ `Troop` 新增軍隊編號（輸出前綴）；⬜ `Battle`、`RPG` 維持原本的 TODO |
+| 測試 | ✅ 原本的 `test/ExampleTests.cpp`（11 個）只改 `OnePunch` 的建構方式；新增 `test/SkillTests.cpp`（41 個）；共 52 個全部通過 |
 
 ---
 
@@ -67,7 +67,8 @@
 - ✅ A9 已結案（決策 D26–D28）。
 - ✅ A10 已結案（決策 D29–D34）。
 - ✅ A11 已結案（決策 D35–D39）。**必要問題 A1–A11 全部結案，架構設計完成。**
-- ⏸ **下一步**：由 Anthony 決定 — 討論開放問題 O1–O6（可略過）、或進入實作階段（`diagrams.md` 已依 D1–D39 更新）（先指定要自己動手的區塊）。
+- ✅ 2026-10-13 進入實作：技能周邊 + 單元測試完成（§7）。
+- ⏸ **下一步**：確認 §7.2 的實作選擇；之後再決定是否實作 State 流程、`IAction`、Battle / RPG、Client 與整場比對測試。
 - 之後依序：開放問題 O1–O5 視時間討論；開放問題 O1–O4 視時間討論。
 
 ### 收尾建議順序
@@ -210,3 +211,22 @@ cmake --build build
 ./build/RPGGAME              # 主程式
 cd test && ./run_tests.sh    # Windows: run_tests.bat
 ```
+
+---
+
+## 7. 實作紀錄
+
+### 7.1 2026-10-13：技能周邊 + 單元測試
+- **範圍**：技能、一拳攻擊（含 handler）、觀察者，以及技能直接用到的 `State` / `Role` / `Troop` 功能。State 流程、`AIAction`、`Battle`、`RPG`、`main.cpp` 維持原本的程式與 TODO。
+- **原則**：在 Anthony 原本的程式上做最小修改；原本能用的命名與寫法（`attack()`、`addSkill` / `getSkills`、`setName` / `setMp`、`Slime` 類別、`Curse` 的不疊加判斷、一拳 80 × 3 的迴圈）都保留。
+- 只因設計決策而改的：`targetEnemy` / `targetFriend` → `getCandidates()`（D29）、`damage()` → `lossHp()`（D17）、`UntilDie()` → `UntilDie(dead)`（D18）、一拳的 `next` 指標 → 注入的 `vector`（D21–D25）、名稱改中文（D27）、Role 自動加入普通攻擊（D28）。
+- 順手修正的錯誤：`Skill` 解構子改為 `virtual`（`Role` 透過 `Skill*` 刪除技能）；`Role` 建構時把 `troop` 初始化為 `nullptr`（原本未初始化）；移除 `State::entryState` / `exitState` 的除錯輸出（會混進遊戲輸出）。
+- 單元測試：原本的 `ExampleTests.cpp` 11 個 + 新的 `SkillTests.cpp` 41 個，共 52 個通過；刻意改壞程式（鼓舞不加成、詛咒疊加、死亡重複通知、一拳不停在第一條規則、召喚 / 詛咒不給獎勵）都會被測試抓到。
+
+### 7.2 實作時自行決定、請 Anthony 確認的地方
+| # | 內容 | 理由 |
+|---|---|---|
+| I1 | **S3 的行動訊息由技能的 `announce(actor, targets)` 印**（virtual；預設「X 對 a, b 使用了 Z。」，沒有目標時「X 使用了 Z。」；`BasicAttack` 覆寫成「X 攻擊 Y。」、`SelfHealing` 覆寫成「X 使用了 自我治療。」）。呼叫時機：State 流程在扣 MP 後、`attack` 前（流程尚未實作）。 | 設計討論沒有決定誰印這行；格式隨行動而異，放在技能裡新增技能不必改模組（需求 ②） |
+| I2 | **輸出名稱前綴**：`Troop` 記住自己的編號（`Troop(int id)`，預設 1），`Role::getDisplayName()` 回傳「[編號]名稱」。 | 召喚的史萊姆加入哪一軍就自動帶對的前綴 |
+| I3 | **`actorSide` 用 `int`（1 = T1、2 = T2）**，與輸出前綴一致。 | 最簡單的表示法 |
+| I4 | **一拳 80 × 3 沿用原本的迴圈**：目標在第 1、2 下就死時，剩下幾下仍會印傷害訊息（死亡訊息只印一次）。 | 照原本程式；需求未說明、測資沒有這種情況，要改的話是一行 |

@@ -7,7 +7,7 @@ class SummonObserver : public SkillObserver {
 public:
     SummonObserver(Role* actor); 
 
-    void UntilDie() override;
+    void UntilDie(Role* dead) override;
 };
 
 #endif /* _SUMMONOBSERVER_H_ */

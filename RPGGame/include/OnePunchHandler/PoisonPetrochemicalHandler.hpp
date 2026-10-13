@@ -7,11 +7,10 @@
 class PoisonPetrochemicalHandler : public OnePunchHandler {
 public:
     PoisonPetrochemicalHandler();
-    PoisonPetrochemicalHandler(OnePunchHandler* nextHandler);
     ~PoisonPetrochemicalHandler();
 
-    bool match(Role* target) override; // Override match function
-    void doHandle(Role* target) override;    // Override doHandle function
+    bool match(Role* actor, Role* target) override; // Override match function
+    void doHandle(Role* actor, Role* target) override;    // Override doHandle function
 };
 
 #endif // POISONPETROCHEMICALHANDLER_HPP

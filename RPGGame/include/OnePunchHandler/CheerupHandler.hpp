@@ -7,11 +7,10 @@
 class CheerupHandler : public OnePunchHandler {
 public:
     CheerupHandler();
-    CheerupHandler(OnePunchHandler* nextHandler);
     ~CheerupHandler();
 
-    bool match(Role* target) override; // Override match function
-    void doHandle(Role* target) override;    // Override doHandle function
+    bool match(Role* actor, Role* target) override; // Override match function
+    void doHandle(Role* actor, Role* target) override;    // Override doHandle function
 };
 
 #endif /* _CHEERUPHANDLER_H_ */

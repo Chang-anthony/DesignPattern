@@ -2,19 +2,17 @@
 #include "Role.hpp"
 #include "State.hpp"
 #include "NormalState.hpp"
+#include "CheerupedState.hpp"
 
 CheerupHandler::CheerupHandler() {}
 
-CheerupHandler::CheerupHandler(OnePunchHandler* nextHandler)
-    : OnePunchHandler(nextHandler) {}
-
 CheerupHandler::~CheerupHandler() {}
 
-bool CheerupHandler::match(Role* target) {
-    return target->getState()->getName() == "CheerupedState";
+bool CheerupHandler::match(Role* actor, Role* target) {
+    return dynamic_cast<CheerupedState*>(target->getState()) != nullptr;
 }
 
-void CheerupHandler::doHandle(Role* target) {
-    target->damage(100);
+void CheerupHandler::doHandle(Role* actor, Role* target) {
+    actor->getState()->doDamage(target, 100);
     target->setState(new NormalState());
 }

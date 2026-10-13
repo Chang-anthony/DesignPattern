@@ -10,6 +10,7 @@ set(GTest SimpleTest)
 
 set(Sources 
     ExampleTests.cpp
+    SkillTests.cpp
 )
 
 include(${LIB_PATH}/libary/test.cmake)

@@ -26,7 +26,7 @@ public:
     virtual ~Role();
 
     bool isDead() const;
-    void damage(int damage);
+    void lossHp(int damage); // HP 減少的唯一出口：歸零當下印死亡訊息並通知觀察者（D17）
     bool checkActionLossMp(int mpCost);
     void setState(State* newState);
     State* getState() const;
@@ -36,6 +36,7 @@ public:
     int getMp() const;
     int getStr() const;
     const std::string& getName() const;
+    std::string getDisplayName() const; // 輸出用名稱，帶軍隊前綴，例如「[1]英雄」
 
     void lossMp(int mpCost);
     void gainMp(int mpGain);

@@ -8,11 +8,10 @@
 class NormalHandler : public OnePunchHandler {
 public:
     NormalHandler();
-    NormalHandler(OnePunchHandler* nextHandler);
     ~NormalHandler();
 
-    bool match(Role* target) override; // Override match function
-    void doHandle(Role* target) override;    // Override doHandle function
+    bool match(Role* actor, Role* target) override; // Override match function
+    void doHandle(Role* actor, Role* target) override;    // Override doHandle function
 };
 
 #endif // NORMALHANDLER_HPP

@@ -1,22 +1,21 @@
 #include "PoisonPetrochemicalHandler.hpp"
 #include "Role.hpp"
 #include "State.hpp"
+#include "PoisonedState.hpp"
+#include "PetrochemicaledState.hpp"
 
 PoisonPetrochemicalHandler::PoisonPetrochemicalHandler() {}
 
-PoisonPetrochemicalHandler::PoisonPetrochemicalHandler(OnePunchHandler* nextHandler)
-    : OnePunchHandler(nextHandler) {}
-
 PoisonPetrochemicalHandler::~PoisonPetrochemicalHandler() {}
 
-bool PoisonPetrochemicalHandler::match(Role* target) {
+bool PoisonPetrochemicalHandler::match(Role* actor, Role* target) {
 
-    return target->getState()->getName() == "PoisonedState" ||
-           target->getState()->getName() == "PetrochemicaledState";
+    return dynamic_cast<PoisonedState*>(target->getState()) != nullptr ||
+           dynamic_cast<PetrochemicaledState*>(target->getState()) != nullptr;
 }
 
-void PoisonPetrochemicalHandler::doHandle(Role* target) {
+void PoisonPetrochemicalHandler::doHandle(Role* actor, Role* target) {
     for (size_t i = 0; i < 3; i++) {
-        target->damage(80);
+        actor->getState()->doDamage(target, 80);
     }
 }

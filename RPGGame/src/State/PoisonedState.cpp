@@ -2,6 +2,7 @@
 
 PoisonedState::PoisonedState() : State() {
     name = "PoisonedState";
+    setRound(3); // 3 回合（含當前回合）；被新狀態覆寫時重新計算（D11）
 }
 
 PoisonedState::~PoisonedState() {}

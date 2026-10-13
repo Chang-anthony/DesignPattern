@@ -1,17 +1,23 @@
 #include "BasicAttack.hpp"
 #include <iostream>
 #include "Role.hpp"
+#include "State.hpp"
 
 BasicAttack::BasicAttack() : Skill()
 {
-    setName("BasicAttack");
+    setName("普通攻擊");
     setMp(0);
-    setTargetEnemy(1);
-    setTargetFriend(0);
 }
 
 void BasicAttack::attack(Role* actor, std::vector<Role*> targets) {
     for (auto role: targets) {
-        role->damage(actor->getStr());
+        actor->getState()->doDamage(role, actor->getStr());
+    }
+}
+
+// 「X 攻擊 Y。」
+void BasicAttack::announce(Role* actor, const std::vector<Role*>& targets) const {
+    for (Role* target : targets) {
+        std::cout << actor->getDisplayName() << " 攻擊 " << target->getDisplayName() << "。" << std::endl;
     }
 }

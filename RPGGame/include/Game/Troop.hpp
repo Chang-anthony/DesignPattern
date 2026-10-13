@@ -8,10 +8,13 @@ class Role;
 
 class Troop {
 private:
+    int id; // 1 = T1、2 = T2；輸出名稱前綴「[1]」「[2]」
     std::vector<Role*> roles; // List of roles in the troop
 
 public:
     Troop();
+    Troop(int id);
+    int getId() const;
     ~Troop();
 
     std::vector<Role*> getRoles() const; // Get the list of roles

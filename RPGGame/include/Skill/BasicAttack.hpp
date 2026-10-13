@@ -11,6 +11,7 @@ public:
     BasicAttack();
     ~BasicAttack() = default;
 
+    void announce(Role* actor, const std::vector<Role*>& targets) const override;
     void attack(Role* actor, std::vector<Role*> roles) override;
 };
 

@@ -10,6 +10,8 @@ class Cheerup : public Skill
 {
 public:
     Cheerup();
+    Candidates getCandidates(Role* actor, const std::vector<Role*>& t1,
+                             const std::vector<Role*>& t2, int actorSide) const override;
     void attack(Role* actor, std::vector<Role*> targets) override;
 };
 

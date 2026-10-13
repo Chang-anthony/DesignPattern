@@ -4,10 +4,8 @@
 #include "PoisonedState.hpp"
 
 Poison::Poison()  : Skill() {
-    setName("Poison");
+    setName("下毒");
     setMp(80);
-    setTargetEnemy(1);
-    setTargetFriend(0);
 }
 
 void Poison::attack(Role* actor, std::vector<Role*> targets) {

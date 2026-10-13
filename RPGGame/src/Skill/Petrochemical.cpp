@@ -6,10 +6,8 @@
 
 Petrochemical::Petrochemical() : Skill()
 {
-    setName("Petrochemical");
+    setName("石化");
     setMp(100);
-    setTargetEnemy(1);
-    setTargetFriend(0);
 }
 
 void Petrochemical::attack(Role* actor, std::vector<Role*> targets)

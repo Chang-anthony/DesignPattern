@@ -6,10 +6,8 @@
 #include "SkillObserver.hpp"
 
 Curse::Curse() : Skill(){
-    setName("Curse");
+    setName("詛咒");
     setMp(100);
-    setTargetEnemy(1);
-    setTargetFriend(0);
 }
 
 void Curse::attack(Role* actor, std::vector<Role*> targets) {

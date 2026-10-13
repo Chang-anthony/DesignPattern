@@ -2,6 +2,7 @@
 
 PetrochemicaledState::PetrochemicaledState() : State() {
     name = "PetrochemicaledState";
+    setRound(3); // 3 回合（含當前回合）；被新狀態覆寫時重新計算（D11）
 }
 
 PetrochemicaledState::~PetrochemicaledState() {}

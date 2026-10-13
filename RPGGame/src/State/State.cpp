@@ -1,6 +1,7 @@
 #include "State.hpp"
 #include <iostream>
 #include "utils.h"
+#include "Role.hpp"
 
 State::State() : round(0), role(nullptr), name("") {} // Default constructor
 
@@ -32,11 +33,20 @@ std::string State::getName() const {
 
 void State::entryState(State* newState) {
     utils::RequireNonNull(newState);
-    std::cout << "Entering state with " << round << " rounds." << std::endl;
 }
 
 void State::exitState() {
-    std::cout << "Exiting state with " << round << " rounds." << std::endl;
+}
+
+void State::doDamage(Role* target, int n) {
+    utils::RequireNonNull(target);
+    std::cout << utils::RequireNonNull(role)->getDisplayName() << " 對 " << target->getDisplayName()
+              << " 造成 " << n << " 點傷害。" << std::endl;
+    utils::RequireNonNull(target->getState())->damage(n);
+}
+
+void State::damage(int n) {
+    utils::RequireNonNull(role)->lossHp(n);
 }
 
 // TODO: Implement the decision method in derived classes
