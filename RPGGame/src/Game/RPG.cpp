@@ -20,6 +20,9 @@ void RPG::GameStart(Troop* troop1, Troop* troop2)
 
     battle = new Battle(troop1, troop2);
     battle->startBattle();
+
+    // 戰鬥結束：英雄活著 → 玩家獲勝（需求「輸出格式」最後一行）
+    std::cout << (battle->isHeroAlive() ? "你獲勝了！" : "你失敗了！") << std::endl;
 }
 
 //TODO:
