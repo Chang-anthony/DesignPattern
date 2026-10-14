@@ -23,7 +23,7 @@
 |---|---|
 | 移除 `Hero` / `AI` 這兩個 `Role` 子類別，改由 `Role` 持有 `IAction`；`seed` 移到 `AIAction` | D4（✅ 2026-10-14 已刪除）；`NonHero` 也刪除，`Slime` 直接繼承 `Role`（D43） |
 | 一次行動的流程由 `State` 主導，固定流程寫在 `State` 抽象類別 | D10、D12 |
-| 傷害一律經過 `actor.state.doDamage()` → `target.state.damage()` → `target.lossHp()` | D16、D17 |
+| 傷害一律經過 `actor.state.doDamage()` → `target.state.damage()` → `target.lossHp()`；`lossHp` 為 private、`damage` 為 protected，技能只能走 `doDamage`（編譯器強制） | D16、D17、D47 |
 | 觀察者改為 pull model：`UntilDie(dead)` 帶入死者 | D18 |
 | 候選名單改由技能計算（`getCandidates`），移除 `targetEnemy` / `targetFriend` | D29、D33 |
 | Battle 交給行動流程的是 T1 / T2 活著的角色名單 + 行動者屬於哪一軍 | D30、D31 |
@@ -179,7 +179,7 @@ classDiagram
         +checkMp(Skill) bool
         +lossMp(int)
         +gainMp(int)
-        +lossHp(int)
+        -lossHp(int)
         +gainHp(int)
         +isDead() bool
         +isHero() bool
@@ -206,7 +206,7 @@ classDiagram
         +decision(t1, t2, actorSide)
         +getDisplayName() string
         +doDamage(Role target, int n)
-        +damage(int n)
+        #damage(int n)
         +getRound() int
         +setRound(int)
         +setRole(Role)
@@ -234,13 +234,14 @@ classDiagram
     State <|-- PetrochemicaledState
     State <|-- CheerupedState
     Role ..> NormalState : 建構 / endThisRound() 歸零時 new
-    State ..> Role : doDamage → target->getState()->damage()，damage → role->lossHp()
+    State ..> Role : doDamage → target->getState()->damage()，damage → role->lossHp()（friend，D47）
 ```
 
 - `Role` 只依賴抽象的 `State` 和**預設狀態** `NormalState`（建構與到期時換回）。石化、中毒、鼓舞由技能建立，`Role` 完全不 include 它們——這是需求 ③（狀態擴充遵守 OCP）在依賴上的樣子。
 - `round` 欄位寫在各子類別裡，表示建構時設定的初始值（D11）。
 - **`State::decision()` 是預設的行動流程**（D10、D12，✅ 2026-10-14）：S1 印「選擇行動」並問決策者，MP 不足就印「你缺乏 MP…」再問一次 → S2 技能算候選、決策者選目標 → S3 扣 MP、`announce`、`attack`。
-- 只有兩個狀態覆寫 `decision()`：`PetrochemicaledState` 整段跳過（不問決策者）；`PoisonedState` 先 `lossHp(30)`，死了就結束，活著才呼叫 `State::decision()`。`NormalState`、`CheerupedState` 直接沿用預設流程（`CheerupedState` 只覆寫 `doDamage`）。
+- 只有兩個狀態覆寫 `decision()`：`PetrochemicaledState` 整段跳過（不問決策者）；`PoisonedState` 先呼叫自己的 `damage(30)`，死了就結束，活著才呼叫 `State::decision()`。`NormalState`、`CheerupedState` 直接沿用預設流程（`CheerupedState` 只覆寫 `doDamage`）。
+- **傷害通道由編譯器強制**（D47）：`Role::lossHp` 是 private，只開放給 `State`（`friend class State`）；`State::damage` 是 protected。技能唯一能用的是 public 的 `doDamage`；自爆的自殺改成技能的 HP 代價 `costHp()`，由 `State::decision()` 在施放後支付。
 - 每個狀態自己設定中文名稱 `displayName`（正常 / 石化 / 中毒 / 受到鼓舞），「輪到 …」那一行用 `getDisplayName()` 印，新增狀態不必改 `State`（§7.2 I8）。
 
 ### ③ 技能（Strategy）與各自的依賴
@@ -252,6 +253,7 @@ classDiagram
         <<abstract>>
         +getName() string
         +getMp() int
+        +costHp(actor) int
         +getCandidates(actor, t1, t2, actorSide) Candidates
         +announce(Role actor, vector~Role~ targets)
         +attack(Role actor, vector~Role~ targets)*
@@ -288,6 +290,7 @@ classDiagram
     class SelfExplosion {
         自爆 MP 200
         +getCandidates()
+        +costHp(actor) int
     }
     class Cheerup {
         鼓舞 MP 100
@@ -402,7 +405,7 @@ classDiagram
         +removeObserver(SkillObserver)
         +getObservers() vector~SkillObserver~
         +notifyObservers()
-        +lossHp(int)
+        -lossHp(int)
     }
     class SkillObserver {
         <<abstract>>
@@ -663,7 +666,7 @@ sequenceDiagram
                 R->>R: 印「輪到 X (HP: …, MP: …, STR: …, State: 中文狀態)。」
                 Note right of R: 在狀態效果之前印：石化也印；<br/>中毒印的是扣 30 之前的 HP（I6）
                 R->>S: decision(t1, t2, actorSide)
-                Note over S: 石化：整段跳過（不問決策者）<br/>中毒：先 lossHp(30)，死了就結束<br/>其他：走 State::decision() 預設流程
+                Note over S: 石化：整段跳過（不問決策者）<br/>中毒：先 damage(30)，死了就結束<br/>其他：走 State::decision() 預設流程
                 loop S1：直到 MP 足夠
                     S->>S: 印「選擇行動：(0) 普通攻擊 (1) …」
                     S->>D: chooseAction(skills)
@@ -683,6 +686,10 @@ sequenceDiagram
                 S->>K: announce(actor, targets)
                 Note right of K: 印「X 對 a, b 使用了 Z。」<br/>（普通攻擊：「X 攻擊 Y。」）
                 S->>K: attack(actor, targets)
+                S->>K: costHp(actor)
+                opt HP 代價 > 0（自爆）
+                    S->>R: lossHp(cost)（不印傷害，歸零印「X 死亡。」）
+                end
                 B->>B: 判斷是否結束（英雄死亡 / 一方殲滅）
             end
         end
@@ -730,10 +737,10 @@ sequenceDiagram
     end
 ```
 
-> 中毒扣的 30 HP、自爆的自殺也都經過 `lossHp()`，所以同樣會印死亡、觸發觀察者（D14、D17）。
+> 中毒扣的 30 HP（`State::damage`）、自爆的 HP 代價（`State::decision()` 支付）也都經過 `lossHp()`，所以同樣會印死亡、觸發觀察者（D14、D17、D47）。
 > 已經死亡的角色再受到傷害不會重複印死亡、不會再通知觀察者。一拳攻擊的 80 × 3 在目標死亡後就停止，不再印剩下幾下的傷害（§7.2 I4，依 `testcases/one-punch.out` 修正）。
 > 獎勵（`gainHp`）發生在「Y 死亡。」之後；`SummonObserver` +30、`CurserObserver` + 死者剩餘 MP。
-> 自爆：目標不含自己、依 T1 → T2；對所有目標處理完後，才 `actor->lossHp(actor->getHp())` 讓自己歸零並印「<自己> 死亡。」，自己歸零**不印**傷害訊息（D34，已用 `testcases/self-explosion.out` 驗證）。
+> 自爆：目標不含自己、依 T1 → T2；對所有目標處理完後，由 `State::decision()` 支付 HP 代價 `costHp()` = 全部 HP，讓自己歸零並印「<自己> 死亡。」（D47），自己歸零**不印**傷害訊息（D34，已用 `testcases/self-explosion.out` 驗證）。
 
 ## OOD — 循序圖：一拳攻擊（Chain of Responsibility，✅）
 
@@ -777,7 +784,7 @@ stateDiagram-v2
     state "正常 NormalState<br/>round = 0，不倒數" as Normal
     state apply <<choice>>
     state "石化 PetrochemicaledState<br/>輪到時跳過 S1–S3" as Petri
-    state "中毒 PoisonedState<br/>輪到時先 lossHp(30)" as Poisoned
+    state "中毒 PoisonedState<br/>輪到時先 damage(30)" as Poisoned
     state "受到鼓舞 CheerupedState<br/>doDamage() 每次 +50" as Cheer
 
     [*] --> Normal : 角色建立

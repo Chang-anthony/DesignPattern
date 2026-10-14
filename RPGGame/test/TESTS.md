@@ -4,7 +4,7 @@
 
 - 需求：[`../need/need.md`](../need/need.md)　設計決策 D1–D40 與實作紀錄：[`../CLAUDE.md`](../CLAUDE.md)　圖：[`../diagrams.md`](../diagrams.md)
 - 測試框架：GoogleTest（`TEST` / `TEST_F`），C++20
-- 最後更新：2026-10-14（加入 Battle、RPG、parser、main.cpp），共 **146** 個測試，全部通過；主程式的手動驗證見 §11
+- 最後更新：2026-10-14（加入 Battle、RPG、parser、main.cpp），共 **149** 個測試，全部通過；主程式的手動驗證見 §11
 
 ---
 
@@ -33,7 +33,7 @@ cmake --build build                 # Windows (MinGW)：build 完會自動執行
 
 | 項目 | 標準 |
 |---|---|
-| 結果 | 最後一行為 `[  PASSED  ] 146 tests.`，沒有任何 `[  FAILED  ]` |
+| 結果 | 最後一行為 `[  PASSED  ] 149 tests.`，沒有任何 `[  FAILED  ]` |
 | 程式結束 | 測試程式正常結束（沒有 crash / segmentation fault）；crash 視同失敗 |
 | 新增測試檔 | `test/CMakeLists.txt` 以 `file(GLOB … CONFIGURE_DEPENDS *.cpp)` 收集，新增 / 刪除 `test/*.cpp` 後直接 build 即可，不必修改 CMake |
 | 單一測試 | 該測試內**所有** `EXPECT_*` / `ASSERT_*` 都成立；`ASSERT_*` 失敗會立即中止該測試（後續檢查不執行） |
@@ -43,15 +43,15 @@ cmake --build build                 # Windows (MinGW)：build 完會自動執行
 | 編號 | 檔案 | Test suite | 數量 | 測試對象 |
 |---|---|---|---|---|
 | EX | `ExampleTests.cpp` | `SkillTest` | 11 | Anthony 原本的技能測試（只檢查 HP / MP / 狀態，不檢查輸出） |
-| SK | `SkillTests.cpp` | `SkillBehaviorTest` | 43 | 技能：名稱、MP、候選、輸出訊息、傷害、狀態、召喚、詛咒、一拳攻擊 |
-| RL | `RoleTests.cpp` | `RoleTest` | 21 | `Role`：屬性、軍隊、MP、HP 與死亡、觀察者、狀態與回合倒數 |
+| SK | `SkillTests.cpp` | `SkillBehaviorTest` | 45 | 技能：名稱、MP、候選、輸出訊息、傷害、狀態、召喚、詛咒、一拳攻擊 |
+| RL | `RoleTests.cpp` | `RoleTest` | 22 | `Role`：屬性、軍隊、MP、HP 與死亡、觀察者、狀態與回合倒數 |
 | AI | `AIActionTests.cpp` | `AIActionTest` | 11 | `AIAction`：seed 規則（S1、S2、自動全選） |
 | HA | `HeroActionTests.cpp` | `HeroActionTest` | 15 | `HeroAction`：從輸入讀英雄決策（S1、S2、提示、格式容錯、錯誤處理） |
 | ST | `StateFlowTests.cpp` | `StateFlowTest` | 16 | `State::decision()` 行動流程、「輪到 …」、石化 / 中毒 / 鼓舞 |
 | RP | `TestcaseReplayTests.cpp` | `AllTestcases/TestcaseReplayTest`、`TestcaseListTest` | 11 | `testcases/` 10 組用正式 parser + RPG 整場比對、測資清單檢查 |
 | PA | `ParserTests.cpp` | `ParserTest` | 8 | Client 端 `RPG_parser`：解析輸入、技能建造函式、錯誤處理 |
 | BT | `BattleTests.cpp` | `BattleTest` | 10 | `Battle` 回合迴圈、結束條件、`RPG` 宣布勝負 |
-| | | **合計** | **146** | |
+| | | **合計** | **149** | |
 
 ### 1.4 測試共用的工具與慣例
 
@@ -59,7 +59,9 @@ cmake --build build                 # Windows (MinGW)：build 完會自動執行
 |---|---|---|
 | `CoutCapture` | SK、RL | 建構時用 `std::cout.rdbuf()` 把輸出導向字串，解構時還原（D38）；`lines()` 依換行切成 `vector<string>`，用來**逐行比對**輸出 |
 | `SkillBehaviorTest` / `RoleTest` fixture | SK、RL | 內含 `Troop t1{1}`、`Troop t2{2}`；`add(troop, name, hp, mp, str)` 建立角色並加入軍隊，所以輸出名稱會帶 `[1]` / `[2]` 前綴 |
-| `run(skill, actor, targets)` | SK | 直接呼叫 `skill.attack(actor, targets)` 並回傳輸出行；**不經過 State 流程，所以不扣 MP、不印行動訊息** |
+| `run(skill, actor, targets)` | SK | 直接呼叫 `skill.attack(actor, targets)` 並回傳輸出行；**不經過 State 流程，所以不扣 MP、不印行動訊息、不付 HP 代價** |
+| `castThroughFlow(actor, index)` | SK | 用 fixture 的 `HeroAction`（輸入 `index`）讓 actor 經過完整的 `takeTurn` 施放第 index 個行動：扣 MP、施放、支付 HP 代價（D47）；回傳完整輸出 |
+| `RoleTest::hurt(target, n)` | RL | 由 fixture 的 `attacker`（不在軍隊，名稱 `Attacker`）呼叫 `getState()->doDamage(target, n)`；`lossHp` 不公開後（D47），測試也走正規傷害通道，會多印一行「Attacker 對 … 造成 n 點傷害。」 |
 | `alive1()` / `alive2()` | SK | 模擬 Battle 交給技能的 T1、T2 名單（D30、D31） |
 | `requirementChain()` | SK | 依需求順序組好的一拳處理鏈：`HpHandler → PoisonPetrochemicalHandler → CheerupHandler → NormalHandler`（D21） |
 | `RecordingState` | RL | 只記錄 `decision()` 被呼叫的次數與參數，用來確認 `Role::takeTurn` 有交給狀態（D10） |
@@ -134,12 +136,14 @@ Anthony 原本寫的技能測試。每個測試都直接呼叫 `skill->attack(ac
 - **通過標準**：4 條規則的傷害與狀態變化都正確；只有「受到鼓舞」會被換回正常。
 
 #### EX-05 `SkillTest.SelfExplosionTest`
-- **目的**：自爆花 200 MP，對目標造成 150 點傷害，自己 HP 歸零。
-- **依據**：需求「行動」表（自爆）；D34。
+- **目的**：自爆花 200 MP，對目標造成 150 點傷害；自殺是它的 HP 代價。
+- **依據**：需求「行動」表（自爆）；D34、D47。
 - **步驟與預期**：
   1. `skill->getMp()` → `200`
-  2. `skill->attack(actor, {target})` → `target` HP `350`、`actor` HP `0`
-- **通過標準**：目標 −150、行動者死亡。
+  2. `skill->attack(actor, {target})` → `target` HP `350`；`actor` HP 仍為 `500`（`attack()` 只對目標施放）
+  3. `skill->costHp(actor)` → `500`（全部 HP，由 State 流程在施放後支付）
+- **通過標準**：目標 −150、`attack()` 不扣施放者 HP、代價為全部 HP。
+- **備註**：2026-10-14 因 D47 修改；原本檢查 `attack()` 之後施放者 HP 為 0。
 
 #### EX-06 `SkillTest.SelfHealingTest`
 - **目的**：自我治療花 50 MP，只替行動者加 150 HP。
@@ -196,7 +200,7 @@ Anthony 原本寫的技能測試。每個測試都直接呼叫 `skill->attack(ac
 
 ---
 
-## 3. SK — `SkillTests.cpp`（`SkillBehaviorTest`，43 個）
+## 3. SK — `SkillTests.cpp`（`SkillBehaviorTest`，45 個）
 
 技能的行為與**輸出文字**。角色用 fixture 的 `add(t1/t2, …)` 建立，所以名稱帶 `[1]` / `[2]` 前綴。`run(skill, actor, targets)` 直接呼叫 `attack()` 並收集輸出（不經過 State 流程：不扣 MP、不印行動訊息）。
 
@@ -440,8 +444,9 @@ Anthony 原本寫的技能測試。每個測試都直接呼叫 `skill->attack(ac
 #### SK-28 `SelfExplosionHitsOthersThenActorDiesLast`
 - **目的**：自爆依 T1 → T2 對其他所有人造成 150；自己的死亡訊息**最後**才印，且自己歸零**不印**傷害訊息。
 - **依據**：D34（已用 `testcases/self-explosion.out` 驗證）。
-- **準備**：T1 = 英雄 `999999 HP`、A `100 HP`；T2 = A `200 HP`。候選用 `getCandidates` 取得。
-- **步驟與預期**：輸出必須是 4 行：
+- **依據補充**：D47（自殺是 HP 代價，由 `State::decision()` 在施放後支付）。
+- **準備**：T1 = 英雄 `999999 HP`（加上自爆，行動 (1)）、A `100 HP`；T2 = A `200 HP`。用 `castThroughFlow(英雄, 1)` 經過完整流程施放。
+- **步驟與預期**：輸出的**最後 4 行**必須是：
   1. `[1]英雄 對 [1]A 造成 150 點傷害。`
   2. `[1]A 死亡。`
   3. `[1]英雄 對 [2]A 造成 150 點傷害。`
@@ -451,17 +456,33 @@ Anthony 原本寫的技能測試。每個測試都直接呼叫 `skill->attack(ac
 - **通過標準**：4 行順序正確，沒有「英雄 對 英雄」的傷害行。
 
 #### SK-29 `SelfExplosionDeathTriggersObservers`
-- **目的**：自爆的自殺也經過 `lossHp`，所以會觸發觀察者（詛咒獎勵）。
-- **準備**：Curser `1000 / 0 / 0`（T2）詛咒英雄 `1000 / 500 / 0`（T1）。
+- **目的**：支付自爆的 HP 代價也經過 `lossHp`，所以會觸發觀察者（詛咒獎勵）。
+- **準備**：Curser `1000 / 0 / 0`（T2）詛咒英雄 `1000 / 500 / 0`（T1，加上自爆）。
 - **步驟與預期**：
-  1. 英雄自爆打 Curser → `["[1]英雄 對 [2]Curser 造成 150 點傷害。", "[1]英雄 死亡。"]`
-  2. → Curser HP `1350`（1000 − 150 + 英雄剩餘 MP 500）
+  1. `castThroughFlow(英雄, 1)` → 最後一行 `[1]英雄 死亡。`
+  2. → Curser HP `1150`（1000 − 150 + 英雄剩餘 MP 300；流程先扣了 200 MP）
 - **通過標準**：輸出與 HP 都相符。
 
 #### SK-30 `CurserKilledByExplosionGainsNothing`
-- **準備**：Curser `100 HP` 詛咒英雄；英雄自爆打 Curser（150 傷害）。
+- **準備**：Curser `100 HP` 詛咒英雄（加上自爆）；`castThroughFlow(英雄, 1)` 自爆打 Curser（150 傷害）。
 - **步驟與預期**：英雄死亡；Curser HP 仍為 `0`
 - **通過標準**：施咒者先被炸死，英雄死亡時不給獎勵。
+
+#### SK-44 `SelfExplosionCostsAllHpButAttackItselfDoesNotKill`（2026-10-14 新增）
+- **目的**：`SelfExplosion::attack()` 只對目標施放；自殺是 `costHp()` 宣告的代價。
+- **依據**：D47。
+- **準備**：英雄 `1234 HP`、Slime `1000 HP`。
+- **步驟與預期**：
+  1. `run(自爆, 英雄, {Slime})` → `["[1]英雄 對 [2]Slime 造成 150 點傷害。"]`
+  2. → 英雄 HP 仍為 `1234`
+  3. `costHp(英雄)` → `1234`
+- **通過標準**：三點都成立。
+
+#### SK-45 `OnlySelfExplosionCostsHp`（2026-10-14 新增）
+- **目的**：除了自爆，所有行動的 HP 代價都是 0（預設值）。
+- **依據**：D47。
+- **步驟與預期**：普通攻擊、水球、火球、自我治療、石化、下毒、召喚、鼓舞、詛咒、一拳攻擊的 `costHp(英雄)` 都是 `0`；`SelfExplosion().costHp(英雄)` 是英雄目前的 HP `777`
+- **通過標準**：11 個都相符。
 
 ### 3.9 詛咒（Observer：`CurserObserver`，D18、D19）
 
@@ -485,11 +506,11 @@ Anthony 原本寫的技能測試。每個測試都直接呼叫 `skill->attack(ac
 - **通過標準**：施咒者已死不給獎勵。
 
 #### SK-34 `CursedRoleDyingFromOtherHpLossStillRewardsCurser`
-- **目的**：非技能的扣血（例如中毒）致死，也會觸發詛咒獎勵。
-- **依據**：D17（所有 HP 減少都走 `lossHp`）。
-- **準備**：英雄 `300 HP` 詛咒 Slime（`30 / 999 / 0`）。
+- **目的**：非技能的扣血（中毒）致死，也會觸發詛咒獎勵。
+- **依據**：D17（所有 HP 減少都走 `lossHp`）、D47（中毒走 `State::damage`）。
+- **準備**：英雄 `300 HP` 詛咒 Slime（`30 / 999 / 0`），Slime 中毒。
 - **步驟與預期**：
-  1. `slime->lossHp(30)` → 輸出只有 `["[2]Slime 死亡。"]`
+  1. `slime->takeTurn(…)` → 輸出 `["輪到 [2]Slime (HP: 30, MP: 999, STR: 0, State: 中毒)。", "[2]Slime 死亡。"]`
   2. → 英雄 HP `1299`（300 + 999）
 - **通過標準**：輸出與 HP 都相符。
 
@@ -557,7 +578,7 @@ Anthony 原本寫的技能測試。每個測試都直接呼叫 `skill->attack(ac
 
 ---
 
-## 4. RL — `RoleTests.cpp`（`RoleTest`，21 個）
+## 4. RL — `RoleTests.cpp`（`RoleTest`，22 個）
 
 `Role` 本身的責任：屬性、所屬軍隊、MP 檢查、HP 與死亡、觀察者、狀態與回合倒數。
 
@@ -629,11 +650,11 @@ Anthony 原本寫的技能測試。每個測試都直接呼叫 `skill->attack(ac
 
 #### RL-09 `LossHpAnnouncesDeathOnlyWhenHpReachesZero`
 - **目的**：只有 HP 從大於 0 變成 0 的那一刻才印死亡；已死亡再扣不再印。
-- **準備**：Slime1 `100 HP`（T2）。
+- **準備**：Slime1 `100 HP`（T2）；用 `hurt()` 經由 `doDamage` 扣血（`lossHp` 不公開，D47）。
 - **步驟與預期**：
-  1. `lossHp(99)` → 無輸出；HP `1`
-  2. `lossHp(1)` → 輸出 `["[2]Slime1 死亡。"]`；`isDead()` 為真
-  3. `lossHp(10)` → 無輸出
+  1. `hurt(Slime1, 99)` → 只有 `Attacker 對 [2]Slime1 造成 99 點傷害。`；HP `1`
+  2. `hurt(Slime1, 1)` → `Attacker 對 [2]Slime1 造成 1 點傷害。`、`[2]Slime1 死亡。`；`isDead()` 為真
+  3. `hurt(Slime1, 10)` → 只有傷害行，**沒有**死亡行
 - **通過標準**：死亡訊息只在第 2 步出現一次。
 
 #### RL-10 `GainHpHasNoCap`
@@ -644,7 +665,7 @@ Anthony 原本寫的技能測試。每個測試都直接呼叫 `skill->attack(ac
 
 #### RL-11 `ObserversAreNotifiedOnceInTheOrderTheyWereAdded`
 - **準備**：T（`10 HP`）依序加入觀察者 a、b（`RecordingObserver`）。
-- **步驟與預期**：`lossHp(10)` 兩次 → log 為 `["a:T", "b:T"]`
+- **步驟與預期**：`hurt(T, 10)` 兩次 → log 為 `["a:T", "b:T"]`
 - **通過標準**：依加入順序、各只通知一次、收到的是死者本身（pull model）。
 
 #### RL-12 `RemovedObserverIsNotNotified`
@@ -654,7 +675,7 @@ Anthony 原本寫的技能測試。每個測試都直接呼叫 `skill->attack(ac
 #### RL-13 `ObserverRewardsAreAppliedAfterDeathMessage`
 - **準備**：Curser `100 HP`、Summoner `100 HP`（T1）；T `10 / 70 / 0`（T2）掛上 `CurserObserver(Curser)`、`SummonObserver(Summoner)`。
 - **步驟與預期**：
-  1. `T->lossHp(10)` → 輸出只有 `["[2]T 死亡。"]`（獎勵本身不印訊息）
+  1. `hurt(T, 10)` → 輸出 `["Attacker 對 [2]T 造成 10 點傷害。", "[2]T 死亡。"]`（獎勵本身不印訊息）
   2. → Curser HP `170`（+ 剩餘 MP 70）、Summoner HP `130`（+30）
 - **通過標準**：兩種獎勵都正確。
 
@@ -714,6 +735,15 @@ Anthony 原本寫的技能測試。每個測試都直接呼叫 `skill->attack(ac
   3. 狀態是 `NormalState`；`isHero()` 為假
   4. `getDecider()` 為 `nullptr`（決策者由 `Summon` 裝上，D40）
 - **通過標準**：全部成立。
+
+#### RL-22 `DoDamageIsTheOnlyPublicWayToReduceHp`（2026-10-14 新增）
+- **目的**：確認技能（或任何外部程式）只能用 `doDamage` 造成傷害，`lossHp` / `damage` 不公開。
+- **依據**：D47（O4）。
+- **步驟與預期**：用 C++20 concept 檢查「從外部呼叫得到嗎」，再以 `static_assert` 判斷：
+  1. `Role::lossHp` → 呼叫不到
+  2. `State::damage` → 呼叫不到
+  3. `State::doDamage` → 呼叫得到
+- **通過標準**：**能編譯**就代表通過（執行時只有 `SUCCEED()`）。若有人把 `lossHp` 或 `damage` 改回 public，整個測試程式會編譯失敗，錯誤訊息是 `Role::lossHp must not be public` / `State::damage must not be public`。
 
 ---
 
@@ -1315,8 +1345,13 @@ Get-ChildItem testcases\*.in | ForEach-Object {
 | Parser：一拳處理鏈順序錯誤 | PA-06、RP-03 |
 | Parser：不檢查軍隊 1 是否有角色 | PA-08（測試程式 crash，視同失敗） |
 | `Slime()` 的 STR 寫錯（50 → 49） | RL-21、SK-23、ST-15、BT-06、RP-09 |
+| 流程沒有支付 HP 代價 | SK-28、SK-29、SK-30、ST-16、RP-07 |
+| 流程在施放**之前**支付 HP 代價 | SK-28、SK-29、SK-30、ST-16、RP-07 |
+| `Skill::costHp` 預設改成全部 HP | SK-45、BT（6 個）、ST（8 個）、RP（9 組） |
+| `Role::lossHp` 改回 public | RL-22（**編譯失敗**：`Role::lossHp must not be public`） |
+| `State::damage` 改回 public | RL-22（**編譯失敗**：`State::damage must not be public`） |
 
-> 最後一次全部重跑：2026-10-14，上表每一列都至少有一個測試失敗；還原後 146 個全部通過。
+> 最後一次全部重跑：2026-10-14，上表每一列都至少有一個測試失敗；還原後 149 個全部通過。
 
 ---
 

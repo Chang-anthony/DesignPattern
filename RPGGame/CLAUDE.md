@@ -46,15 +46,15 @@
 
 | 區塊 | 現況 |
 |---|---|
-| `Skill/` | ✅ 保留原本的 `attack()`、`setName` / `setMp` 寫法；名稱改中文（D27）；移除 `targetEnemy` / `targetFriend` 與巨集，改為 `getCandidates()`（D29、D33）；新增 `announce()`（§7 I1）；傷害改走 `actor->getState()->doDamage()`（D16） |
+| `Skill/` | ✅ 保留原本的 `attack()`、`setName` / `setMp` 寫法；名稱改中文（D27）；移除 `targetEnemy` / `targetFriend` 與巨集，改為 `getCandidates()`（D29、D33）；新增 `announce()`（§7 I1）；傷害改走 `actor->getState()->doDamage()`（D16）；`costHp(actor)`：行動的 HP 代價，預設 0、自爆 = 全部 HP（D47） |
 | `OnePunchHandler/` | ✅ 移除 `next` 指標，改由 `OnePunch` 以 `vector` 注入（D21、D23）；`handle / match / doHandle` 帶入 `actor`（D22）；用 `dynamic_cast` 判斷狀態（D25） |
 | `Observer/` | ✅ `UntilDie(Role* dead)`（pull model，D18）；`SummonObserver` +30、`CurserObserver` + 剩餘 MP，施放者已死就不給 |
-| `State/` | ✅ `doDamage` / `damage`（D16）、受到鼓舞 +50、計時狀態回合數 3（D11）；移除 `entryState` / `exitState` 裡的除錯輸出；**`State::decision()` 是預設行動流程（S1 → S2 → S3，D10、D12）**，石化覆寫成整段跳過、中毒覆寫成先扣 30 再沿用預設流程；各狀態持有中文名稱 `getDisplayName()`（§7.6） |
-| `Role/` | ✅ `lossHp()`：歸零當下印死亡並通知觀察者（D17）；建立時自動加入普通攻擊（D28）；`getDisplayName()`；`checkMp(Skill*)` 只檢查（D9，取代 `checkActionLossMp`）；`endThisRound()`（D11）；`takeTurn(t1, t2, actorSide)` 交給 `state->decision(...)`（D10）；決策者 `setDecider / getDecider`（D4）；英雄識別 `setIdentity / isHero`（D6）；✅ `Hero` / `AI` 子類別已刪除（D4）；`NonHero` 已刪除、`Slime` 直接繼承 `Role`（D43）並以 `Slime()` 持有需求數值（D44） |
+| `State/` | ✅ `doDamage` / `damage`（D16）、受到鼓舞 +50、計時狀態回合數 3（D11）；移除 `entryState` / `exitState` 裡的除錯輸出；**`State::decision()` 是預設行動流程（S1 → S2 → S3，D10、D12）**，石化覆寫成整段跳過、中毒覆寫成先扣 30 再沿用預設流程；各狀態持有中文名稱 `getDisplayName()`（§7.6）；`damage()` 改為 protected，`decision()` 在施放後支付 `Skill::costHp()`（D47） |
+| `Role/` | ✅ `lossHp()`：歸零當下印死亡並通知觀察者（D17）；建立時自動加入普通攻擊（D28）；`getDisplayName()`；`checkMp(Skill*)` 只檢查（D9，取代 `checkActionLossMp`）；`endThisRound()`（D11）；`takeTurn(t1, t2, actorSide)` 交給 `state->decision(...)`（D10）；決策者 `setDecider / getDecider`（D4）；英雄識別 `setIdentity / isHero`（D6）；✅ `Hero` / `AI` 子類別已刪除（D4）；`NonHero` 已刪除、`Slime` 直接繼承 `Role`（D43）並以 `Slime()` 持有需求數值（D44）；`lossHp()` 改為 private、只開放給 `State`（D47） |
 | `IAction` / `AIAction` / `HeroAction` | ✅ `IAction`：`chooseAction(skills)`、`chooseTargets(candidates, m)`（D4、D5、D7、D8）；`AIAction`：seed 規則（§7.2 I5）；`HeroAction`：從注入的 `istream` 讀英雄決策（D37，§7.5） |
 | `Game/` | ✅ `Troop` 新增軍隊編號（輸出前綴）；`Battle::startBattle()` 回合迴圈（D1、D11、D20、D30、D31）、`isHeroAlive()`；`RPG::GameStart()` 啟動戰鬥並印勝負（§7.2 I9）；`RPG::makeAction()`、`Troop::StartBattle()` 已刪除（D42） |
 | Client | ✅ `test/libary/RPG_parser`：解析輸入、技能建造函式（D26、D36，§7.2 I10）；`main.cpp`：讀測資 / `--play` 實際玩 / 標準輸入三種用法（§7.2 I11） |
-| 測試 | ✅ `ExampleTests.cpp` 11、`SkillTests.cpp` 43、`RoleTests.cpp` 20、`AIActionTests.cpp` 11、`HeroActionTests.cpp` 15、`StateFlowTests.cpp` 16、`BattleTests.cpp` 10、`ParserTests.cpp` 8、`TestcaseReplayTests.cpp` 11（`testcases/` 10 組用正式的 parser + RPG 整場比對，加上測資清單檢查），共 145 個全部通過；主程式 `RPGGAME <測資.in>` 的輸出也與 10 組 `.out` 完全相同。每個測試的流程與通過標準見 [`test/TESTS.md`](test/TESTS.md) |
+| 測試 | ✅ `ExampleTests.cpp` 11、`SkillTests.cpp` 45、`RoleTests.cpp` 22、`AIActionTests.cpp` 11、`HeroActionTests.cpp` 15、`StateFlowTests.cpp` 16、`BattleTests.cpp` 10、`ParserTests.cpp` 8、`TestcaseReplayTests.cpp` 11（`testcases/` 10 組用正式的 parser + RPG 整場比對，加上測資清單檢查），共 149 個全部通過；主程式 `RPGGAME <測資.in>` 的輸出也與 10 組 `.out` 完全相同。每個測試的流程與通過標準見 [`test/TESTS.md`](test/TESTS.md) |
 
 ---
 
@@ -155,7 +155,7 @@
 - **O1. 物件擁有權**：全用裸指標，召喚的 `Slime` 由誰釋放沒有定義。要不要用 `std::unique_ptr` 表達擁有權？（需求未要求）
 - **O2. `Troop` 與 `Battle` 的責任** ✅ 結案（D42、D45）：`Troop::StartBattle()` 已刪除（`Troop` 不再認識 `Battle`）；`Battle` 的成員改名為陣營 `heroTroop` / `opponentTroop`。
 - **O3. 命名與詞彙表** ✅ 結案（D46）：維持 `Skill` / `attack()` 命名，`attack` 意指「施放行動」，已在 `Skill.hpp` 註明。
-- **O4. 防止技能繞過傷害通道**：`Role` 的扣血函式若為 public，新技能可能直接扣血而跳過狀態的傷害加成。可用存取權限（private + friend / 只開放給 State）或團隊約定處理。（需求只要求能擴充，未要求防呆；D13 的 `doAction(actor, targets)` 已拿得到行動者）
+- **O4. 防止技能繞過傷害通道** ✅ 結案（D47）：`lossHp` private、`damage` protected，技能只能用 `doDamage`；自爆的自殺改為 `costHp()` 由流程支付；`RoleTests` 以 static_assert 在編譯期檢查。
 - **O5. 技能名稱重複定義**：Client 的建造函式（D26）與技能本身（D27）各寫一次「火球」，改名或拼錯時兩邊可能不一致。（需求的測資名稱固定，Anthony 決定先假設不會寫錯）
 - **O6. 輸出目的地可替換**：模組直接寫 `std::cout`（D38），測試靠 `rdbuf` 導向。若要讓輸出可注入（`ostream&` 或輸出介面），需改整條呼叫鏈。（需求未要求）
 
@@ -209,6 +209,7 @@
 | D44 | 2026-10-14 | 實作後補充（D43 延伸） | **史萊姆的數值由 `Slime` 自己持有**：建構子改為 `Slime()`，內部呼叫 `Role(100, 0, 50, "Slime")`；`Summon` 只寫 `new Slime()`，再裝上觀察者與 `AIAction`。 | 需求對史萊姆的描述（100 HP、0 MP、50 STR、沒有技能）集中在 `Slime`，`Summon` 只負責「召喚」這個動作；與 D27（技能各自持有名稱）同樣的思路。已排除：刪掉 `Slime`、由 `Summon` 直接 `new Role(...)`（史萊姆這個概念只剩一行數字） |
 | D45 | 2026-10-14 | O2 | **`Battle` 的兩支軍隊改名為陣營：`heroTroop`（英雄方，T1，先行動）與 `opponentTroop`（對手方，T2）**，取代原本的 `ally` / `enemy`。 | Anthony 認為 `Battle` 應該知道哪一軍是英雄方。不用 `ally` / `enemy`，因為需求詞彙表的「友軍 / 敵軍」是相對於某個角色而言（T2 的角色行動時，T1 是它的敵軍），容易混淆。已排除：維持 `ally` / `enemy`、以輪流順序命名 `t1` / `t2` |
 | D46 | 2026-10-14 | O3 | **維持 `Skill` / `attack()` 的命名**：`Skill` 是所有行動（含普通攻擊）的抽象，`attack(actor, targets)` 的意思是「施放這個行動」，不限於造成傷害。只在 `Skill.hpp` 的宣告加上註解說明，不改名。 | Anthony 認為這不是問題：`Skill` 只是用來抽象描述技能，`attack` 當成施放。改名（例如 `cast` / `perform`）要動 11 個技能、測試與文件，換來的只是用詞更貼近詞彙表 |
+| D47 | 2026-10-14 | O4 | **技能造成傷害只能走 `doDamage`，由編譯器強制**：`Role::lossHp` 改為 private（`friend class State`）、`State::damage` 改為 protected；中毒改呼叫自己的 `damage(30)`。**自爆的自殺改視為技能的「HP 代價」**：`Skill` 新增 `virtual int costHp(Role* actor) const`（預設 0），`SelfExplosion` 回傳全部 HP；`State::decision()` 在 `attack()` 之後支付（不印傷害訊息，死亡訊息自然排在所有目標之後，D34）。 | Anthony 要求技能的寫法統一、不要多一個 `die()` 入口；自殺與 MP 一樣是施放的代價，由流程支付。代價：`Skill` 多一個 virtual；直接呼叫 `attack()` 的自爆測試改成經過流程 |
 
 ---
 
@@ -305,3 +306,12 @@ cd test && ./run_tests.sh                        # Windows: run_tests.bat
   - `ParserTests.cpp` 8 個：兩軍屬性與技能、英雄與 AI、讀完停在決策行、CRLF 與空白行、10 種技能名稱、一拳的處理鏈、未知技能、各種格式錯誤。
   - `TestcaseReplayTests.cpp` 11 個：原本 `StateFlowTests` 裡的測試用鷹架（簡易 parser + 迴圈）**移除**，改用正式的 `RPG_parser` + `HeroAction` + `RPG`；不一致時寫出 `<名稱>.actual.txt`（D39）；另加一個測試確認 `testcases/` 的每個 `.in` 都有被跑到。
   - 共 145 個全部通過；`RPGGAME` 主程式三種用法對 10 組測資的輸出都與 `.out` 相同（含 LF / CRLF 檔案）；刻意改壞 Battle / RPG / parser 的 14 個地方都會被抓到（見 `TESTS.md`）。
+
+### 7.8 2026-10-14：開放問題 O2–O4
+- **O2（D42、D45）**：刪除 `Troop::StartBattle()`；`Battle` 的成員改名為 `heroTroop` / `opponentTroop`。
+- **O3（D46）**：維持 `Skill` / `attack()` 命名，在 `Skill.hpp` 註明 `attack` 是「施放」。
+- **O4（D47）**：
+  - `Role::lossHp` private + `friend class State`；`State::damage` protected；`PoisonedState` 改呼叫 `damage(30)`。
+  - `Skill::costHp(actor)`（預設 0）、`SelfExplosion::costHp` = 全部 HP；`SelfExplosion::attack` 不再自殺；`State::decision()` 在 `attack()` 之後詢問並支付 HP 代價（施放途中得到的 HP 也算在內）。
+  - 測試：直接呼叫 `lossHp` 的 13 處改走 `doDamage`（`RoleTests` 用 fixture 的 `hurt()`）或完整流程（`SkillTests` 新增 `castThroughFlow()`）；`ExampleTests` 的 `SelfExplosionTest` 改為檢查 `attack()` 不扣施放者 HP、`costHp()` = 500；新增 `SelfExplosionCostsAllHpButAttackItselfDoesNotKill`、`OnlySelfExplosionCostsHp`、`DoDamageIsTheOnlyPublicWayToReduceHp`（用 C++20 concept + static_assert 在編譯期確認 `lossHp` / `damage` 不公開）。共 149 個通過，10 組測資整場輸出不變。
+  - 刻意改壞：不支付 HP 代價、在施放前支付、預設代價改成全部 HP → 測試失敗；把 `lossHp` 或 `damage` 改回 public → **編譯失敗**（static_assert 訊息直接指出原因）。
