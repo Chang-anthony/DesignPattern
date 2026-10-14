@@ -4,7 +4,7 @@
 
 - 需求：[`../need/need.md`](../need/need.md)　設計決策 D1–D40 與實作紀錄：[`../CLAUDE.md`](../CLAUDE.md)　圖：[`../diagrams.md`](../diagrams.md)
 - 測試框架：GoogleTest（`TEST` / `TEST_F`），C++20
-- 最後更新：2026-10-14，共 **98** 個測試，全部通過
+- 最後更新：2026-10-14（加入 State 行動流程），共 **126** 個測試，全部通過
 
 ---
 
@@ -25,6 +25,7 @@ cmake --build build                 # Windows (MinGW)：build 完會自動執行
 ./build/bin/SimpleTest --gtest_filter='HeroActionTest.*'
 ./build/bin/SimpleTest --gtest_filter='SkillBehaviorTest.OnePunch*'
 ./build/bin/SimpleTest --gtest_filter='RoleTest.CheckMpBoundaryIsInclusive'
+./build/bin/SimpleTest --gtest_filter='AllTestcases/TestcaseReplayTest.*'   # 只跑 10 組測資整場重播
 ./build/bin/SimpleTest --gtest_list_tests          # 列出所有測試名稱
 ```
 
@@ -32,7 +33,7 @@ cmake --build build                 # Windows (MinGW)：build 完會自動執行
 
 | 項目 | 標準 |
 |---|---|
-| 結果 | 最後一行為 `[  PASSED  ] 98 tests.`，沒有任何 `[  FAILED  ]` |
+| 結果 | 最後一行為 `[  PASSED  ] 126 tests.`，沒有任何 `[  FAILED  ]` |
 | 程式結束 | 測試程式正常結束（沒有 crash / segmentation fault）；crash 視同失敗 |
 | 新增測試檔 | `test/CMakeLists.txt` 以 `file(GLOB … CONFIGURE_DEPENDS *.cpp)` 收集，新增 / 刪除 `test/*.cpp` 後直接 build 即可，不必修改 CMake |
 | 單一測試 | 該測試內**所有** `EXPECT_*` / `ASSERT_*` 都成立；`ASSERT_*` 失敗會立即中止該測試（後續檢查不執行） |
@@ -42,11 +43,13 @@ cmake --build build                 # Windows (MinGW)：build 完會自動執行
 | 編號 | 檔案 | Test suite | 數量 | 測試對象 |
 |---|---|---|---|---|
 | EX | `ExampleTests.cpp` | `SkillTest` | 11 | Anthony 原本的技能測試（只檢查 HP / MP / 狀態，不檢查輸出） |
-| SK | `SkillTests.cpp` | `SkillBehaviorTest` | 42 | 技能：名稱、MP、候選、輸出訊息、傷害、狀態、召喚、詛咒、一拳攻擊 |
+| SK | `SkillTests.cpp` | `SkillBehaviorTest` | 43 | 技能：名稱、MP、候選、輸出訊息、傷害、狀態、召喚、詛咒、一拳攻擊 |
 | RL | `RoleTests.cpp` | `RoleTest` | 20 | `Role`：屬性、軍隊、MP、HP 與死亡、觀察者、狀態與回合倒數 |
 | AI | `AIActionTests.cpp` | `AIActionTest` | 11 | `AIAction`：seed 規則（S1、S2、自動全選） |
-| HA | `HeroActionTests.cpp` | `HeroActionTest` | 14 | `HeroAction`：從輸入讀英雄決策（S1、S2、格式容錯、錯誤處理） |
-| | | **合計** | **98** | |
+| HA | `HeroActionTests.cpp` | `HeroActionTest` | 15 | `HeroAction`：從輸入讀英雄決策（S1、S2、提示、格式容錯、錯誤處理） |
+| ST | `StateFlowTests.cpp` | `StateFlowTest` | 16 | `State::decision()` 行動流程、「輪到 …」、石化 / 中毒 / 鼓舞 |
+| RP | `StateFlowTests.cpp` | `AllTestcases/TestcaseReplayTest` | 10 | `testcases/` 10 組整場重播，輸出逐行比對 |
+| | | **合計** | **126** | |
 
 ### 1.4 測試共用的工具與慣例
 
@@ -62,6 +65,9 @@ cmake --build build                 # Windows (MinGW)：build 完會自動執行
 | `DummyAction` | RL | 最簡單的 `IAction`：永遠選第一個行動、回傳全部候選 |
 | `std::istringstream` | HA | 模擬英雄的輸入（D37：`HeroAction` 注入 `std::istream&`） |
 | `namesOf(roles)` | AI、HA | 把 `vector<Role*>` 轉成名字清單，方便比對 |
+| `HeroActionTest::mute` | HA | fixture 成員 `CoutCapture`：把 `chooseTargets` 印的提示靜音；要檢查提示的測試在裡面再開一個 `CoutCapture`（巢狀導向，結束時還原到外層） |
+| `StateFlowTest::turn(role)` | ST | 依角色所屬軍隊決定 actorSide，呼叫 `takeTurn(t1.getRoles(), t2.getRoles(), side)` 並回傳**完整輸出** |
+| `readLines` / `createSkill` / `load` / `play` | RP | 測試用的 parser 與 Battle 迴圈（見 §8.1） |
 
 輸出格式依 `testcases/*.out`：傷害「`<行動者> 對 <目標> 造成 <N> 點傷害。`」、死亡「`<角色> 死亡。`」，名稱一律帶軍隊前綴。
 
@@ -74,6 +80,8 @@ cmake --build build                 # Windows (MinGW)：build 完會自動執行
 - **準備**：建立的角色（`名稱 HP / MP / STR`）、軍隊、狀態等前置資料。
 - **步驟與預期**：依序執行的動作，每一步後面的「→」是該步驟要成立的檢查。
 - **通過標準**：整個測試算通過的條件（摘要）。
+
+**編號規則**：編號一旦給出就固定，之後新增的測試接在該檔案的最後一號（例如 SK-43、HA-15），文件中放在相關主題的位置；這樣 §9 的對照表與其他文件引用的編號不會跑掉。
 
 ---
 
@@ -185,7 +193,7 @@ Anthony 原本寫的技能測試。每個測試都直接呼叫 `skill->attack(ac
 
 ---
 
-## 3. SK — `SkillTests.cpp`（`SkillBehaviorTest`，42 個）
+## 3. SK — `SkillTests.cpp`（`SkillBehaviorTest`，43 個）
 
 技能的行為與**輸出文字**。角色用 fixture 的 `add(t1/t2, …)` 建立，所以名稱帶 `[1]` / `[2]` 前綴。`run(skill, actor, targets)` 直接呼叫 `attack()` 並收集輸出（不經過 State 流程：不扣 MP、不印行動訊息）。
 
@@ -499,6 +507,13 @@ Anthony 原本寫的技能測試。每個測試都直接呼叫 `skill->attack(ac
   2. 打 Slime3 → HP `60`
 - **通過標準**：每一下各印一行，兩種狀態都套用規則 2。
 
+#### SK-43 `OnePunchStopsHittingOnceTargetDies`（2026-10-14 新增）
+- **目的**：中毒 / 石化目標在 80 × 3 的途中死亡時，剩下的幾下不再出手、不再印傷害。
+- **依據**：`testcases/one-punch.out` 第 88–90 行（目標在第 2 下死亡，沒有第 3 行）；§7.2 I4。
+- **準備**：Slime1 `160 HP`、中毒。
+- **步驟與預期**：輸出必須是 3 行：`[1]英雄 對 [2]Slime1 造成 80 點傷害。` × 2、`[2]Slime1 死亡。`；HP `0`
+- **通過標準**：沒有第 3 行傷害。
+
 #### SK-37 `OnePunchOnCheeredTargetDeals100AndResetsToNormal`
 - **準備**：Slime1 `201 HP`、受到鼓舞。
 - **步驟與預期**：輸出 `["[1]英雄 對 [2]Slime1 造成 100 點傷害。"]`；HP `101`；狀態變成 `NormalState`
@@ -652,10 +667,13 @@ Anthony 原本寫的技能測試。每個測試都直接呼叫 `skill->attack(ac
 - **通過標準**：三點都成立。
 
 #### RL-16 `TakeTurnHandsTheBattlefieldToCurrentState`
-- **目的**：`Role::takeTurn` 把戰場資訊原封不動交給目前狀態的 `decision()`。
-- **準備**：英雄（T1）的狀態換成 `RecordingState`；Slime1 在 T2。
-- **步驟與預期**：`英雄->takeTurn(t1.getRoles(), t2.getRoles(), 1)` → `calls == 1`、`lastT1 == {英雄}`、`lastT2 == {Slime1}`、`lastSide == 1`
-- **通過標準**：呼叫一次且參數相同。
+- **目的**：`Role::takeTurn` 先印「輪到 …」，再把戰場資訊原封不動交給目前狀態的 `decision()`。
+- **依據**：D10；§7.2 I6。
+- **準備**：英雄 `100 / 0 / 0`（T1）的狀態換成 `RecordingState`（中文名稱設為「測試」）；Slime1 在 T2。
+- **步驟與預期**：`英雄->takeTurn(t1.getRoles(), t2.getRoles(), 1)`：
+  1. 輸出 → `["輪到 [1]英雄 (HP: 100, MP: 0, STR: 0, State: 測試)。"]`
+  2. `calls == 1`、`lastT1 == {英雄}`、`lastT2 == {Slime1}`、`lastSide == 1`
+- **通過標準**：印一行「輪到 …」、呼叫一次且參數相同。
 
 #### RL-17 `NormalStateHasNoCountdown`
 - **步驟與預期**：正常狀態下 `endThisRound()` 兩次 → 狀態物件不變（同一個指標），仍為 `NormalState`
@@ -764,15 +782,15 @@ Anthony 原本寫的技能測試。每個測試都直接呼叫 `skill->attack(ac
 
 ---
 
-## 6. HA — `HeroActionTests.cpp`（`HeroActionTest`，14 個）
+## 6. HA — `HeroActionTests.cpp`（`HeroActionTest`，15 個）
 
 `HeroAction` 從注入的 `std::istream` 讀英雄決策（D37）：
 
 - 每個決策一行，數字以「`, `」隔開（例如 `1`、`0, 1, 2`）；**S1 與 S2 共用同一串輸入**。
 - S1：讀一行 → 選第 i 個行動；MP 不足時呼叫端再呼叫一次 → 讀**下一行**。
-- S2：n > m 時讀一行 m 個數字，依**輸入順序**回傳；m = 0 或 n ≤ m 時**不讀輸入**、直接回傳全部候選。
+- S2：n > m 時先印「選擇 m 位目標: (0) … (1) …」（§7.2 I7），再讀一行 m 個數字，依**輸入順序**回傳；m = 0 或 n ≤ m 時**不印、不讀輸入**、直接回傳全部候選。
 
-> 共同準備：fixture 內有 A、B、C（`abc`）與英雄 `300 / 500 / 100`，行動為 (0) 普通攻擊 (1) 火球 (2) 水球。輸入都用 `std::istringstream` 建立。
+> 共同準備：fixture 內有 A、B、C（`abc`）與英雄 `300 / 500 / 100`，行動為 (0) 普通攻擊 (1) 火球 (2) 水球。輸入都用 `std::istringstream` 建立。fixture 的 `mute` 把輸出靜音（`chooseTargets` 會印提示）。
 
 ### 6.1 S1：選行動
 
@@ -810,6 +828,18 @@ Anthony 原本寫的技能測試。每個測試都直接呼叫 `skill->attack(ac
   4. `chooseTargets({}, 0)` → 空
   5. `chooseAction` → 「水球」（`2` 這行仍在）
 - **通過標準**：前 4 步都沒有讀輸入，第 5 步讀到的是第一行。
+
+#### HA-15 `PromptsForTargetsOnlyWhenActuallyChoosing`（2026-10-14 新增）
+- **目的**：英雄在 S2 真的要選時印提示；略過 S2 時不印。
+- **依據**：需求「輸出格式」：「如果此為英雄的回合」印 `選擇 <m> 位目標: (0) <候選-1> …`；§7.2 I7。
+- **準備**：輸入 `"2, 0\n"`；在 `CoutCapture` 內執行。
+- **步驟與預期**：
+  1. `chooseTargets(abc, 2)` → 印 `選擇 2 位目標: (0) A (1) B (2) C`
+  2. `chooseTargets({A, B}, 2)`（n = m）→ 不印
+  3. `chooseTargets({}, 0)`（m = 0）→ 不印
+
+  → 全部輸出只有第 1 步那一行
+- **通過標準**：輸出剛好 1 行且格式相同（`位目標:` 後是半形冒號加空白）。
 
 ### 6.3 輸入格式的容錯
 
@@ -871,7 +901,185 @@ Anthony 原本寫的技能測試。每個測試都直接呼叫 `skill->attack(ac
 
 ---
 
-## 7. 測試有效性（Mutation 檢查）
+## 7. ST — `StateFlowTests.cpp`（`StateFlowTest`，16 個）
+
+`State::decision()` 的行動流程（D10、D12）與 `Role::takeTurn` 印的「輪到 …」（§7.2 I6）。每個測試用 fixture 的 `turn(role)` 讓角色行動一次並收集**完整輸出**，逐行比對。
+
+> 共同準備：fixture 有 `Troop t1{1}`、`t2{2}`；`add(troop, name, hp, mp, str, skills)` 建角色並加入軍隊；`turn(role)` 依角色所屬軍隊決定 actorSide，呼叫 `role->takeTurn(t1.getRoles(), t2.getRoles(), side)`。AI 用 `AIAction`、英雄用 `HeroAction` + `istringstream`。
+
+流程摘要（預設流程，`NormalState` / `CheerupedState` 沿用）：
+
+```
+輪到 X (HP: h, MP: m, STR: s, State: 正常)。        ← Role::takeTurn（I6）
+選擇行動：(0) 普通攻擊 (1) …                        ← S1，每個角色都印
+[你缺乏 MP，不能進行此行動。 → 回到 S1 重印選單]
+[選擇 m 位目標: (0) … (1) …]                        ← S2，只有英雄、且 n > m 時（I7）
+X 對 a, b 使用了 Z。 / X 攻擊 Y。 / X 使用了 Z。      ← S3：先扣 MP，再 announce
+X 對 a 造成 N 點傷害。 [a 死亡。] …                  ← attack
+```
+
+### 7.1 「輪到 …」與狀態名稱
+
+#### ST-01 `StatesHaveChineseDisplayNames`
+- **目的**：每個狀態有自己的中文名稱（「輪到 …」那一行用），類別名稱 `getName()` 不變。
+- **依據**：需求「輸出格式」（狀態只可能是 正常 / 石化 / 中毒 / 受到鼓舞）；§7.2 I8。
+- **步驟與預期**：`getDisplayName()` → `正常`、`石化`、`中毒`、`受到鼓舞`；`PoisonedState().getName()` → `"PoisonedState"`
+- **通過標準**：5 個比對都成立。
+
+#### ST-02 `TurnStartsWithHeaderShowingStatsAndState`
+- **準備**：英雄 `300 / 500 / 100`（T1，AI 決策）、Slime1（T2）。
+- **步驟與預期**：`turn(英雄)` 的第一行 → `輪到 [1]英雄 (HP: 300, MP: 500, STR: 100, State: 正常)。`
+- **通過標準**：格式完全相同（半形括號與逗號、全形句號）。
+
+### 7.2 預設流程（S1 → S2 → S3）
+
+#### ST-03 `NormalFlowPrintsMenuThenActionAndDamage`
+- **準備**：英雄 `300 / 500 / 100`（T1）；Slime1 `200 / 60 / 49`（T2，行動：普通攻擊、火球；`AIAction` seed 0）。
+- **步驟與預期**：`turn(Slime1)` 輸出必須是：
+  1. `輪到 [2]Slime1 (HP: 200, MP: 60, STR: 49, State: 正常)。`
+  2. `選擇行動：(0) 普通攻擊 (1) 火球`
+  3. `[2]Slime1 攻擊 [1]英雄。`
+  4. `[2]Slime1 對 [1]英雄 造成 49 點傷害。`
+
+  → 英雄 HP `251`、Slime1 MP 仍為 `60`
+- **通過標準**：4 行完全相同；目標只有 1 位，AI 自動選，不印目標提示。
+
+#### ST-04 `ChosenActionCostsMpBeforeExecuting`
+- **準備**：英雄 `300 / 500 / 100`（行動：普通攻擊、火球、水球；輸入 `"1\n"`）；T2 = Slime1、Slime2。
+- **步驟與預期**：輸出依序為「輪到」、`選擇行動：(0) 普通攻擊 (1) 火球 (2) 水球`、`[1]英雄 對 [2]Slime1, [2]Slime2 使用了 火球。`、兩行 50 傷害；英雄 MP `450`
+- **通過標準**：S3 扣了 50 MP；火球自動全選，不印目標提示。
+
+#### ST-05 `InsufficientMpPrintsMessageAndAsksAgain`
+- **依據**：需求 S1（MP 不足 → 印訊息並重新選擇）；D5、D9。
+- **準備**：Slime1 `150 / 10 / 49`（行動：普通攻擊、火球；`AIAction(1)`）。
+- **步驟與預期**：輸出必須是 6 行：
+  1. `輪到 [2]Slime1 (HP: 150, MP: 10, STR: 49, State: 正常)。`
+  2. `選擇行動：(0) 普通攻擊 (1) 火球`（seed 1 → 火球）
+  3. `你缺乏 MP，不能進行此行動。`
+  4. `選擇行動：(0) 普通攻擊 (1) 火球`（**重印**選單；seed 2 → 普通攻擊）
+  5. `[2]Slime1 攻擊 [1]英雄。`
+  6. `[2]Slime1 對 [1]英雄 造成 49 點傷害。`
+
+  → MP 仍為 `10`（不合法的行動不扣）、seed `3`、英雄 HP `251`
+- **通過標準**：6 行完全相同且 MP、seed 正確。
+
+#### ST-06 `HeroIsPromptedForTargetsOnlyWhenChoosing`
+- **依據**：需求「輸出格式」S2；§7.2 I7。
+- **準備**：英雄（行動：普通攻擊、水球；輸入 `"1\n1\n1\n"`）；T2 = Slime1、Slime2。
+- **步驟與預期**：
+  1. 第一次 `turn(英雄)` → 「輪到」、選單、`選擇 1 位目標: (0) [2]Slime1 (1) [2]Slime2`、`[1]英雄 對 [2]Slime2 使用了 水球。`、120 傷害；Slime2 HP `80`
+  2. 讓 Slime2 死亡，只給 T2 = `{Slime1}` 再行動一次 → 「輪到」（MP `450`）、選單、`使用了 水球`、120 傷害，**沒有**目標提示行
+- **通過標準**：提示只在第 1 次（2 位候選選 1 位）出現。
+
+#### ST-07 `AIChoosesTargetsWithoutPrompt`
+- **準備**：T1 = A、B（`500 HP`）；Slime1 `200 / 100 / 0`（行動：普通攻擊、水球；`AIAction(1)`）。
+- **步驟與預期**：輸出為「輪到」、選單、`[2]Slime1 對 [1]A 使用了 水球。`、`[2]Slime1 對 [1]A 造成 120 點傷害。`；B HP 仍為 `500`；seed `3`
+- **通過標準**：AI 依 seed 選了 A（`u[2 % 2]`），且沒有印目標提示。
+
+#### ST-08 `RoleWithoutDeciderCannotAct`
+- **步驟與預期**：沒有設定決策者的英雄（正常狀態）`takeTurn` → 丟 `std::invalid_argument`
+- **通過標準**：不會用空指標繼續執行。
+
+### 7.3 各狀態只覆寫不同的部分
+
+#### ST-09 `PetrifiedRoleOnlyPrintsHeader`
+- **依據**：需求「石化：略過 S1、S2、S3，仍要印出『輪到 …』」。
+- **準備**：BOSS `270 / 9999 / 399`（T2，AI）被石化；英雄 `400 HP`。
+- **步驟與預期**：輸出只有 `輪到 [2]BOSS (HP: 270, MP: 9999, STR: 399, State: 石化)。`；seed 仍為 `0`；英雄 HP 仍為 `400`
+- **通過標準**：一行、沒有問決策者、沒有行動。
+
+#### ST-10 `PetrifiedHeroDoesNotConsumeInput`
+- **準備**：英雄（行動：普通攻擊、水球；輸入 `"1\n"`）被石化。
+- **步驟與預期**：`turn(英雄)` 只有 1 行；之後直接呼叫 `chooseAction` → 「水球」（`1` 這行還在）
+- **通過標準**：石化的英雄不讀輸入（否則後面的決策會全部錯位）。
+
+#### ST-11 `PoisonedRoleLoses30BeforeActing`
+- **依據**：需求「中毒：進入 S1 前 HP − 30」；`testcases/poison.out` 印的是扣血前的 HP。
+- **準備**：英雄 `1000 / 500 / 0`；Slime1 `120 / 90 / 50`（AI）中毒。
+- **步驟與預期**：輸出為：
+  1. `輪到 [2]Slime1 (HP: 120, MP: 90, STR: 50, State: 中毒)。`（扣血**前**的 120）
+  2. `選擇行動：(0) 普通攻擊`
+  3. `[2]Slime1 攻擊 [1]英雄。`
+  4. `[2]Slime1 對 [1]英雄 造成 50 點傷害。`
+
+  → Slime1 HP `90`、英雄 HP `950`
+- **通過標準**：4 行相同；扣 30 不印傷害訊息。
+
+#### ST-12 `PoisonedRoleDyingCannotAct`
+- **準備**：Slime1 `30 / 90 / 50` 中毒。
+- **步驟與預期**：輸出只有 `輪到 [2]Slime1 (HP: 30, …, State: 中毒)。`、`[2]Slime1 死亡。`；`isDead()` 為真、seed 仍為 `0`、英雄 HP 仍為 `1000`
+- **通過標準**：死亡後不印選單、不行動。
+
+#### ST-13 `PoisonDeathTriggersObservers`
+- **準備**：英雄 `300 HP` 詛咒 Slime1（`30 / 70 / 0`），Slime1 中毒。
+- **步驟與預期**：`turn(Slime1)` → Slime1 中毒死亡 → 英雄 HP `370`（+ 剩餘 MP 70）
+- **通過標準**：中毒致死也會觸發詛咒獎勵（D17）。
+
+#### ST-14 `CheeredRoleUsesDefaultFlowWithBonus`
+- **準備**：Servant1 `1000 / 0 / 0`（AI）受到鼓舞；Slime1 `500 HP`。
+- **步驟與預期**：輸出為 `輪到 [1]Servant1 (…, State: 受到鼓舞)。`、`選擇行動：(0) 普通攻擊`、`[1]Servant1 攻擊 [2]Slime1。`、`[1]Servant1 對 [2]Slime1 造成 50 點傷害。`；Slime1 HP `450`
+- **通過標準**：走預設流程、傷害 +50。
+
+### 7.4 經過流程的特殊技能
+
+#### ST-15 `SummonedSlimeActsWithItsOwnAI`
+- **依據**：需求「召喚的史萊姆本回合就能行動」；D40。
+- **準備**：英雄 `500 / 10000 / 30`（行動：普通攻擊、召喚；輸入 `"1\n"`）；敵人 Slime1 `1000 / 0 / 99`。
+- **步驟與預期**：
+  1. `turn(英雄)` → 「輪到」、`選擇行動：(0) 普通攻擊 (1) 召喚`、`[1]英雄 使用了 召喚。`；英雄 MP `9850`；T1 人數 `2`
+  2. `turn(新的史萊姆)` → `輪到 [1]Slime (HP: 100, MP: 0, STR: 50, State: 正常)。`、`選擇行動：(0) 普通攻擊`、`[1]Slime 攻擊 [2]Slime1。`、50 傷害；敵人 HP `950`
+- **通過標準**：史萊姆用 `Summon` 給的 AI 正常行動。
+
+#### ST-16 `SelfExplosionThroughFlow`
+- **準備**：英雄 `500 / 200 / 0`（行動：普通攻擊、自爆；輸入 `"1\n"`）；T2 = A `100 HP`、B `300 HP`。
+- **步驟與預期**：輸出 7 行：「輪到」、`選擇行動：(0) 普通攻擊 (1) 自爆`、`[1]英雄 對 [2]A, [2]B 使用了 自爆。`、`[1]英雄 對 [2]A 造成 150 點傷害。`、`[2]A 死亡。`、`[1]英雄 對 [2]B 造成 150 點傷害。`、`[1]英雄 死亡。`；英雄 MP `0`、A 死亡、B HP `150`
+- **通過標準**：先扣 MP、行動訊息列出所有目標、自己的死亡最後印。
+
+---
+
+## 8. RP — `StateFlowTests.cpp`（`AllTestcases/TestcaseReplayTest`，10 個）
+
+用 `testcases/` 的 10 組 `.in` 跑**整場遊戲**，輸出與 `.out` **逐行**比對。因為 `Battle` / `RPG` / 正式 parser 尚未實作，這組測試在檔案內自帶**測試用的鷹架**；正式版完成後改用正式流程（D35–D39）。
+
+### 8.1 測試用鷹架
+
+| 函式 | 做什麼 | 對應的設計 |
+|---|---|---|
+| `readLines(path)` | 讀檔、去掉行尾 `\r`、去掉檔尾空行 | — |
+| `createSkill(name)` | 中文技能名 → `Skill*`；一拳攻擊注入需求順序的處理鏈 | D26、D21 |
+| `load(game, lines)` | 解析 `#軍隊-1-開始` … `#軍隊-2-結束` 之間的「名稱 HP MP STR 技能…」；T1 第一位設為英雄（`setIdentity('h')` + `HeroAction`），其他角色 `new AIAction()`；之後的每一行都放進英雄的輸入串流 | D6、D36、D37 |
+| `play(game)` | 每回合：T1 → T2；用索引走訪並**每圈重讀人數**（召喚的史萊姆本回合就行動）；跳過死者；把**活著的** T1 / T2 名單交給 `takeTurn`；**每次行動後**檢查「英雄死亡或任一方殲滅」；回合結束對所有角色 `endThisRound()`；最後印「你獲勝了！」或「你失敗了！」；最多 1000 回合防止無窮迴圈 | D1、D11、D20、D30、D31 |
+
+### 8.2 每一組的流程與通過標準
+
+**流程**（10 組都一樣）：
+
+1. 讀 `testcases/<名稱>.in`、`<名稱>.out`；任何一個讀不到 → `ASSERT` 失敗並印出路徑。
+2. `load` 建立兩軍與決策者。
+3. `play` 跑整場並收集輸出。
+4. 從第 1 行開始逐行比對；第一個不同的行會**立即停止**並報告「`<名稱>.out 第 N 行不同`」與兩邊的內容。
+5. 最後比對行數。
+
+**通過標準**：每一行都相同，且行數相同。
+
+| # | 測試名稱（`…/OutputMatchesExpectedFile/<參數>`） | `.out` 行數 | 這組主要驗證 |
+|---|---|---|---|
+| RP-01 | `cheerup` | 70 | 鼓舞選 3 位友軍（英雄輸入 `0, 1, 2`）、+50、STR 0 印「造成 0 點傷害」 |
+| RP-02 | `curse` | 75 | 兩位施咒者在受詛咒者死亡時各自獲得剩餘 MP、MP 不足重選 |
+| RP-03 | `one-punch` | 106 | 一拳 4 條規則、**目標死亡後停止連擊**（I4） |
+| RP-04 | `only-basic-attack` | 82 | 基本流程、英雄選目標的提示 |
+| RP-05 | `petrochemical` | 64 | 石化只印「輪到」、3 回合後恢復 |
+| RP-06 | `poison` | 83 | 中毒先扣 30（「輪到」印扣血前的 HP）、中毒致死不行動 |
+| RP-07 | `self-explosion` | 41 | 自爆目標順序 T1 → T2、自己最後死亡 |
+| RP-08 | `self-healing` | 84 | 自我治療、MP 不足重選 |
+| RP-09 | `summon` | 128 | 史萊姆加入隊尾且本回合行動、死亡時召喚者 +30 |
+| RP-10 | `waterball-and-fireball-1v2` | 52 | 需求範例；AI 的 seed、MP 不足重選 |
+
+失敗時的看法：訊息中的行號對應 `.out` 的行號，打開兩個檔案對照該行前後即可找到是哪個角色的哪一步出錯。
+
+---
+
+## 9. 測試有效性（Mutation 檢查）
 
 確認測試真的能抓到錯誤：刻意把程式改壞，測試必須失敗（或 crash）；檢查完再還原。
 
@@ -899,15 +1107,27 @@ Anthony 原本寫的技能測試。每個測試都直接呼叫 `skill->attack(ac
 | Hero：不檢查數字個數 | HA-11 |
 | Hero：不檢查索引範圍（用 `[]` 取代 `at()`） | HA-10 |
 | Hero：空白行不略過 | HA-08（測試程式 crash，視同失敗） |
+| 一拳：目標死亡後仍繼續打（I4 改回原樣） | SK-43、RP-03 |
+| 流程：MP 不足時不重新選擇 / 不印「你缺乏 MP」/ 選單只印一次 | ST-05、RP-02、RP-08、RP-10 |
+| 流程：沒有扣 MP | ST-04、ST-06、ST-15、ST-16、RP（8 組） |
+| 流程：沒有印行動訊息 / 行動訊息在傷害之後才印 | ST-03–ST-07、ST-11、ST-14–ST-16、RP（10 組） |
+| 流程：選單用「, 」分隔 | ST-03–ST-07、ST-15、ST-16、RP（9 組） |
+| 石化仍然行動 | ST-09、ST-10、RP-03、RP-05 |
+| 中毒不扣 30 | ST-11–ST-13、RP-03、RP-06 |
+| 中毒致死仍然行動 / 先行動再扣 30 | ST-12、RP-06 |
+| 「輪到 …」在狀態效果之後才印 | RL-16、ST-02–ST-07、ST-11、ST-12、ST-14–ST-16、RP（10 組） |
+| 狀態中文名稱錯誤（中毒寫成石化） | ST-01、ST-11、ST-12、RP-03、RP-06 |
+| 英雄從不印目標提示 | HA-15、ST-06、RP（6 組） |
 
-> 最後一次全部重跑：2026-10-14，上表每一列都至少有一個測試失敗；還原後 98 個全部通過。
+> 最後一次全部重跑：2026-10-14，上表每一列都至少有一個測試失敗；還原後 126 個全部通過。
 
 ---
 
-## 8. 尚未涵蓋（等對應功能實作後補上）
+## 10. 尚未涵蓋（等對應功能實作後補上）
 
 | 範圍 | 原因 | 之後的測試 |
 |---|---|---|
-| State 的 `decision()` 流程（S1 → MP 檢查 → S2 → 扣 MP → 執行、石化跳過、中毒先扣 30） | 四個狀態仍是 stub | 每個狀態一組流程測試，含「選擇行動：…」「選擇 N 位目標: …」提示與「你缺乏 MP…」 |
-| `Battle`：輪流順序、跳過死者、召喚的史萊姆本回合行動、結束條件、`endThisRound` | 尚未實作 | Battle 單元測試 |
-| 整場輸入 → 輸出比對 | Client / parser 尚未實作 | `TEST_P` 逐行比對 `testcases/` 10 組（D35–D39） |
+| 正式的 `Battle`：輪流順序、跳過死者、召喚的史萊姆本回合行動、結束條件、`endThisRound` | 尚未實作；目前由 RP 的測試用迴圈代替 | Battle 單元測試；RP 改用正式 `Battle` |
+| `RPG`：啟動戰鬥、印「你獲勝了！」/「你失敗了！」 | 尚未實作；目前由 `play()` 代印 | RPG 單元測試 |
+| 正式 parser（`test/libary`）與 Client 的技能建造函式 | 尚未實作；目前由 RP 的 `load()` / `createSkill()` 代替 | parser 單元測試；RP 改用正式 parser（D36） |
+| 失敗時寫出 `build/<名稱>.actual.txt` | D39 的一部分，尚未做 | 正式整場比對時加入 |

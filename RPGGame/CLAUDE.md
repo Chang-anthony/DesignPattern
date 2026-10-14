@@ -42,18 +42,18 @@
 
 ---
 
-## 3. 目前程式快照（2026-10-14，技能周邊 + Role / Observer + IAction / AIAction 完成後）
+## 3. 目前程式快照（2026-10-14，技能周邊 + Role / Observer + 決策者 + State 行動流程完成後）
 
 | 區塊 | 現況 |
 |---|---|
 | `Skill/` | ✅ 保留原本的 `attack()`、`setName` / `setMp` 寫法；名稱改中文（D27）；移除 `targetEnemy` / `targetFriend` 與巨集，改為 `getCandidates()`（D29、D33）；新增 `announce()`（§7 I1）；傷害改走 `actor->getState()->doDamage()`（D16） |
 | `OnePunchHandler/` | ✅ 移除 `next` 指標，改由 `OnePunch` 以 `vector` 注入（D21、D23）；`handle / match / doHandle` 帶入 `actor`（D22）；用 `dynamic_cast` 判斷狀態（D25） |
 | `Observer/` | ✅ `UntilDie(Role* dead)`（pull model，D18）；`SummonObserver` +30、`CurserObserver` + 剩餘 MP，施放者已死就不給 |
-| `State/` | ✅ 新增 `doDamage` / `damage`（D16）、受到鼓舞 +50、計時狀態回合數 3（D11）；移除 `entryState` / `exitState` 裡的除錯輸出（會混進遊戲輸出）；`decision(t1, t2, actorSide)` 帶入戰場資訊；⬜ `decision()` 內容維持原本的 stub |
+| `State/` | ✅ `doDamage` / `damage`（D16）、受到鼓舞 +50、計時狀態回合數 3（D11）；移除 `entryState` / `exitState` 裡的除錯輸出；**`State::decision()` 是預設行動流程（S1 → S2 → S3，D10、D12）**，石化覆寫成整段跳過、中毒覆寫成先扣 30 再沿用預設流程；各狀態持有中文名稱 `getDisplayName()`（§7.6） |
 | `Role/` | ✅ `lossHp()`：歸零當下印死亡並通知觀察者（D17）；建立時自動加入普通攻擊（D28）；`getDisplayName()`；`checkMp(Skill*)` 只檢查（D9，取代 `checkActionLossMp`）；`endThisRound()`（D11）；`takeTurn(t1, t2, actorSide)` 交給 `state->decision(...)`（D10）；決策者 `setDecider / getDecider`（D4）；英雄識別 `setIdentity / isHero`（D6）；✅ `Hero` / `AI` 子類別已刪除（D4）；`NonHero` / `Slime` 保留 |
 | `IAction` / `AIAction` / `HeroAction` | ✅ `IAction`：`chooseAction(skills)`、`chooseTargets(candidates, m)`（D4、D5、D7、D8）；`AIAction`：seed 規則（§7.2 I5）；`HeroAction`：從注入的 `istream` 讀英雄決策（D37，§7.5） |
 | `Game/` | ✅ `Troop` 新增軍隊編號（輸出前綴）；⬜ `Battle`、`RPG` 維持原本的 TODO |
-| 測試 | ✅ 原本的 `test/ExampleTests.cpp`（11 個）只改 `OnePunch` 的建構方式；`test/SkillTests.cpp`（42 個）；`test/RoleTests.cpp`（20 個）；`test/AIActionTests.cpp`（11 個）；`test/HeroActionTests.cpp`（14 個）；共 98 個全部通過。每個測試的流程與通過標準見 [`test/TESTS.md`](test/TESTS.md) |
+| 測試 | ✅ `ExampleTests.cpp` 11、`SkillTests.cpp` 43、`RoleTests.cpp` 20、`AIActionTests.cpp` 11、`HeroActionTests.cpp` 15、`StateFlowTests.cpp` 26（含 `testcases/` 10 組整場重播，全部與 `.out` 逐行一致），共 126 個全部通過。每個測試的流程與通過標準見 [`test/TESTS.md`](test/TESTS.md) |
 
 ---
 
@@ -69,7 +69,7 @@
 - ✅ A10 已結案（決策 D29–D34）。
 - ✅ A11 已結案（決策 D35–D39）。**必要問題 A1–A11 全部結案，架構設計完成。**
 - ✅ 2026-10-13 進入實作：技能周邊 + 單元測試完成（§7）。
-- ⏸ **下一步**：確認 §7.2 的實作選擇；之後再決定是否實作 State 流程、Battle / RPG、Client 與整場比對測試。
+- ⏸ **下一步**：確認 §7.2 的實作選擇（I1–I8）；之後實作 `Battle` / `RPG`、Client（parser、技能建造函式）與正式的整場比對測試（D35–D39）。
 - 之後依序：開放問題 O1–O5 視時間討論；開放問題 O1–O4 視時間討論。
 
 ### 收尾建議順序
@@ -231,8 +231,11 @@ cd test && ./run_tests.sh    # Windows: run_tests.bat
 | I1 | **S3 的行動訊息由技能的 `announce(actor, targets)` 印**（virtual；預設「X 對 a, b 使用了 Z。」，沒有目標時「X 使用了 Z。」；`BasicAttack` 覆寫成「X 攻擊 Y。」、`SelfHealing` 覆寫成「X 使用了 自我治療。」）。呼叫時機：State 流程在扣 MP 後、`attack` 前（流程尚未實作）。 | 設計討論沒有決定誰印這行；格式隨行動而異，放在技能裡新增技能不必改模組（需求 ②） |
 | I2 | **輸出名稱前綴**：`Troop` 記住自己的編號（`Troop(int id)`，預設 1），`Role::getDisplayName()` 回傳「[編號]名稱」。 | 召喚的史萊姆加入哪一軍就自動帶對的前綴 |
 | I3 | **`actorSide` 用 `int`（1 = T1、2 = T2）**，與輸出前綴一致。 | 最簡單的表示法 |
-| I4 | **一拳 80 × 3 沿用原本的迴圈**：目標在第 1、2 下就死時，剩下幾下仍會印傷害訊息（死亡訊息只印一次）。 | 照原本程式；需求未說明、測資沒有這種情況，要改的話是一行 |
+| I4 | ~~一拳 80 × 3 沿用原本的迴圈：目標死亡後剩下幾下仍會印傷害~~ → **2026-10-14 修正：目標死亡後就停止**（`PoisonPetrochemicalHandler` 迴圈條件加上 `!target->isDead()`）。 | 原本寫「測資沒有這種情況」是錯的：`testcases/one-punch.out` 第 88–90 行，目標在第 2 下死亡，沒有第 3 行傷害 |
 | I5 | **`AIAction` 在 S2 自動全選（m = 0 或 n ≤ m）時 seed 不 + 1**；S2 真的選目標時，選完 m 位才 + 1 一次。 | 需求「每做完一項決策 seed + 1」，自動全選不是 AI 的決策；`waterball-and-fireball-1v2` 中 Slime1 的行動順序（普通攻擊 → 火球 → 普通攻擊 → MP 不足 → 普通攻擊）只有這樣才對得上 |
+| I6 | **「輪到 X (HP: …, MP: …, STR: …, State: …)。」由 `Role::takeTurn` 在交給狀態之前印**。 | 石化也要印（需求）；`testcases/poison.out` 印的是中毒扣 30 **之前**的 HP，所以要在狀態效果之前印。放在 Role 而不是各狀態，石化 / 中毒不必各自重印 |
+| I7 | **「選擇 m 位目標: (0) … (1) …」由 `HeroAction::chooseTargets` 在真的要選（n > m）時印**；「選擇行動：(0) …」由 `State::decision()` 印、每個角色都印。 | 需求寫明 S2 提示只在「英雄的回合」；10 組測資中只有英雄印過這行。放在 `HeroAction`，State 流程不必判斷 `isHero()` |
+| I8 | **每個狀態在建構子設定自己的中文名稱 `displayName`**，`State::getDisplayName()` 回傳；原本的 `getName()`（類別名稱）保留。 | 與 D27（技能各自持有中文名稱）同樣理由：新增 / 刪除狀態不必改 `State`（需求 ③）；`ExampleTests` 仍用 `getName()` 比對類別名稱 |
 
 ### 7.3 2026-10-14：Role 與 Observer
 - **Observer**：7.1 已完成（`UntilDie(Role* dead)`、召喚 +30、詛咒 + 剩餘 MP、施放者已死不給）；本次只補測試（通知順序、只通知一次、移除後不通知、獎勵在死亡訊息之後）。
@@ -250,7 +253,7 @@ cd test && ./run_tests.sh    # Windows: run_tests.bat
 - **保留** `NonHero`、`Slime`：D4 只決定移除 `Hero` / `AI`；史萊姆是否保留子類別在討論中沒有決定（`Summon` 目前 `new Slime(...)`）。
 - **`IAction`**：原本的 `action()` 換成 `chooseAction(skills)` → `Skill*`、`chooseTargets(candidates, m)` → `vector<Role*>`，並加上 virtual 解構子。MP 檢查不在介面內（D5）。
 - **`AIAction`**：`seed`（預設 0，可由建構子指定）、`getSeed()`；規則見 §7.2 I5 與 `diagrams.md` ⑦。
-- **未做**：英雄的 `HeroAction`（D37，讀 `istream`）；「選擇行動：(0) …」「選擇 1 位目標: …」這兩行提示由 State 流程印（測資中 AI 也會印），等實作 State 流程時處理。
+- **未做**：英雄的 `HeroAction`（D37，讀 `istream`）；「選擇行動：(0) …」「選擇 1 位目標: …」這兩行提示等實作 State 流程時處理（**更正**：只有「選擇行動」每個角色都印；「選擇 m 位目標」只有英雄印，見 §7.2 I7）。
 - 測試：新增 `test/AIActionTests.cpp` 11 個（含重現測資 Slime1 的行動順序），`RoleTests` 的 `DummyAction` 改為新介面；全部 83 個通過。刻意改壞（自動全選也 + 1、公式少一位、每選一位就 + 1、S1 不 + 1、`n ≤ m` 寫成 `n < m`）都會被抓到。
 - CMake：`src/*/*.cmake` 的 `file(GLOB)` 加上 `CONFIGURE_DEPENDS`；`test/CMakeLists.txt` 的測試檔清單改為 `file(GLOB … CONFIGURE_DEPENDS *.cpp)`。新增 / 刪除 `.cpp` 後直接 build，CMake 會自動重新搜尋，不必手動重跑 `cmake -S . -B build`，也不必再改測試清單（已實測新增 / 刪除測試檔與原始檔）。
 - **召喚的史萊姆攜帶 `AIAction`（D40）**：`Summon::attack` 加上 `slime->setDecider(new AIAction())`；`SkillTests` 新增 `SummonedSlimeCarriesItsOwnAIAction`（共 84 個通過；拿掉 `setDecider` 會被抓到）。
@@ -262,3 +265,17 @@ cd test && ./run_tests.sh    # Windows: run_tests.bat
   - 容錯：略過空白行、接受 `\r\n`；輸入用完丟 `std::runtime_error`、索引超出範圍丟 `std::out_of_range`、目標數字個數 ≠ m 丟 `std::invalid_argument`（測資保證格式正確，這些是除錯用）。
 - 測試：新增 `test/HeroActionTests.cpp` 14 個（含重現 `waterball-and-fireball-1v2`、`cheerup` 兩組測資的英雄決策），全部 98 個通過。
 - **測試文件** [`test/TESTS.md`](test/TESTS.md)：每個測試的目的、依據、準備資料、步驟與預期、通過標準；另含執行方式、共用工具、Mutation 檢查表（2026-10-14 全部重跑確認）與尚未涵蓋的範圍。**之後新增測試時要同步更新此文件**。
+
+### 7.6 2026-10-14：State 行動流程
+- **`State::decision()` 改為預設流程**（原本是純虛擬函式，四個狀態都是除錯用 stub；D10、D12）：
+  1. S1：印「選擇行動：(0) 普通攻擊 (1) …」→ `decider->chooseAction()` → `actor->checkMp()`；不足就印「你缺乏 MP，不能進行此行動。」並回到 S1 重印選單。
+  2. S2：`skill->getCandidates()` → `decider->chooseTargets()`（自動全選與英雄的提示都在決策者裡，D8、I7）。
+  3. S3：`actor->lossMp()` → `skill->announce()` → `skill->attack()`。
+- **只覆寫不同的部分**：`PetrochemicaledState::decision()` 是空的（不問決策者：AI 的 seed 不變、英雄不讀輸入）；`PoisonedState::decision()` 先 `lossHp(30)`（不印傷害、歸零時印死亡並通知觀察者），活著才呼叫 `State::decision()`。`NormalState`、`CheerupedState` 刪除原本的 stub，直接沿用預設流程。
+- `Role::takeTurn()` 先印「輪到 …」（I6）；各狀態加上中文 `displayName`（I8）；`HeroAction` 在 S2 真的要選時印提示（I7）。
+- **修正 I4**：一拳攻擊的 80 × 3 在目標死亡後停止（整場重播 `one-punch` 時發現）。
+- **測試**：
+  - 新增 `test/StateFlowTests.cpp`：`StateFlowTest` 16 個（每種狀態、MP 不足重選、英雄 / AI 的 S2 提示差異、召喚的史萊姆用自己的 AI 行動、自爆經過流程）。
+  - `TestcaseReplayTest` 10 個：在測試內用簡易 parser + Battle 迴圈（T1 → T2、每圈重讀人數、跳過死者、每次行動後檢查結束、回合結束 `endThisRound`）重播 `testcases/` 全部 10 組，**輸出與 `.out` 逐行完全一致**。這是測試用的鷹架，正式的 `Battle` / `RPG` / parser 完成後改用正式流程。
+  - `SkillTests` 新增 `OnePunchStopsHittingOnceTargetDies`；`RoleTests` 的 `takeTurn` 測試改為檢查「輪到 …」；`HeroActionTests` 新增 S2 提示測試，fixture 把輸出靜音。
+  - 共 126 個全部通過；刻意改壞 15 種流程細節（見 `TESTS.md` §9）都會被抓到。

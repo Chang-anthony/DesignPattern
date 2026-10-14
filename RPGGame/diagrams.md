@@ -4,13 +4,13 @@
 >
 > **依據：** [`CLAUDE.md`](CLAUDE.md) §5 設計決策 D1–D39（2026-10-12 架構設計完成）與 §7 實作紀錄。
 >
-> **2026-10-14 更新**：已實作的部分（技能周邊、Role、Observer、`IAction` / `AIAction` / `HeroAction`）**改用程式裡的實際名稱**（例如 `attack`、`addSkill`、`State::decision`），並補上實作時的修正（`lossHp` 只印一次死亡、`setTroop(nullptr)`、`announce`、`handle` 回傳 `bool`）。尚未實作的部分（State 流程、`Battle`、`RPG`、Client）仍是**決定後的設計**，方法名稱為暫定，實作時可以改。下表標出各部分的狀態。
+> **2026-10-14 更新**：已實作的部分（技能周邊、Role、Observer、`IAction` / `AIAction` / `HeroAction`、State 行動流程）**改用程式裡的實際名稱**（例如 `attack`、`addSkill`、`State::decision`），並補上實作時的修正（`lossHp` 只印一次死亡、`setTroop(nullptr)`、`announce`、`handle` 回傳 `bool`）。尚未實作的部分（`Battle`、`RPG`、Client）仍是**決定後的設計**，方法名稱為暫定，實作時可以改。下表標出各部分的狀態。
 
 | Role | Class | 實作 |
 |---|---|---|
 | 關聯類別（兩軍對戰） | `Battle`（D1） | ⬜ |
 | Context（持有狀態與決策者） | `Role` | ✅ |
-| State（Template Method 骨架在抽象類別） | `State` ← `NormalState`、`PoisonedState`、`PetrochemicaledState`、`CheerupedState` | ✅ 傷害 / 回合數；⬜ `decision()` 流程 |
+| State（Template Method 骨架在抽象類別） | `State` ← `NormalState`、`PoisonedState`、`PetrochemicaledState`、`CheerupedState` | ✅ |
 | Strategy：決策者 | `IAction` ← `AIAction`、英雄的 `IAction`（暫稱 `HeroAction`） | ✅ |
 | Strategy：行動 | `Skill` ← `BasicAttack` + 10 種技能 | ✅ |
 | Observer | `SkillObserver` ← `SummonObserver`、`CurserObserver` | ✅ |
@@ -194,7 +194,9 @@ classDiagram
         <<abstract>>
         -int round
         -Role role
-        +decision(t1, t2, actorSide)*
+        #string displayName
+        +decision(t1, t2, actorSide)
+        +getDisplayName() string
         +doDamage(Role target, int n)
         +damage(int n)
         +getRound() int
@@ -202,18 +204,18 @@ classDiagram
         +setRole(Role)
     }
     class NormalState {
-        round = 0
+        正常 round = 0
     }
     class PoisonedState {
-        round = 3
+        中毒 round = 3
         +decision(t1, t2, actorSide)
     }
     class PetrochemicaledState {
-        round = 3
+        石化 round = 3
         +decision(t1, t2, actorSide)
     }
     class CheerupedState {
-        round = 3
+        受到鼓舞 round = 3
         +doDamage(Role target, int n)
     }
 
@@ -229,7 +231,9 @@ classDiagram
 
 - `Role` 只依賴抽象的 `State` 和**預設狀態** `NormalState`（建構與到期時換回）。石化、中毒、鼓舞由技能建立，`Role` 完全不 include 它們——這是需求 ③（狀態擴充遵守 OCP）在依賴上的樣子。
 - `round` 欄位寫在各子類別裡，表示建構時設定的初始值（D11）。
-- `decision()` 目前四個狀態都還是原本的 stub（⬜）；圖上只列出設計中會覆寫它的兩個狀態（D12）。
+- **`State::decision()` 是預設的行動流程**（D10、D12，✅ 2026-10-14）：S1 印「選擇行動」並問決策者，MP 不足就印「你缺乏 MP…」再問一次 → S2 技能算候選、決策者選目標 → S3 扣 MP、`announce`、`attack`。
+- 只有兩個狀態覆寫 `decision()`：`PetrochemicaledState` 整段跳過（不問決策者）；`PoisonedState` 先 `lossHp(30)`，死了就結束，活著才呼叫 `State::decision()`。`NormalState`、`CheerupedState` 直接沿用預設流程（`CheerupedState` 只覆寫 `doDamage`）。
+- 每個狀態自己設定中文名稱 `displayName`（正常 / 石化 / 中毒 / 受到鼓舞），「輪到 …」那一行用 `getDisplayName()` 印，新增狀態不必改 `State`（§7.2 I8）。
 
 ### ③ 技能（Strategy）與各自的依賴
 
@@ -628,7 +632,7 @@ sequenceDiagram
 
 > 召喚（`Summon::attack`）用 `actor->getTroop()->addRole(slime)` 把史萊姆加到施放者所屬軍隊的隊尾，所以史萊姆自動帶對的前綴（D20、§7.2 I2）。目前程式沒有地方呼叫 `removeRole`；死者仍留在名單中，由 Battle 跳過。
 
-## OOD — 循序圖：一回合與一次行動（⬜ Battle 與 State 流程尚未實作）
+## OOD — 循序圖：一回合與一次行動（✅ State 流程；⬜ Battle）
 
 ```mermaid
 sequenceDiagram
@@ -646,9 +650,12 @@ sequenceDiagram
             else 活著
                 B->>B: 整理 t1、t2（排除死者）與 actorSide
                 B->>R: takeTurn(t1, t2, actorSide)
+                R->>R: 印「輪到 X (HP: …, MP: …, STR: …, State: 中文狀態)。」
+                Note right of R: 在狀態效果之前印：石化也印；<br/>中毒印的是扣 30 之前的 HP（I6）
                 R->>S: decision(t1, t2, actorSide)
-                Note over S: 石化：跳過 S1–S3<br/>中毒：先 lossHp(30)，死了就結束<br/>其他：走預設流程
+                Note over S: 石化：整段跳過（不問決策者）<br/>中毒：先 lossHp(30)，死了就結束<br/>其他：走 State::decision() 預設流程
                 loop S1：直到 MP 足夠
+                    S->>S: 印「選擇行動：(0) 普通攻擊 (1) …」
                     S->>D: chooseAction(skills)
                     D-->>S: skill
                     S->>R: checkMp(skill)
@@ -660,7 +667,7 @@ sequenceDiagram
                 S->>K: getCandidates(actor, t1, t2, actorSide)
                 K-->>S: Candidates{roles, m}
                 S->>D: chooseTargets(roles, m)
-                Note right of D: m = 0 或 n ≤ m：自動全選、略過 S2
+                Note right of D: m = 0 或 n ≤ m：自動全選、略過 S2<br/>英雄真的要選時，HeroAction 先印<br/>「選擇 m 位目標: (0) … (1) …」（I7）
                 D-->>S: targets
                 S->>R: lossMp(skill->getMp())
                 S->>K: announce(actor, targets)
@@ -683,7 +690,7 @@ sequenceDiagram
     end
 ```
 
-> 本圖已實作的部分（✅）：`Role::takeTurn` → `state->decision()` 的委派、`checkMp`、`lossMp`、`getCandidates`、`announce`、`attack`、`endThisRound`。
+> 本圖已實作的部分（✅）：`Role::takeTurn` 之後的整段流程（「輪到 …」、S1–S3、石化 / 中毒）、`endThisRound`。外層的 Battle 迴圈（⬜）目前由測試用的簡易迴圈代替，已用 `testcases/` 10 組整場重播驗證（見 [`test/TESTS.md`](test/TESTS.md) RP）。
 
 ## OOD — 循序圖：傷害、死亡與觀察者（✅）
 
@@ -714,7 +721,7 @@ sequenceDiagram
 ```
 
 > 中毒扣的 30 HP、自爆的自殺也都經過 `lossHp()`，所以同樣會印死亡、觸發觀察者（D14、D17）。
-> 已經死亡的角色再受到傷害（例如一拳的第 2、3 下）不會重複印死亡、不會再通知觀察者（§7.2 I4）。
+> 已經死亡的角色再受到傷害不會重複印死亡、不會再通知觀察者。一拳攻擊的 80 × 3 在目標死亡後就停止，不再印剩下幾下的傷害（§7.2 I4，依 `testcases/one-punch.out` 修正）。
 > 獎勵（`gainHp`）發生在「Y 死亡。」之後；`SummonObserver` +30、`CurserObserver` + 死者剩餘 MP。
 > 自爆：目標不含自己、依 T1 → T2；對所有目標處理完後，才 `actor->lossHp(actor->getHp())` 讓自己歸零並印「<自己> 死亡。」，自己歸零**不印**傷害訊息（D34，已用 `testcases/self-explosion.out` 驗證）。
 
@@ -794,7 +801,7 @@ stateDiagram-v2
 
 **round 的計算**（D11）：施加當下的回合算第 1 回合。例：第 1 回合被石化 → round = 3；第 1、2、3 回合結束時各 −1，第 3 回合結束歸零 → 第 4 回合恢復正常，所以第 1、2、3 回合都被跳過。正常狀態 round = 0，不倒數。被覆寫時新狀態重新從 3 開始。
 
-## 測試：整場輸入 → 輸出比對（D35–D39，⬜ 尚未實作）
+## 測試：整場輸入 → 輸出比對（D35–D39，⬜ 正式版待 Battle / RPG；目前用測試用迴圈重播）
 
 ```mermaid
 sequenceDiagram
@@ -815,4 +822,6 @@ sequenceDiagram
     end
 ```
 
-> 目前已有的單元測試（✅）：`ExampleTests.cpp` 11 個、`SkillTests.cpp` 42 個、`RoleTests.cpp` 20 個、`AIActionTests.cpp` 11 個、`HeroActionTests.cpp` 14 個，共 98 個（每個測試的流程與通過標準見 [`test/TESTS.md`](test/TESTS.md)）；輸出同樣用 `rdbuf` 收集（D38）。
+> 目前已有的測試（✅）：`ExampleTests.cpp` 11 個、`SkillTests.cpp` 43 個、`RoleTests.cpp` 20 個、`AIActionTests.cpp` 11 個、`HeroActionTests.cpp` 15 個、`StateFlowTests.cpp` 26 個（含 10 組測資整場重播），共 126 個（每個測試的流程與通過標準見 [`test/TESTS.md`](test/TESTS.md)）；輸出同樣用 `rdbuf` 收集（D38）。
+>
+> 目前的整場重播在 `StateFlowTests.cpp` 內自帶簡易 parser 與 Battle 迴圈；正式的 parser（`test/libary`）與 `Battle` / `RPG` 完成後，改成上圖的流程。
