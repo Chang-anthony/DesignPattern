@@ -11,7 +11,7 @@
 
 ### 1.1 本專案的特殊情況
 - RPGGame 在建立這套流程**之前就已經有第一版設計與程式**，所以本專案是「回頭 review 既有設計」，從 §4 的待討論問題開始，而不是從 OOA 從頭開始。
-- Anthony 之後會上傳**他自己畫的設計圖**，那才是設計的依據。[`diagrams.md`](diagrams.md) 已於 2026-10-12 依 D1–D39 改畫成**決定後的設計**（不再是程式現況）；與 Anthony 自己的圖不一致時以他的圖為準，並先問他。
+- Anthony 之後會上傳**他自己畫的設計圖**，那才是設計的依據。[`diagrams.md`](diagrams.md) 已於 2026-10-12 依 D1–D39 改畫成**決定後的設計**；2026-10-14 起已實作的部分改用程式實際名稱，類別圖拆成 6 張並標出數量與依賴，各部分以 ✅ / ⬜ 標示是否已實作；與 Anthony 自己的圖不一致時以他的圖為準，並先問他。
 - 討論後若 Anthony 決定修改設計，才依他的決定更新 `diagrams.md`。
 
 ### 1.2 實作
@@ -42,17 +42,17 @@
 
 ---
 
-## 3. 目前程式快照（2026-10-13，技能周邊完成後）
+## 3. 目前程式快照（2026-10-14，技能周邊 + Role / Observer 完成後）
 
 | 區塊 | 現況 |
 |---|---|
 | `Skill/` | ✅ 保留原本的 `attack()`、`setName` / `setMp` 寫法；名稱改中文（D27）；移除 `targetEnemy` / `targetFriend` 與巨集，改為 `getCandidates()`（D29、D33）；新增 `announce()`（§7 I1）；傷害改走 `actor->getState()->doDamage()`（D16） |
 | `OnePunchHandler/` | ✅ 移除 `next` 指標，改由 `OnePunch` 以 `vector` 注入（D21、D23）；`handle / match / doHandle` 帶入 `actor`（D22）；用 `dynamic_cast` 判斷狀態（D25） |
 | `Observer/` | ✅ `UntilDie(Role* dead)`（pull model，D18）；`SummonObserver` +30、`CurserObserver` + 剩餘 MP，施放者已死就不給 |
-| `State/` | ✅ 新增 `doDamage` / `damage`（D16）、受到鼓舞 +50、計時狀態回合數 3（D11）；移除 `entryState` / `exitState` 裡的除錯輸出（會混進遊戲輸出）；⬜ `decision()` 維持原本的 stub |
-| `Role/` | ✅ `damage()` 改為 `lossHp()`：歸零當下印死亡並通知觀察者（D17）；建立時自動加入普通攻擊（D28）；`setState` 設定狀態的 role；新增 `getDisplayName()`；⬜ `checkActionLossMp`（D9）、英雄識別（D6）、`Hero` / `AI` 移除（D4）、`IAction` / `AIAction` 維持原樣 |
+| `State/` | ✅ 新增 `doDamage` / `damage`（D16）、受到鼓舞 +50、計時狀態回合數 3（D11）；移除 `entryState` / `exitState` 裡的除錯輸出（會混進遊戲輸出）；`decision(t1, t2, actorSide)` 帶入戰場資訊；⬜ `decision()` 內容維持原本的 stub |
+| `Role/` | ✅ `lossHp()`：歸零當下印死亡並通知觀察者（D17）；建立時自動加入普通攻擊（D28）；`getDisplayName()`；`checkMp(Skill*)` 只檢查（D9，取代 `checkActionLossMp`）；`endThisRound()`（D11）；`takeTurn(t1, t2, actorSide)` 交給 `state->decision(...)`（D10）；決策者 `setDecider / getDecider`（D4）；英雄識別 `setIdentity / isHero`（D6）；⬜ `Hero` / `AI` 子類別尚未移除（D4）、`IAction` / `AIAction` 維持原樣 |
 | `Game/` | ✅ `Troop` 新增軍隊編號（輸出前綴）；⬜ `Battle`、`RPG` 維持原本的 TODO |
-| 測試 | ✅ 原本的 `test/ExampleTests.cpp`（11 個）只改 `OnePunch` 的建構方式；新增 `test/SkillTests.cpp`（41 個）；共 52 個全部通過 |
+| 測試 | ✅ 原本的 `test/ExampleTests.cpp`（11 個）只改 `OnePunch` 的建構方式；`test/SkillTests.cpp`（41 個）；`test/RoleTests.cpp`（20 個）；共 72 個全部通過 |
 
 ---
 
@@ -230,3 +230,15 @@ cd test && ./run_tests.sh    # Windows: run_tests.bat
 | I2 | **輸出名稱前綴**：`Troop` 記住自己的編號（`Troop(int id)`，預設 1），`Role::getDisplayName()` 回傳「[編號]名稱」。 | 召喚的史萊姆加入哪一軍就自動帶對的前綴 |
 | I3 | **`actorSide` 用 `int`（1 = T1、2 = T2）**，與輸出前綴一致。 | 最簡單的表示法 |
 | I4 | **一拳 80 × 3 沿用原本的迴圈**：目標在第 1、2 下就死時，剩下幾下仍會印傷害訊息（死亡訊息只印一次）。 | 照原本程式；需求未說明、測資沒有這種情況，要改的話是一行 |
+
+### 7.3 2026-10-14：Role 與 Observer
+- **Observer**：7.1 已完成（`UntilDie(Role* dead)`、召喚 +30、詛咒 + 剩餘 MP、施放者已死不給）；本次只補測試（通知順序、只通知一次、移除後不通知、獎勵在死亡訊息之後）。
+- **Role**（在原本的程式上補齊設計決策）：
+  - `checkActionLossMp(int)` → `checkMp(const Skill*)`：只檢查、不扣除、不印訊息（D9）；扣 MP 用原本的 `lossMp()`。
+  - `endThisRound()`：狀態回合數 −1，歸零由 Role 換回 `NormalState`（D11）。
+  - `takeTurn(t1, t2, actorSide)`：交給目前狀態的 `decision(t1, t2, actorSide)`（D10）；`State::decision()` 的簽名因此帶入戰場資訊，四個狀態的內容仍是原本的 stub。
+  - `setDecider / getDecider`（D4）、`setIdentity / getIdentity / isHero`（D6）。
+- 未做（不在本次範圍）：移除 `Hero` / `AI` 子類別（D4，需要刪檔並調整 `ExampleTests.cpp` 與 `main.cpp`）、`IAction` 介面與 `AIAction` 內容、State 流程。
+- 測試：新增 `test/RoleTests.cpp` 20 個，全部 72 個通過；刻意改壞（MP 邊界、回合倒數、`takeTurn` 未委派、`isHero`、`removeObserver`）都會被抓到。
+- 修正（2026-10-14）：`Role::setTroop()` 原本會 `RequireNonNull`，但 `Troop::removeRole()` 會呼叫 `setTroop(nullptr)`，導致 `removeRole` 一定丟例外；改為接受 `nullptr`（代表離開軍隊），並補上測試。
+

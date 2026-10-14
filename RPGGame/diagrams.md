@@ -2,25 +2,25 @@
 
 > **Patterns:** Template Method + State（`State` 主導一次行動的流程）、Strategy（`IAction` 決策者、`Skill` 行動）、Observer（`SkillObserver` 死亡事件）、Chain of Responsibility（`OnePunchHandler`，由 Client 注入）
 >
-> **依據：** [`CLAUDE.md`](CLAUDE.md) §5 設計決策 D1–D39（2026-10-12 架構設計完成）。本圖畫的是**決定後的設計**，不是目前程式碼的現況；程式碼要到實作階段才會調整。
+> **依據：** [`CLAUDE.md`](CLAUDE.md) §5 設計決策 D1–D39（2026-10-12 架構設計完成）與 §7 實作紀錄。
 >
-> **方法名稱為暫定**：討論決定的是「責任放在誰身上」，多數方法名稱是為了畫圖暫取的（例如 `takeTurn`、`getCandidates`、`chooseAction`），實作時可以改；沿用自現有程式碼或討論中出現過的名稱（`doAction`、`doDamage`、`lossHp`、`endThisRound`、`checkMp`、`handle`…）保留原名。
+> **2026-10-14 更新**：已實作的部分（技能周邊、Role、Observer）**改用程式裡的實際名稱**（例如 `attack`、`addSkill`、`State::decision`），並補上實作時的修正（`lossHp` 只印一次死亡、`setTroop(nullptr)`、`announce`、`handle` 回傳 `bool`）。尚未實作的部分（`IAction`、State 流程、`Battle`、`RPG`、Client）仍是**決定後的設計**，方法名稱為暫定，實作時可以改。下表標出各部分的狀態。
 
-| Role | Class |
-|---|---|
-| 關聯類別（兩軍對戰） | `Battle`（D1） |
-| Context（持有狀態與決策者） | `Role` |
-| State（Template Method 骨架在抽象類別） | `State` ← `NormalState`、`PoisonedState`、`PetrochemicaledState`、`CheerupedState` |
-| Strategy：決策者 | `IAction` ← `AIAction`、英雄的 `IAction`（暫稱 `HeroAction`） |
-| Strategy：行動 | `Skill` ← `BasicAttack` + 10 種技能 |
-| Observer | `SkillObserver` ← `SummonObserver`、`CurserObserver` |
-| Chain of Responsibility | `OnePunchHandler` ← `HpHandler`、`PoisonPetrochemicalHandler`、`CheerupHandler`、`NormalHandler` |
+| Role | Class | 實作 |
+|---|---|---|
+| 關聯類別（兩軍對戰） | `Battle`（D1） | ⬜ |
+| Context（持有狀態與決策者） | `Role` | ✅ |
+| State（Template Method 骨架在抽象類別） | `State` ← `NormalState`、`PoisonedState`、`PetrochemicaledState`、`CheerupedState` | ✅ 傷害 / 回合數；⬜ `decision()` 流程 |
+| Strategy：決策者 | `IAction` ← `AIAction`、英雄的 `IAction`（暫稱 `HeroAction`） | ⬜ |
+| Strategy：行動 | `Skill` ← `BasicAttack` + 10 種技能 | ✅ |
+| Observer | `SkillObserver` ← `SummonObserver`、`CurserObserver` | ✅ |
+| Chain of Responsibility | `OnePunchHandler` ← `HpHandler`、`PoisonPetrochemicalHandler`、`CheerupHandler`、`NormalHandler` | ✅ |
 
 ### 與舊版（從程式碼反推的圖）相比的主要改變
 
 | 改變 | 決策 |
 |---|---|
-| 移除 `Hero` / `AI` 這兩個 `Role` 子類別，改由 `Role` 持有 `IAction`；`seed` 移到 `AIAction` | D4 |
+| 移除 `Hero` / `AI` 這兩個 `Role` 子類別，改由 `Role` 持有 `IAction`；`seed` 移到 `AIAction` | D4（⬜ 子類別尚未刪除） |
 | 一次行動的流程由 `State` 主導，固定流程寫在 `State` 抽象類別 | D10、D12 |
 | 傷害一律經過 `actor.state.doDamage()` → `target.state.damage()` → `target.lossHp()` | D16、D17 |
 | 觀察者改為 pull model：`UntilDie(dead)` 帶入死者 | D18 |
@@ -29,15 +29,54 @@
 | 一拳攻擊的處理鏈改為 `vector` 並由 Client 注入；handler 介面加入 `actor`；移除 `next` 指標 | D21–D23 |
 | handler 用型別判斷狀態，不再比對字串 | D25 |
 
+### 圖上名稱 ↔ 程式名稱（2026-10-14 對齊）
+
+| 舊圖的暫定名稱 | 程式裡的名稱 | 說明 |
+|---|---|---|
+| `Skill::doAction(actor, targets)` | `Skill::attack(actor, targets)` | 保留 Anthony 原本的名稱 |
+| `Role::addAction` / `actions` | `Role::addSkill` / `skills`、`getSkills()` | 同上 |
+| `State::takeTurn(t1, t2, actorSide)` | `State::decision(t1, t2, actorSide)` | 保留原本的 `decision`；`Role::takeTurn` 委派給它 |
+| `Troop::size()` / `getRole(i)` | `Troop::getRoles()` | 程式沒有 `size` / `getRole`；Battle 每圈重新呼叫 `getRoles()` 也能達到 D20「每圈重讀人數」 |
+| （無） | `Skill::announce(actor, targets)` | §7.2 I1：S3 的行動訊息 |
+| （無） | `Skill::othersOf(actor, t1, t2)` | 自爆用：全場其他角色，T1 → T2 |
+| （無） | `OnePunchHandler::handle(actor, target) bool` | 包住 `match` + `doHandle`，成立時回傳 `true` |
+| （無） | `Troop(int id)`、`Role::getDisplayName()` | §7.2 I2：輸出前綴「[1]」「[2]」 |
+
 ---
 
 ## OOD — 類別圖
 
+類別圖拆成 6 張，每張只看一個面向，避免全部擠在一起：
+
+| 圖 | 看什麼 |
+|---|---|
+| ① 總覽 | 所有核心類別之間的**結構關係與數量**（誰持有誰、幾個） |
+| ② Role 與 State | Context ↔ State 的雙向關聯、狀態的繼承、狀態之間的依賴 |
+| ③ 技能（Strategy） | 11 個行動的繼承，以及每個技能**依賴哪些類別**（建立哪個狀態、哪個觀察者） |
+| ④ 一拳攻擊（Chain of Responsibility） | handler 的繼承，以及每個 handler 判斷 / 建立哪些狀態 |
+| ⑤ 觀察者（Observer） | 誰被觀察、誰是觀察者、誰負責掛上觀察者 |
+| ⑥ 依賴方向：模組 vs 外部擴充 | 驗證需求 ②：刪除外部擴充的檔案，模組不受影響 |
+
+### 圖例
+
+| 符號 | 意思 | 本專案的例子 |
+|---|---|---|
+| `A <\|-- B`（實線、空心三角） | 繼承：B 是 A | `Skill <\|-- Fireball` |
+| `A <\|.. B`（虛線、空心三角） | 實作介面 | `IAction <\|.. AIAction` |
+| `A *-- B`（實心菱形） | 組合：A 擁有 B，A 解構時 `delete` B | `Role *-- State`、`Role *-- Skill` |
+| `A o-- B`（空心菱形） | 聚合：A 持有 B，但不負責釋放 | `Troop o-- Role`、`Role o-- SkillObserver` |
+| `A --> B`（實線箭頭） | 關聯：A 的成員變數指向 B | `State --> Role`、`Role --> Troop` |
+| `A ..> B`（虛線箭頭） | 依賴：A 只在函式裡**用到** B（參數、`new`、`dynamic_cast`、呼叫），不存成成員 | `Poison ..> PoisonedState : new` |
+| `"1"`、`"0..1"`、`"*"`、`"2"` | 數量（多重性）：每一個 A 對應幾個 B | `Troop "1" o-- "*" Role` |
+
+> 組合 / 聚合是依**程式目前誰 `delete` 誰**來畫的：`Role::~Role()` 會 `delete state` 和所有技能，不會 `delete` 觀察者；`Troop`、`OnePunch` 都不 `delete` 它們持有的物件（O1 物件擁有權為開放問題）。
+
+### ① 總覽：結構關係與數量
+
 ```mermaid
 classDiagram
+    direction LR
     class RPG {
-        -Troop t1
-        -Troop t2
         -Battle battle
         +GameStart(Troop t1, Troop t2)
         +GameEnd()
@@ -49,133 +88,204 @@ classDiagram
         -isEnd() bool
     }
     class Troop {
+        -int id
         -vector~Role~ roles
-        +addRole(Role)
-        +size() int
-        +getRole(int i) Role
-        +Annihilated() bool
+    }
+    class Role {
+        -State state
+        -IAction decider
+        -Troop troop
+        -vector~Skill~ skills
+        -vector~SkillObserver~ observers
+    }
+    class State {
+        <<abstract>>
+        -int round
+        -Role role
+    }
+    class IAction {
+        <<interface>>
+    }
+    class Skill {
+        <<abstract>>
+        -string name
+        -int mp
+    }
+    class Candidates {
+        <<struct>>
+        +vector~Role~ roles
+        +int m
+    }
+    class SkillObserver {
+        <<abstract>>
+        #Role actor
+    }
+    class OnePunch
+    class OnePunchHandler {
+        <<abstract>>
     }
 
+    RPG "1" --> "0..1" Battle : battle
+    RPG ..> Troop : GameStart 參數
+    Battle "1" --> "2" Troop : T1, T2
+    Troop "1" o-- "*" Role : roles（依加入順序）
+    Role "*" --> "0..1" Troop : troop（removeRole 後為 nullptr）
+
+    Role "1" *-- "1" State : state（目前的狀態）
+    State "1" --> "1" Role : role（擁有此狀態的角色）
+    Role "1" --> "0..1" IAction : decider
+    Role "1" *-- "1..*" Skill : skills（第 0 項固定是 BasicAttack）
+    Role "1" o-- "*" SkillObserver : observers（死亡時通知）
+    SkillObserver "*" --> "1" Role : actor（施咒者 / 召喚者）
+
+    Skill ..> Candidates : getCandidates() 回傳
+    Skill ..> Role : attack(actor, targets)
+    Skill ..> State : actor->getState()->doDamage()
+    Skill <|-- OnePunch
+    OnePunch "1" o-- "*" OnePunchHandler : handlers（Client 注入，依序比對）
+```
+
+讀圖重點：
+
+- **一個 `Role` 一定有 1 個 `State`**（建立時是 `NormalState`），換狀態時 `setState` 會 `delete` 舊的，所以是組合。`State` 反過來也指向它的 `Role`（雙向），`doDamage` / `damage` 才找得到「行動者」與「受傷者」。
+- **一個 `Role` 至少有 1 個 `Skill`**（`BasicAttack`，D28），Client 再加入 0 個以上。
+- `Role → Troop` 是 `0..1`：剛建立、或被 `removeRole` 之後都沒有軍隊；這正是 2026-10-14 修正的情境。
+- `Role → IAction` 程式目前是 `0..1`（建構時 `decider = nullptr`），設計上 Client 組裝後每個角色都要有 1 個（D4）。
+- `Battle → Troop` 是 2（T1、T2）：Battle 是兩軍之間的關聯類別（D1）。
+
+### ② Role 與 State（State pattern）
+
+```mermaid
+classDiagram
+    direction TB
     class Role {
         -int hp
         -int mp
         -int str
         -string name
         -char identity
-        -State state
-        -IAction decider
-        -vector~Skill~ actions
-        -vector~SkillObserver~ observers
-        +addAction(Skill)
         +takeTurn(t1, t2, actorSide)
         +checkMp(Skill) bool
         +lossMp(int)
+        +gainMp(int)
         +lossHp(int)
         +gainHp(int)
         +isDead() bool
         +isHero() bool
         +setState(State)
+        +getState() State
         +endThisRound()
+        +addSkill(Skill)
+        +getSkills() vector~Skill~
+        +setDecider(IAction)
+        +setIdentity(char)
+        +setTroop(Troop)
+        +getTroop() Troop
+        +getDisplayName() string
         +addObserver(SkillObserver)
+        +removeObserver(SkillObserver)
         +getObservers() vector~SkillObserver~
-        -notifyObservers()
+        +notifyObservers()
     }
-
-    class IAction {
-        <<interface>>
-        +chooseAction(vector~Skill~ actions) Skill*
-        +chooseTargets(vector~Role~ candidates, int m) vector~Role~*
-    }
-    class AIAction {
-        -int seed
-    }
-    class HeroAction {
-        -istream input
-    }
-
-    class Skill {
-        <<abstract>>
-        -string name
-        -int mp
-        +getName() string
-        +getMp() int
-        +getCandidates(actor, t1, t2, actorSide) Candidates
-        +doAction(Role actor, vector~Role~ targets)*
-        #enemiesOf(actor, t1, t2, actorSide) vector~Role~
-        #alliesOf(actor, t1, t2, actorSide) vector~Role~
-    }
-    class BasicAttack
-    class Waterball
-    class Fireball
-    class SelfHealing
-    class Petrochemical
-    class Poison
-    class Summon
-    class SelfExplosion
-    class Cheerup
-    class Curse
-    class OnePunch {
-        -vector~OnePunchHandler~ handlers
-        +OnePunch(vector~OnePunchHandler~ handlers)
-    }
-
     class State {
         <<abstract>>
         -int round
         -Role role
-        +takeTurn(t1, t2, actorSide)
+        +decision(t1, t2, actorSide)*
         +doDamage(Role target, int n)
         +damage(int n)
         +getRound() int
         +setRound(int)
+        +setRole(Role)
     }
-    class NormalState
+    class NormalState {
+        round = 0
+    }
     class PoisonedState {
-        +takeTurn(t1, t2, actorSide)
+        round = 3
+        +decision(t1, t2, actorSide)
     }
     class PetrochemicaledState {
-        +takeTurn(t1, t2, actorSide)
+        round = 3
+        +decision(t1, t2, actorSide)
     }
     class CheerupedState {
+        round = 3
         +doDamage(Role target, int n)
     }
 
-    class SkillObserver {
-        <<abstract>>
-        -Role actor
-        +UntilDie(Role dead)*
-        +getRole() Role
-    }
-    class SummonObserver
-    class CurserObserver
-
-    class OnePunchHandler {
-        <<abstract>>
-        +match(Role actor, Role target)* bool
-        +doHandle(Role actor, Role target)*
-    }
-    class HpHandler
-    class PoisonPetrochemicalHandler
-    class CheerupHandler
-    class NormalHandler
-
-    RPG --> "2" Troop
-    RPG --> Battle
-    Battle --> "2" Troop : T1, T2
-    Troop "1" o-- "*" Role
-
-    Role "1" --> "1" State
-    State --> Role
+    Role "1" *-- "1" State : state
+    State "1" --> "1" Role : role
     State <|-- NormalState
     State <|-- PoisonedState
     State <|-- PetrochemicaledState
     State <|-- CheerupedState
+    Role ..> NormalState : 建構 / endThisRound() 歸零時 new
+    State ..> Role : doDamage → target->getState()->damage()，damage → role->lossHp()
+```
 
-    Role "1" --> "1" IAction : decider
-    IAction <|.. AIAction
-    IAction <|.. HeroAction
+- `Role` 只依賴抽象的 `State` 和**預設狀態** `NormalState`（建構與到期時換回）。石化、中毒、鼓舞由技能建立，`Role` 完全不 include 它們——這是需求 ③（狀態擴充遵守 OCP）在依賴上的樣子。
+- `round` 欄位寫在各子類別裡，表示建構時設定的初始值（D11）。
+- `decision()` 目前四個狀態都還是原本的 stub（⬜）；圖上只列出設計中會覆寫它的兩個狀態（D12）。
 
-    Role "1" o-- "*" Skill : actions
+### ③ 技能（Strategy）與各自的依賴
+
+```mermaid
+classDiagram
+    direction LR
+    class Skill {
+        <<abstract>>
+        +getName() string
+        +getMp() int
+        +getCandidates(actor, t1, t2, actorSide) Candidates
+        +announce(Role actor, vector~Role~ targets)
+        +attack(Role actor, vector~Role~ targets)*
+        #enemiesOf(t1, t2, actorSide)$ vector~Role~
+        #alliesOf(actor, t1, t2, actorSide)$ vector~Role~
+        #othersOf(actor, t1, t2)$ vector~Role~
+    }
+    class BasicAttack {
+        普通攻擊 MP 0
+        +announce()
+    }
+    class Waterball {
+        水球 MP 50
+    }
+    class Fireball {
+        火球 MP 50
+        +getCandidates()
+    }
+    class SelfHealing {
+        自我治療 MP 50
+        +getCandidates()
+        +announce()
+    }
+    class Petrochemical {
+        石化 MP 100
+    }
+    class Poison {
+        下毒 MP 80
+    }
+    class Summon {
+        召喚 MP 150
+        +getCandidates()
+    }
+    class SelfExplosion {
+        自爆 MP 200
+        +getCandidates()
+    }
+    class Cheerup {
+        鼓舞 MP 100
+        +getCandidates()
+    }
+    class Curse {
+        詛咒 MP 100
+    }
+    class OnePunch {
+        一拳攻擊 MP 180
+        -vector~OnePunchHandler~ handlers
+    }
+
     Skill <|-- BasicAttack
     Skill <|-- Waterball
     Skill <|-- Fireball
@@ -188,26 +298,191 @@ classDiagram
     Skill <|-- Curse
     Skill <|-- OnePunch
 
-    Role "1" o-- "*" SkillObserver
-    SkillObserver --> Role : actor
-    SkillObserver <|-- SummonObserver
-    SkillObserver <|-- CurserObserver
+    BasicAttack ..> State : doDamage(str)
+    Waterball ..> State : doDamage(120)
+    Fireball ..> State : doDamage(50) × 所有敵軍
+    SelfExplosion ..> State : doDamage(150) × 其他所有人
+    SelfHealing ..> Role : gainHp(150)
+    Petrochemical ..> PetrochemicaledState : new
+    Poison ..> PoisonedState : new
+    Cheerup ..> CheerupedState : new
+    Summon ..> Slime : new
+    Summon ..> SummonObserver : new，掛在史萊姆上
+    Summon ..> Troop : actor->getTroop()->addRole()
+    Curse ..> CurserObserver : new，掛在目標上
+    Curse ..> SkillObserver : 檢查是否同一施咒者
+    OnePunch "1" o-- "*" OnePunchHandler : handlers
+```
 
-    OnePunch "1" o-- "*" OnePunchHandler : 依序比對
+各技能的目標規則（`getCandidates`，D29–D34）：
+
+| 技能 | 候選 | m | 覆寫 `getCandidates`？ |
+|---|---|---|---|
+| 普通攻擊、水球、石化、下毒、詛咒、一拳攻擊 | 敵軍 | 1 | 否（預設） |
+| 火球 | 敵軍 | 全部 | 是 |
+| 自我治療、召喚 | 無 | 0 | 是 |
+| 鼓舞 | 友軍（不含自己） | 3 | 是 |
+| 自爆 | 全場其他角色（T1 → T2） | 全部 | 是 |
+
+### ④ 一拳攻擊（Chain of Responsibility）
+
+```mermaid
+classDiagram
+    direction LR
+    class OnePunch {
+        -vector~OnePunchHandler~ handlers
+        +OnePunch(vector~OnePunchHandler~ handlers)
+        +attack(actor, targets)
+    }
+    class OnePunchHandler {
+        <<abstract>>
+        +handle(Role actor, Role target) bool
+        +match(Role actor, Role target)* bool
+        +doHandle(Role actor, Role target)*
+    }
+    class HpHandler {
+        match: target HP ≥ 500
+        doHandle: 300 傷害
+    }
+    class PoisonPetrochemicalHandler {
+        match: 中毒或石化
+        doHandle: 80 傷害 × 3
+    }
+    class CheerupHandler {
+        match: 受到鼓舞
+        doHandle: 100 傷害後換回正常
+    }
+    class NormalHandler {
+        match: 正常狀態
+        doHandle: 100 傷害
+    }
+
+    OnePunch "1" o-- "*" OnePunchHandler : 依 vector 順序，第一個成立就停
     OnePunchHandler <|-- HpHandler
     OnePunchHandler <|-- PoisonPetrochemicalHandler
     OnePunchHandler <|-- CheerupHandler
     OnePunchHandler <|-- NormalHandler
+
+    HpHandler ..> Role : getHp()
+    PoisonPetrochemicalHandler ..> PoisonedState : dynamic_cast
+    PoisonPetrochemicalHandler ..> PetrochemicaledState : dynamic_cast
+    CheerupHandler ..> CheerupedState : dynamic_cast
+    CheerupHandler ..> NormalState : new
+    NormalHandler ..> NormalState : dynamic_cast
+    OnePunchHandler ..> State : actor->getState()->doDamage()
 ```
+
+- `OnePunch` 只依賴抽象的 `OnePunchHandler`；具體 handler 依賴哪些狀態都畫在右邊，這些依賴屬於外部擴充（D24、D25）。
+- Client 注入的順序：`HpHandler → PoisonPetrochemicalHandler → CheerupHandler → NormalHandler`（需求一拳攻擊的由上而下，D21）。
+
+### ⑤ 觀察者（Observer）
+
+```mermaid
+classDiagram
+    direction LR
+    class Role {
+        -vector~SkillObserver~ observers
+        +addObserver(SkillObserver)
+        +removeObserver(SkillObserver)
+        +getObservers() vector~SkillObserver~
+        +notifyObservers()
+        +lossHp(int)
+    }
+    class SkillObserver {
+        <<abstract>>
+        #Role actor
+        +UntilDie(Role dead)*
+        +getRole() Role
+    }
+    class SummonObserver {
+        UntilDie: 召喚者活著 → +30 HP
+    }
+    class CurserObserver {
+        UntilDie: 施咒者活著 → + 死者剩餘 MP
+    }
+    class Summon
+    class Curse
+
+    Role "1 被觀察者（死者）" o-- "*" SkillObserver : observers
+    SkillObserver "*" --> "1" Role : actor（拿獎勵的人）
+    SkillObserver <|-- SummonObserver
+    SkillObserver <|-- CurserObserver
+    Summon ..> SummonObserver : new 並掛到史萊姆
+    Curse ..> CurserObserver : new 並掛到目標
+```
+
+- 同一個 `Role` 在圖上出現兩種角色：**被觀察者**（`observers` 清單的擁有者，死亡時通知）與**觀察者的 `actor`**（施咒者 / 召喚者，拿獎勵）。
+- 一個角色可被多位不同施咒者詛咒（`*`），同一施咒者不疊加由 `Curse` 判斷（D19）。
+
+### ⑥ 依賴方向：模組 vs 外部擴充
+
+```mermaid
+classDiagram
+    direction LR
+    namespace 模組內部 {
+        class RPG
+        class Battle
+        class Troop
+        class Role
+        class State
+        class NormalState
+        class IAction
+        class Skill
+        class BasicAttack
+        class SkillObserver
+        class OnePunchHandler
+    }
+    namespace 外部擴充 {
+        class Fireball
+        class Poison
+        class PoisonedState
+        class Summon
+        class SummonObserver
+        class Slime
+        class OnePunch
+        class NormalHandler
+        class AIAction
+    }
+
+    RPG --> Battle
+    Battle --> Troop
+    Troop o-- Role
+    Role *-- State
+    Role *-- Skill
+    Role --> IAction
+    Role o-- SkillObserver
+    Role ..> BasicAttack
+    Role ..> NormalState
+    State <|-- NormalState
+    Skill <|-- BasicAttack
+
+    Skill <|-- Fireball
+    Skill <|-- Poison
+    Skill <|-- Summon
+    Skill <|-- OnePunch
+    State <|-- PoisonedState
+    Poison ..> PoisonedState
+    SkillObserver <|-- SummonObserver
+    Role <|-- Slime
+    Summon ..> SummonObserver
+    Summon ..> Slime
+    OnePunch o-- OnePunchHandler
+    OnePunchHandler <|-- NormalHandler
+    NormalHandler ..> NormalState
+    IAction <|.. AIAction
+```
+
+> 圖中外部擴充只挑代表（其他技能、狀態、handler 同理）。檢查方式：**所有箭頭都是「外部 → 模組」或「外部 → 外部」，沒有「模組 → 外部」**，所以刪掉外部擴充的檔案，模組仍能編譯（需求 ②③④）。`OnePunchHandler` 抽象類別、`AIAction` 歸屬哪一邊在討論中沒有明確決定，圖中暫放；`Slime` 程式裡是 `Role ← NonHero ← Slime`，這裡簡化成直接繼承 `Role`。
 
 **圖中的符號說明**
 
-- `Candidates`：類似 tuple 的（候選名單 `vector<Role*>`, 要選的人數 `m`）（D29）。
-- `t1, t2`：Battle 整理好的 T1、T2 名單，**都已排除死者**、各自依隊伍順序；`actorSide`：行動者屬於 T1 還是 T2（D30、D31）。
-- `identity`：識別字元，`'h'` 代表英雄（D6）。
-- `Skill::getCandidates()` 是 virtual，**預設 = 1 位敵軍**；火球、自我治療、召喚、自爆、鼓舞覆寫它，並呼叫 `enemiesOf` / `alliesOf`（D32、D33）。
-- `Role` 建立時自動把 `BasicAttack` 放在 `actions` 第 0 項；Client 只加入輸入檔列出的技能（D28）。
+- `Candidates`：`struct { vector<Role*> roles; int m; }`，候選名單與要選的人數（D29）。
+- `t1, t2`：Battle 整理好的 T1、T2 名單，**都已排除死者**、各自依隊伍順序；`actorSide`：`int`，1 = T1、2 = T2（D30、D31，§7.2 I3）。
+- `identity`：識別字元，`'h'` 代表英雄，其他角色為 `' '`（D6）。
+- `getDisplayName()`：有軍隊時回傳「[編號]名稱」，沒有時只回傳名稱。
+- `enemiesOf` / `alliesOf` / `othersOf` 後面的 `$` 代表 static（D32）。
 - 每個技能子類別各自持有自己的**中文名稱**，輸出時用 `getName()`（D27）。
+- `IAction` 的 `chooseAction` / `chooseTargets` 是設計，程式裡目前仍是原本的 `action()`；`Hero` / `AI` / `NonHero` 子類別也還在（⬜ D4），所以 ①–⑤ 沒有畫它們。
 
 ### 每個類別負責什麼
 
@@ -215,13 +490,14 @@ classDiagram
 |---|---|---|
 | `RPG` | 註冊兩支軍隊、建立並啟動 `Battle`、接收結果 | D1 |
 | `Battle` | 依 T1 → T2、用索引 + 每圈重讀人數輪流（召喚的史萊姆本回合就能行動）、跳過死者；整理 T1 / T2 活著的名單；每次行動後判斷是否結束（英雄死亡 / 一方殲滅）；每回合結束呼叫 `endThisRound()` | D1、D11、D20、D30、D31 |
-| `Role` | 持有 State、決策者、行動、觀察者；`checkMp` 只檢查；`lossHp` 是 HP 減少的唯一出口（印死亡、通知觀察者）；回合數歸零時由 Role 換回 `NormalState` | D5、D9、D11、D17 |
-| `State` | 固定流程（S1 → MP 檢查 → 算候選 → S2 → 扣 MP → 執行）；`doDamage` 套用行動者的加成並印傷害訊息；`damage` 轉交 `lossHp` | D10、D12、D16 |
+| `Troop` | 管理角色名單與軍隊編號；`addRole` / `removeRole` 同時設定 / 清除角色的 `troop` | §7.2 I2、§7.3 |
+| `Role` | 持有 State、決策者、技能、觀察者；`takeTurn` 委派給 `state->decision()`；`checkMp` 只檢查、不扣、不印；`lossHp` 是 HP 減少的唯一出口（只在「活 → 死」那一刻印死亡、通知觀察者一次）；`setState` 釋放舊狀態並把新狀態綁回自己；回合數歸零時由 Role 換回 `NormalState` | D5、D9、D10、D11、D17 |
+| `State` | 固定流程（S1 → MP 檢查 → 算候選 → S2 → 扣 MP → `announce` → `attack`，⬜ 尚未實作）；`doDamage` 套用行動者的加成並印傷害訊息；`damage` 轉交 `lossHp` | D10、D12、D16 |
 | `IAction` | 只做兩個決策：選行動、選目標；n ≤ m 時自動全選也由它判斷（AI 可就地決定 seed 要不要 +1） | D4、D5、D7、D8 |
-| `Skill` | 宣告 MP、名稱；計算候選；`doAction` 內每造成一次傷害就呼叫一次 `actor.state.doDamage()` | D3、D16、D29 |
+| `Skill` | 宣告 MP、名稱；計算候選；`announce` 印 S3 的行動訊息；`attack` 內每造成一次傷害就呼叫一次 `actor->getState()->doDamage()` | D3、D16、D29、§7.2 I1 |
 | `SkillObserver` | 收到死者後自行讀資料、自行判斷施咒者 / 召喚者是否還活著 | D18 |
 | `Curse` | 從目標的 observer 清單判斷「同一施咒者不疊加」 | D19 |
-| `OnePunch` | 對每位目標依序比對 Client 注入的 handler，套用第一個成立的；**沒有預設鏈** | D21–D23 |
+| `OnePunch` | 對每位目標依序呼叫 Client 注入的 handler 的 `handle()`，第一個回傳 `true` 就停；**沒有預設鏈** | D21–D23 |
 
 ### 模組內部 vs 外部擴充（只列已決定的）
 
@@ -231,11 +507,11 @@ classDiagram
 | **外部擴充**（可直接刪檔，不影響模組） | 10 種技能（含 `OnePunch`）、具體的 `OnePunchHandler`；`Curse` / `CurserObserver` 等技能專屬的觀察者；技能帶出的狀態（中毒、石化、鼓舞） | D19、D23、D24、需求 ② |
 | **Client** | 讀測資 / 輸入、名稱 → 技能的建造函式、組裝一拳攻擊的處理鏈、建立角色與軍隊、決定每個角色的 `IAction` | D21、D26、D36、D37 |
 
-> 討論中沒有明確決定、圖中暫時這樣畫的：`OnePunchHandler` 抽象類別歸在哪一邊、`AIAction` / `HeroAction` 屬於模組還是 Client、召喚的史萊姆是否保留 `Slime` 子類別（圖中直接用 `Role` 表示）。
+> 討論中沒有明確決定、圖中暫時這樣畫的：`OnePunchHandler` 抽象類別歸在哪一邊、`AIAction` / `HeroAction` 屬於模組還是 Client、召喚的史萊姆是否保留 `Slime` 子類別（程式目前用 `Slime`，圖中直接用 `Role` 表示）。
 
 ---
 
-## OOD — 循序圖：Client 組裝與啟動
+## OOD — 循序圖：Client 組裝與啟動（⬜ 尚未實作）
 
 ```mermaid
 sequenceDiagram
@@ -243,12 +519,14 @@ sequenceDiagram
     participant C as Client（main / 測試）
     participant F as 技能建造函式
     participant OP as OnePunch
+    participant TR as Troop
     participant R as Role
     participant G as RPG
 
     C->>C: 解析 .in：軍隊行 + 英雄決策行
+    C->>TR: new Troop(1) / new Troop(2)
     loop 每位角色
-        C->>R: new Role(name, hp, mp, str)
+        C->>R: new Role(hp, mp, str, name)
         Note right of R: 建構時自動加入 BasicAttack（第 0 項）
         loop 該角色的每個技能名稱
             C->>F: create("火球" / "一拳攻擊" / …)
@@ -257,20 +535,44 @@ sequenceDiagram
                 Note right of OP: 順序由 Client 決定
             end
             F-->>C: Skill*
-            C->>R: addAction(skill)
+            C->>R: addSkill(skill)
         end
         alt T1 的第一位
-            C->>R: 標成英雄 'h'，decider = HeroAction(istream)
+            C->>R: setIdentity('h')、setDecider(HeroAction(istream))
         else 其他角色
-            C->>R: decider = AIAction（seed = 0）
+            C->>R: setDecider(AIAction（seed = 0）)
         end
+        C->>TR: addRole(role)
+        TR->>R: setTroop(this)
     end
     C->>G: GameStart(t1, t2)
 ```
 
 > 正式執行時 `HeroAction` 讀 `std::cin`；測試時讀測資檔剩下的英雄決策行（D37）。S1 和 S2 共用同一串輸入。
 
-## OOD — 循序圖：一回合與一次行動
+## OOD — 循序圖：角色加入 / 離開軍隊（✅ 2026-10-14 修正）
+
+```mermaid
+sequenceDiagram
+    autonumber
+    participant X as 呼叫者（Client / Summon / 測試）
+    participant TR as Troop
+    participant R as Role
+
+    X->>TR: addRole(role)
+    TR->>TR: roles.push_back(role)
+    TR->>R: setTroop(this)
+    Note right of R: getDisplayName() →「[編號]名稱」
+
+    X->>TR: removeRole(role)
+    TR->>TR: 從 roles 移除 role
+    TR->>R: setTroop(nullptr)
+    Note right of R: 修正前：RequireNonNull 丟例外<br/>修正後：接受 nullptr，代表離開軍隊<br/>getDisplayName() → 只剩「名稱」
+```
+
+> 召喚（`Summon::attack`）用 `actor->getTroop()->addRole(slime)` 把史萊姆加到施放者所屬軍隊的隊尾，所以史萊姆自動帶對的前綴（D20、§7.2 I2）。目前程式沒有地方呼叫 `removeRole`；死者仍留在名單中，由 Battle 跳過。
+
+## OOD — 循序圖：一回合與一次行動（⬜ Battle 與 State 流程尚未實作）
 
 ```mermaid
 sequenceDiagram
@@ -282,40 +584,52 @@ sequenceDiagram
     participant K as Skill
 
     loop 每一回合
-        loop T1 再 T2，idx = 0；idx < troop.size()（每圈重讀）
+        loop T1 再 T2，idx = 0；idx < getRoles().size()（每圈重讀）
             alt 角色已死亡
                 B->>B: 跳過
             else 活著
                 B->>B: 整理 t1、t2（排除死者）與 actorSide
                 B->>R: takeTurn(t1, t2, actorSide)
-                R->>S: takeTurn(t1, t2, actorSide)
+                R->>S: decision(t1, t2, actorSide)
                 Note over S: 石化：跳過 S1–S3<br/>中毒：先 lossHp(30)，死了就結束<br/>其他：走預設流程
                 loop S1：直到 MP 足夠
-                    S->>D: chooseAction(actions)
+                    S->>D: chooseAction(skills)
                     D-->>S: skill
                     S->>R: checkMp(skill)
+                    R-->>S: bool（只檢查，不扣、不印）
                     opt MP 不足
                         S->>S: 印「你缺乏 MP，不能進行此行動。」
                     end
                 end
                 S->>K: getCandidates(actor, t1, t2, actorSide)
-                K-->>S: (candidates, m)
-                S->>D: chooseTargets(candidates, m)
+                K-->>S: Candidates{roles, m}
+                S->>D: chooseTargets(roles, m)
                 Note right of D: m = 0 或 n ≤ m：自動全選、略過 S2
                 D-->>S: targets
-                S->>R: lossMp(skill.getMp())
-                S->>K: doAction(actor, targets)
+                S->>R: lossMp(skill->getMp())
+                S->>K: announce(actor, targets)
+                Note right of K: 印「X 對 a, b 使用了 Z。」<br/>（普通攻擊：「X 攻擊 Y。」）
+                S->>K: attack(actor, targets)
                 B->>B: 判斷是否結束（英雄死亡 / 一方殲滅）
             end
         end
         loop 每位角色
             B->>R: endThisRound()
-            Note right of R: 狀態回合數 −1，歸零時 setState(NormalState)
+            alt round ≤ 0（正常狀態）
+                R->>R: 不處理
+            else round − 1 後 = 0
+                R->>R: setState(new NormalState())
+                Note right of R: delete 舊狀態，新狀態 setRole(this)
+            else round − 1 後 > 0
+                R->>R: 維持原狀態
+            end
         end
     end
 ```
 
-## OOD — 循序圖：傷害、死亡與觀察者
+> 本圖已實作的部分（✅）：`Role::takeTurn` → `state->decision()` 的委派、`checkMp`、`lossMp`、`getCandidates`、`announce`、`attack`、`endThisRound`。
+
+## OOD — 循序圖：傷害、死亡與觀察者（✅）
 
 ```mermaid
 sequenceDiagram
@@ -324,25 +638,31 @@ sequenceDiagram
     participant AS as actor.state
     participant TS as target.state
     participant T as target
-    participant O as SkillObserver
+    participant O as SkillObserver（依加入順序）
 
     loop 每造成一次傷害（一拳的 80 × 3 就是 3 次）
         K->>AS: doDamage(target, n)
         Note right of AS: 套用加成（鼓舞 +50）<br/>印「X 對 Y 造成 N 點傷害。」（N 為加成後數值）
         AS->>TS: damage(n')
         TS->>T: lossHp(n')
-        opt HP ≤ 0
+        T->>T: wasAlive = !isDead()；hp −= n'（最低 0）
+        opt wasAlive 且現在 isDead()（只在「活 → 死」那一刻）
             T->>T: 印「Y 死亡。」
-            T->>O: UntilDie(target)
-            Note right of O: pull：自行讀死者剩餘 MP，<br/>自行判斷施咒者 / 召喚者是否活著
+            T->>T: notifyObservers()
+            loop 每個 observer
+                T->>O: UntilDie(target)
+                Note right of O: pull：自行讀死者剩餘 MP，<br/>施咒者 / 召喚者還活著才給獎勵
+            end
         end
     end
 ```
 
 > 中毒扣的 30 HP、自爆的自殺也都經過 `lossHp()`，所以同樣會印死亡、觸發觀察者（D14、D17）。
-> 自爆：目標不含自己、依 T1 → T2；對所有目標處理完後，才讓自己 HP 歸零並印「<自己> 死亡。」，自己歸零**不印**傷害訊息（D34，已用 `testcases/self-explosion.out` 驗證）。
+> 已經死亡的角色再受到傷害（例如一拳的第 2、3 下）不會重複印死亡、不會再通知觀察者（§7.2 I4）。
+> 獎勵（`gainHp`）發生在「Y 死亡。」之後；`SummonObserver` +30、`CurserObserver` + 死者剩餘 MP。
+> 自爆：目標不含自己、依 T1 → T2；對所有目標處理完後，才 `actor->lossHp(actor->getHp())` 讓自己歸零並印「<自己> 死亡。」，自己歸零**不印**傷害訊息（D34，已用 `testcases/self-explosion.out` 驗證）。
 
-## OOD — 循序圖：一拳攻擊（Chain of Responsibility）
+## OOD — 循序圖：一拳攻擊（Chain of Responsibility，✅）
 
 ```mermaid
 sequenceDiagram
@@ -353,18 +673,22 @@ sequenceDiagram
 
     loop 每位目標
         loop 依 vector 順序
-            OP->>H: match(actor, target)
-            alt 成立（第一個）
-                OP->>H: doHandle(actor, target)
+            OP->>H: handle(actor, target)
+            H->>H: match(actor, target)
+            alt 成立
+                H->>H: doHandle(actor, target)
                 H->>AS: doDamage(target, n)（可能多次）
                 Note right of H: 例：CheerupHandler 造成 100 傷害後<br/>把目標狀態換回正常
-                OP->>OP: 停止比對
+                H-->>OP: true
+                OP->>OP: break（只套用第一個成立的）
+            else 不成立
+                H-->>OP: false，換下一個
             end
         end
     end
 ```
 
-> handler 用型別判斷（如 `dynamic_cast`）辨認目標的狀態，不比對字串（D25）；具體 handler 和它們依賴的狀態一起屬於外部擴充（D24）。
+> handler 用型別判斷（`dynamic_cast`）辨認目標的狀態，不比對字串（D25）；具體 handler 和它們依賴的狀態一起屬於外部擴充（D24）。
 
 ## State Diagram — role states（狀態機）
 
@@ -377,7 +701,7 @@ sequenceDiagram
 ```mermaid
 stateDiagram-v2
     direction TB
-    state "正常 NormalState" as Normal
+    state "正常 NormalState<br/>round = 0，不倒數" as Normal
     state apply <<choice>>
     state "石化 PetrochemicaledState<br/>輪到時跳過 S1–S3" as Petri
     state "中毒 PoisonedState<br/>輪到時先 lossHp(30)" as Poisoned
@@ -403,17 +727,18 @@ stateDiagram-v2
 
 | 目前狀態 | 事件 | 條件 | 轉移後 | 動作 / 由誰執行 | 依據 |
 |---|---|---|---|---|---|
-| 任一狀態（含相同狀態） | 被「石化」命中 | — | 石化 | `target.setState(new PetrochemicaledState)`，round = 3；舊狀態由 Role 釋放 | 需求「覆寫並重新倒數」、D11 |
+| 任一狀態（含相同狀態） | 被「石化」命中 | — | 石化 | `target->setState(new PetrochemicaledState())`，round = 3；`setState` 釋放舊狀態並把新狀態綁回角色 | 需求「覆寫並重新倒數」、D11 |
 | 任一狀態（含相同狀態） | 被「下毒」命中 | — | 中毒 | 同上，round = 3 | 同上 |
 | 任一狀態（含相同狀態） | 被「鼓舞」選為目標 | — | 受到鼓舞 | 同上，round = 3 | 同上 |
+| 正常 | 回合結束 `endThisRound()` | round ≤ 0 | 不變 | 直接返回，不倒數 | D11 |
 | 石化 / 中毒 / 受到鼓舞 | 回合結束 `endThisRound()`（Battle 呼叫） | round > 1 | 不變 | Role 將 round − 1 | D11 |
-| 石化 / 中毒 / 受到鼓舞 | 回合結束 `endThisRound()` | round = 1（−1 後歸零） | 正常 | **Role** 呼叫 `setState(NormalState)`（不由 State 自己換） | D11 |
-| 受到鼓舞 | 被一拳攻擊命中 | 不符合「HP ≥ 500」「中毒或石化」 | 正常 | `CheerupHandler` 先造成 100 傷害，再 `setState(NormalState)` | 需求一拳第 3 條、D24 |
-| 任一狀態 | `lossHp()` 後 HP ≤ 0 | — | （角色死亡） | 印「X 死亡。」、通知觀察者；之後 Battle 跳過此角色 | D17、D20 |
+| 石化 / 中毒 / 受到鼓舞 | 回合結束 `endThisRound()` | round = 1（−1 後歸零） | 正常 | **Role** 呼叫 `setState(new NormalState())`（不由 State 自己換） | D11 |
+| 受到鼓舞 | 被一拳攻擊命中 | 不符合「HP ≥ 500」「中毒或石化」 | 正常 | `CheerupHandler` 先造成 100 傷害，再 `setState(new NormalState())` | 需求一拳第 3 條、D24 |
+| 任一狀態 | `lossHp()` 後由活轉死 | — | （角色死亡） | 印「X 死亡。」、通知觀察者（各一次）；之後 Battle 跳過此角色 | D17、D20 |
 
-**round 的計算**（D11）：施加當下的回合算第 1 回合。例：第 1 回合被石化 → round = 3；第 1、2、3 回合結束時各 −1，第 3 回合結束歸零 → 第 4 回合恢復正常，所以第 1、2、3 回合都被跳過。正常狀態沒有 round，不倒數。
+**round 的計算**（D11）：施加當下的回合算第 1 回合。例：第 1 回合被石化 → round = 3；第 1、2、3 回合結束時各 −1，第 3 回合結束歸零 → 第 4 回合恢復正常，所以第 1、2、3 回合都被跳過。正常狀態 round = 0，不倒數。被覆寫時新狀態重新從 3 開始。
 
-## 測試：整場輸入 → 輸出比對（D35–D39）
+## 測試：整場輸入 → 輸出比對（D35–D39，⬜ 尚未實作）
 
 ```mermaid
 sequenceDiagram
@@ -433,3 +758,5 @@ sequenceDiagram
         T->>T: 報出第一個不同的行號，寫出 build/<名稱>.actual.txt
     end
 ```
+
+> 目前已有的單元測試（✅）：`ExampleTests.cpp` 11 個、`SkillTests.cpp` 41 個、`RoleTests.cpp` 20 個，共 72 個；輸出同樣用 `rdbuf` 收集（D38）。
