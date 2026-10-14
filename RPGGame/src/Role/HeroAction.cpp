@@ -2,6 +2,8 @@
 #include <sstream>
 #include <stdexcept>
 #include <string>
+#include <iostream>
+#include "Role.hpp"
 
 HeroAction::HeroAction(std::istream& input) : input(input) {}
 
@@ -31,6 +33,13 @@ std::vector<Role*> HeroAction::chooseTargets(const std::vector<Role*>& candidate
     if (m <= 0 || n <= m) {
         return candidates; // 略過 S2：不讀輸入
     }
+    // S2 的提示只在英雄真的要選時印（需求：「如果此為英雄的回合」；§7.2 I7）
+    std::cout << "選擇 " << m << " 位目標:";
+    for (int i = 0; i < n; i++) {
+        std::cout << " (" << i << ") " << candidates[i]->getDisplayName();
+    }
+    std::cout << std::endl;
+
     std::vector<int> decision = readDecision();
     if (static_cast<int>(decision.size()) != m) {
         throw std::invalid_argument("HeroAction: expected " + std::to_string(m) + " target indices");

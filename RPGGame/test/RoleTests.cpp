@@ -54,6 +54,8 @@ using Lines = std::vector<std::string>;
 // 記錄 decision() 收到的參數，用來確認 Role::takeTurn 交給目前的狀態（D10）
 class RecordingState : public State {
 public:
+    RecordingState() { displayName = "測試"; }
+
     int calls = 0;
     std::vector<Role*> lastT1;
     std::vector<Role*> lastT2;
@@ -303,7 +305,12 @@ TEST_F(RoleTest, TakeTurnHandsTheBattlefieldToCurrentState) {
     auto* state = new RecordingState();
     hero->setState(state);
 
-    hero->takeTurn(t1.getRoles(), t2.getRoles(), 1);
+    {
+        CoutCapture capture;
+        hero->takeTurn(t1.getRoles(), t2.getRoles(), 1);
+        // 「輪到 …」由 Role 在交給狀態之前印（§7.2 I6）
+        EXPECT_EQ(capture.lines(), (Lines{"輪到 [1]英雄 (HP: 100, MP: 0, STR: 0, State: 測試)。"}));
+    }
     EXPECT_EQ(state->calls, 1);
     EXPECT_EQ(state->lastT1, (std::vector<Role*>{hero}));
     EXPECT_EQ(state->lastT2, (std::vector<Role*>{slime}));

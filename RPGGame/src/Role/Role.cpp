@@ -29,6 +29,9 @@ Role::~Role() {
 }
 
 void Role::takeTurn(const std::vector<Role*>& t1, const std::vector<Role*>& t2, int actorSide) {
+    // 「輪到 …」在狀態效果之前印：石化也要印、中毒印的是扣 30 之前的 HP（§7.2 I6，對照 testcases/poison.out）
+    std::cout << "輪到 " << getDisplayName() << " (HP: " << hp << ", MP: " << mp << ", STR: " << str
+              << ", State: " << state->getDisplayName() << ")。" << std::endl;
     state->decision(t1, t2, actorSide);
 }
 

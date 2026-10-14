@@ -8,8 +8,7 @@ class NormalState : public State {
 public:
     NormalState(); // Default constructor
     ~NormalState();
-
-    void decision(const std::vector<Role*>& t1, const std::vector<Role*>& t2, int actorSide) override;
+    // 正常狀態：沿用 State::decision() 的預設流程
 };
 
 #endif // NORMALSTATE_HPP

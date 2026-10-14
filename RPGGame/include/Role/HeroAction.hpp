@@ -19,7 +19,7 @@ public:
 
     // S1：讀一行，選第 i 個行動；MP 不足時呼叫端會再呼叫一次 → 讀下一行
     Skill* chooseAction(const std::vector<Skill*>& skills) override;
-    // S2：n > m 時讀一行 m 個數字，依輸入順序回傳對應的候選；
+    // S2：n > m 時先印「選擇 m 位目標: (0) … (1) …」，再讀一行 m 個數字，依輸入順序回傳對應的候選；
     //     m = 0 或 n ≤ m 時直接回傳全部候選，**不讀輸入**（略過 S2，D8）
     std::vector<Role*> chooseTargets(const std::vector<Role*>& candidates, int m) override;
 };

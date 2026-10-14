@@ -6,6 +6,7 @@
  */
 #include <gtest/gtest.h>
 
+#include <iostream>
 #include <memory>
 #include <sstream>
 #include <stdexcept>
@@ -25,6 +26,24 @@ using Names = std::vector<std::string>;
 
 namespace {
 
+class CoutCapture {
+public:
+    CoutCapture() : old(std::cout.rdbuf(buffer.rdbuf())) {}
+    ~CoutCapture() { std::cout.rdbuf(old); }
+
+    std::vector<std::string> lines() const {
+        std::vector<std::string> result;
+        std::istringstream in(buffer.str());
+        std::string line;
+        while (std::getline(in, line)) result.push_back(line);
+        return result;
+    }
+
+private:
+    std::ostringstream buffer;
+    std::streambuf* old;
+};
+
 Names namesOf(const std::vector<Role*>& roles) {
     Names names;
     for (Role* role : roles) names.push_back(role->getName());
@@ -35,6 +54,7 @@ Names namesOf(const std::vector<Role*>& roles) {
 
 class HeroActionTest : public ::testing::Test {
 protected:
+    CoutCapture mute; // chooseTargets 會印「選擇 m 位目標」，其他測試不檢查輸出
     Role a{100, 0, 0, "A"};
     Role b{100, 0, 0, "B"};
     Role c{100, 0, 0, "C"};
@@ -101,6 +121,17 @@ TEST_F(HeroActionTest, AutoSelectionDoesNotConsumeInput) {
     EXPECT_EQ(namesOf(decider.chooseTargets({&a, &b}, 3)), (Names{"A", "B"}));      // n < m
     EXPECT_TRUE(decider.chooseTargets({}, 0).empty());                              // m = 0（召喚、自我治療）
     EXPECT_EQ(decider.chooseAction(hero.getSkills())->getName(), "水球");          // "2" 仍是下一個決策
+}
+
+TEST_F(HeroActionTest, PromptsForTargetsOnlyWhenActuallyChoosing) {
+    // 需求「輸出格式」：S2 時印「選擇 <m> 位目標: (0) <候選-1> (1) <候選-2> …」（§7.2 I7）
+    std::istringstream input("2, 0\n");
+    HeroAction decider(input);
+    CoutCapture capture;
+    decider.chooseTargets(abc, 2);
+    decider.chooseTargets({&a, &b}, 2); // n = m：略過 S2，不印
+    decider.chooseTargets({}, 0);       // m = 0：不印
+    EXPECT_EQ(capture.lines(), (Names{"選擇 2 位目標: (0) A (1) B (2) C"}));
 }
 
 // =====================================================================

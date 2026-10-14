@@ -23,6 +23,7 @@ public:
     void setRole(Role* role);
 
     std::string getName() const; // Getter for className
+    std::string getDisplayName() const; // 輸出用的中文名稱：正常 / 石化 / 中毒 / 受到鼓舞（「輪到 …」那一行用）
 
     void entryState(State* newState);
     void exitState();
@@ -32,14 +33,16 @@ public:
     // 擁有此狀態的角色受到 n 點傷害，轉交 Role::lossHp()（D16、D17）
     virtual void damage(int n);
 
-    // TODO: Implement the decision method in derived classes
-    // 一次行動的流程（D10、D12）；t1 / t2 為已排除死者的兩軍名單，actorSide = 1 或 2（D30、D31）
-    virtual void decision(const std::vector<Role*>& t1, const std::vector<Role*>& t2, int actorSide) = 0; // Pure virtual function
+    // 一次行動的預設流程（D10、D12）：S1 選行動（MP 不足就印訊息並重選）→ S2 算候選、選目標 → S3 扣 MP、印行動訊息、執行
+    //   t1 / t2 為已排除死者的兩軍名單，actorSide = 1 或 2（D30、D31）
+    //   各狀態只覆寫不同的部分：石化 → 整段跳過；中毒 → 先扣 30 HP、活著才走這個預設流程
+    virtual void decision(const std::vector<Role*>& t1, const std::vector<Role*>& t2, int actorSide);
 
     friend class Role; // Add Role as a friend class
 
 protected:
-    std::string name; // Class name
+    std::string name;        // Class name
+    std::string displayName; // 中文名稱，由各狀態在建構子設定（新增狀態不必改 State，需求 ③）
 };
 
 #endif // STATE_HPP
