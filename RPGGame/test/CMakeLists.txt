@@ -8,11 +8,9 @@ set(CMAKE_CXX_STANDARD 20)
 
 set(GTest SimpleTest)
 
-set(Sources 
-    ExampleTests.cpp
-    SkillTests.cpp
-    RoleTests.cpp
-)
+# test/ 底下的 *.cpp 都是測試檔；新增 / 刪除測試檔不必改這裡（libary/ 在子資料夾，不會被抓進來）
+# CONFIGURE_DEPENDS：每次 build 都重新搜尋，檔案增減時會自動重跑 cmake
+file(GLOB Sources CONFIGURE_DEPENDS ${LIB_PATH}/*.cpp)
 
 include(${LIB_PATH}/libary/test.cmake)
 set(SRCS)

@@ -82,7 +82,8 @@ private:
 
 class DummyAction : public IAction {
 public:
-    void action() override {}
+    Skill* chooseAction(const std::vector<Skill*>& skills) override { return skills.front(); }
+    std::vector<Role*> chooseTargets(const std::vector<Role*>& candidates, int) override { return candidates; }
 };
 
 class RoleTest : public ::testing::Test {

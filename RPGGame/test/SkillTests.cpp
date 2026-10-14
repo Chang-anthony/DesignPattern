@@ -39,6 +39,7 @@
 #include "CheerupedState.hpp"
 #include "SkillObserver.hpp"
 #include "SummonObserver.hpp"
+#include "AIAction.hpp"
 #include "CurserObserver.hpp"
 
 namespace {
@@ -477,6 +478,27 @@ TEST_F(SkillBehaviorTest, EverySummonCreatesItsOwnSlime) {
     ASSERT_EQ(static_cast<int>(t1.getRoles().size()), 3);
     EXPECT_NE(t1.getRoles()[1], t1.getRoles()[2]);
     EXPECT_EQ(t1.getRoles()[2]->getObservers().size(), 1u);
+}
+
+// D40：召喚的史萊姆由 AI 操控，透過 setDecider 攜帶自己的 AIAction（seed 從 0 開始、彼此獨立）
+TEST_F(SkillBehaviorTest, SummonedSlimeCarriesItsOwnAIAction) {
+    Role* hero = add(t1, "英雄", 500, 10000, 30);
+    Summon summon;
+    run(summon, hero, {});
+    run(summon, hero, {});
+    Role* slime1 = t1.getRoles()[1];
+    Role* slime2 = t1.getRoles()[2];
+
+    auto* ai1 = dynamic_cast<AIAction*>(slime1->getDecider());
+    auto* ai2 = dynamic_cast<AIAction*>(slime2->getDecider());
+    ASSERT_NE(ai1, nullptr);
+    ASSERT_NE(ai2, nullptr);
+    EXPECT_NE(ai1, ai2);
+    EXPECT_EQ(ai1->getSeed(), 0);
+
+    EXPECT_EQ(slime1->getDecider()->chooseAction(slime1->getSkills())->getName(), "普通攻擊");
+    EXPECT_EQ(ai1->getSeed(), 1);
+    EXPECT_EQ(ai2->getSeed(), 0); // 各自的 seed 不互相影響
 }
 
 TEST_F(SkillBehaviorTest, SummonerGains30HpWhenSlimeDies) {

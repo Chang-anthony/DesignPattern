@@ -5,6 +5,7 @@
 #include "SummonObserver.hpp"
 #include "Slime.hpp"
 #include "Troop.hpp"
+#include "AIAction.hpp"
 
 Summon::Summon()  : Skill() {
     setName("召喚");
@@ -16,6 +17,7 @@ void Summon::attack(Role* actor, std::vector<Role*> targets) {
     Slime* slime = new Slime(100, 0, 50, "Slime");
     SummonObserver* observer = new SummonObserver(actor);
     slime->addObserver(observer);
+    slime->setDecider(new AIAction()); // 英雄以外的角色都由 AI 操控；史萊姆和其他角色一樣透過 setDecider 攜帶決策者（D4、D40）
     troop->addRole(slime);
 }
 

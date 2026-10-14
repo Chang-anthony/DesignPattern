@@ -14,7 +14,6 @@
 #include <SelfHealing.hpp>
 #include <Role.hpp>
 
-#include <Hero.hpp>
 #include <Role.hpp>
 #include "SkillObserver.hpp"
 #include "CurserObserver.hpp"
@@ -41,9 +40,9 @@ int main()
 
     Skill* skill = new Curse();
 
-    Role* actor = new Hero(500, 500, 50, "h");
-    Role* actor2 = new Hero(500, 500, 50, "h");
-    Role* target = new Hero(500, 500, 50, "h");
+    Role* actor = new Role(500, 500, 50, "h");
+    Role* actor2 = new Role(500, 500, 50, "h");
+    Role* target = new Role(500, 500, 50, "h");
     
     skill->attack(actor, {target});
     std::vector<SkillObserver*> observser = target->getObservers();

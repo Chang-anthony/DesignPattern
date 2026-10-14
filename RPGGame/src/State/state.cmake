@@ -1,6 +1,6 @@
 set(__LIB_NAME "State")
 set(__LIB_PATH ${CMAKE_CURRENT_LIST_DIR})
 
-file(GLOB LIB_SRCS
+file(GLOB LIB_SRCS CONFIGURE_DEPENDS
     ${__LIB_PATH}/*.cpp
 )
