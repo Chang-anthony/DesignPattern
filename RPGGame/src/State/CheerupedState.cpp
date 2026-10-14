@@ -8,7 +8,7 @@ CheerupedState::CheerupedState() : State() {
 CheerupedState::~CheerupedState() {}
 
 //TODO: implement the decision method
-void CheerupedState::decision() {
+void CheerupedState::decision(const std::vector<Role*>& t1, const std::vector<Role*>& t2, int actorSide) {
     std::cout << "CheerupedState: Making a decision while in a cheer-up state." << std::endl;
 }
 

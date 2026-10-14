@@ -2,6 +2,7 @@
 #define STATE_HPP
 
 #include <string>
+#include <vector>
 
 class Role; // Forward declaration
 
@@ -32,7 +33,8 @@ public:
     virtual void damage(int n);
 
     // TODO: Implement the decision method in derived classes
-    virtual void decision() = 0; // Pure virtual function
+    // 一次行動的流程（D10、D12）；t1 / t2 為已排除死者的兩軍名單，actorSide = 1 或 2（D30、D31）
+    virtual void decision(const std::vector<Role*>& t1, const std::vector<Role*>& t2, int actorSide) = 0; // Pure virtual function
 
     friend class Role; // Add Role as a friend class
 

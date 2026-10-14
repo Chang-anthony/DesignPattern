@@ -8,6 +8,6 @@ PoisonedState::PoisonedState() : State() {
 PoisonedState::~PoisonedState() {}
 
 // TODO: implement the decision method
-void PoisonedState::decision() {
+void PoisonedState::decision(const std::vector<Role*>& t1, const std::vector<Role*>& t2, int actorSide) {
     std::cout << "PoisonedState: Making a decision while poisoned." << std::endl;
 }

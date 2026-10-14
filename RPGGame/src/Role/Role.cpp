@@ -10,13 +10,13 @@
 
 //TODO: Implement the State class and its methods
 Role::Role(int hp, int mp, int str, const std::string& name)
-    : hp(hp), mp(mp), str(str), name(name), state(new NormalState()), troop(nullptr) { // Default state is NormalState
+    : hp(hp), mp(mp), str(str), name(name), identity(' '), state(new NormalState()), troop(nullptr), decider(nullptr) { // Default state is NormalState
     state->setRole(this);
     skills.insert(skills.begin(), new BasicAttack()); // 普通攻擊固定在第 0 項（D28）
 }
 
 Role::Role(int hp, int mp, int str, const std::string& name, const std::vector<Skill*>& skills)
-    : hp(hp), mp(mp), str(str), name(name), state(new NormalState()), skills(skills), troop(nullptr) { // Default state is NormalState
+    : hp(hp), mp(mp), str(str), name(name), identity(' '), state(new NormalState()), skills(skills), troop(nullptr), decider(nullptr) { // Default state is NormalState
     state->setRole(this);
     this->skills.insert(this->skills.begin(), new BasicAttack()); // 普通攻擊固定在第 0 項（D28）
 }
@@ -26,6 +26,10 @@ Role::~Role() {
     for (Skill* skill : skills) {
         delete skill;
     }
+}
+
+void Role::takeTurn(const std::vector<Role*>& t1, const std::vector<Role*>& t2, int actorSide) {
+    state->decision(t1, t2, actorSide);
 }
 
 bool Role::isDead() const {
@@ -42,14 +46,8 @@ void Role::lossHp(int damage) {
     }
 }
 
-bool Role::checkActionLossMp(int mpCost) {
-    if (mp < mpCost) {
-        std::cout << name << " does not have enough MP to perform the action." << std::endl;
-        return false;
-    } else {
-        mp -= mpCost;
-        return true;
-    }
+bool Role::checkMp(const Skill* skill) const {
+    return mp >= utils::RequireNonNull(skill)->getMp();
 }
 
 void Role::setState(State* newState) {
@@ -64,6 +62,16 @@ void Role::setState(State* newState) {
 
 State* Role::getState() const {
     return state;
+}
+
+void Role::endThisRound() {
+    if (state->getRound() <= 0) {
+        return; // 沒有時效的狀態（正常狀態）
+    }
+    state->setRound(state->getRound() - 1);
+    if (state->getRound() == 0) {
+        setState(new NormalState()); // 由 Role 換狀態，避免 State 在自己的函式內被 delete（D11）
+    }
 }
 
 void Role::addSkill(Skill* skill) {
@@ -130,11 +138,31 @@ void Role::notifyObservers() {
     }
 }
 
+// troop 可為 nullptr：代表角色離開軍隊（Troop::removeRole 會這樣呼叫）
 void Role::setTroop(Troop* troop) {
-    utils::RequireNonNull(troop);
     this->troop = troop;
 }
 
 Troop* Role::getTroop() const {
     return troop;
+}
+
+void Role::setDecider(IAction* decider) {
+    this->decider = utils::RequireNonNull(decider);
+}
+
+IAction* Role::getDecider() const {
+    return decider;
+}
+
+void Role::setIdentity(char identity) {
+    this->identity = identity;
+}
+
+char Role::getIdentity() const {
+    return identity;
+}
+
+bool Role::isHero() const {
+    return identity == 'h';
 }

@@ -9,7 +9,7 @@ public:
     PoisonedState(); // Default constructor
     ~PoisonedState();
 
-    void decision() override;
+    void decision(const std::vector<Role*>& t1, const std::vector<Role*>& t2, int actorSide) override;
 };
 
 #endif /* _POISONEDSTATE_H_ */

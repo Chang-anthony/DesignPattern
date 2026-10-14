@@ -9,7 +9,7 @@ public:
     NormalState(); // Default constructor
     ~NormalState();
 
-    void decision() override;
+    void decision(const std::vector<Role*>& t1, const std::vector<Role*>& t2, int actorSide) override;
 };
 
 #endif // NORMALSTATE_HPP
