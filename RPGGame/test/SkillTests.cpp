@@ -687,6 +687,21 @@ TEST_F(SkillBehaviorTest, OnePunchHitsPoisonedOrPetrifiedTargetThreeTimes) {
     EXPECT_EQ(petrified->getHp(), 60);
 }
 
+// §7.2 I4（2026-10-14 依 testcases/one-punch.out 修正）：目標在第 2 下死亡 → 不再打第 3 下
+TEST_F(SkillBehaviorTest, OnePunchStopsHittingOnceTargetDies) {
+    Role* hero = add(t1, "英雄", 1000, 10000, 0);
+    Role* slime = add(t2, "Slime1", 160, 0, 0);
+    slime->setState(new PoisonedState());
+
+    OnePunch punch(requirementChain());
+    EXPECT_EQ(run(punch, hero, {slime}), (Lines{
+        "[1]英雄 對 [2]Slime1 造成 80 點傷害。",
+        "[1]英雄 對 [2]Slime1 造成 80 點傷害。",
+        "[2]Slime1 死亡。",
+    }));
+    EXPECT_EQ(slime->getHp(), 0);
+}
+
 TEST_F(SkillBehaviorTest, OnePunchOnCheeredTargetDeals100AndResetsToNormal) {
     Role* hero = add(t1, "英雄", 400, 10000, 0);
     Role* slime = add(t2, "Slime1", 201, 0, 0);
