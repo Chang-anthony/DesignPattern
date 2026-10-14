@@ -42,7 +42,7 @@
 
 ---
 
-## 3. 目前程式快照（2026-10-14，技能周邊 + Role / Observer 完成後）
+## 3. 目前程式快照（2026-10-14，技能周邊 + Role / Observer + IAction / AIAction 完成後）
 
 | 區塊 | 現況 |
 |---|---|
@@ -50,9 +50,10 @@
 | `OnePunchHandler/` | ✅ 移除 `next` 指標，改由 `OnePunch` 以 `vector` 注入（D21、D23）；`handle / match / doHandle` 帶入 `actor`（D22）；用 `dynamic_cast` 判斷狀態（D25） |
 | `Observer/` | ✅ `UntilDie(Role* dead)`（pull model，D18）；`SummonObserver` +30、`CurserObserver` + 剩餘 MP，施放者已死就不給 |
 | `State/` | ✅ 新增 `doDamage` / `damage`（D16）、受到鼓舞 +50、計時狀態回合數 3（D11）；移除 `entryState` / `exitState` 裡的除錯輸出（會混進遊戲輸出）；`decision(t1, t2, actorSide)` 帶入戰場資訊；⬜ `decision()` 內容維持原本的 stub |
-| `Role/` | ✅ `lossHp()`：歸零當下印死亡並通知觀察者（D17）；建立時自動加入普通攻擊（D28）；`getDisplayName()`；`checkMp(Skill*)` 只檢查（D9，取代 `checkActionLossMp`）；`endThisRound()`（D11）；`takeTurn(t1, t2, actorSide)` 交給 `state->decision(...)`（D10）；決策者 `setDecider / getDecider`（D4）；英雄識別 `setIdentity / isHero`（D6）；⬜ `Hero` / `AI` 子類別尚未移除（D4）、`IAction` / `AIAction` 維持原樣 |
+| `Role/` | ✅ `lossHp()`：歸零當下印死亡並通知觀察者（D17）；建立時自動加入普通攻擊（D28）；`getDisplayName()`；`checkMp(Skill*)` 只檢查（D9，取代 `checkActionLossMp`）；`endThisRound()`（D11）；`takeTurn(t1, t2, actorSide)` 交給 `state->decision(...)`（D10）；決策者 `setDecider / getDecider`（D4）；英雄識別 `setIdentity / isHero`（D6）；✅ `Hero` / `AI` 子類別已刪除（D4）；`NonHero` / `Slime` 保留 |
+| `IAction` / `AIAction` / `HeroAction` | ✅ `IAction`：`chooseAction(skills)`、`chooseTargets(candidates, m)`（D4、D5、D7、D8）；`AIAction`：seed 規則（§7.2 I5）；`HeroAction`：從注入的 `istream` 讀英雄決策（D37，§7.5） |
 | `Game/` | ✅ `Troop` 新增軍隊編號（輸出前綴）；⬜ `Battle`、`RPG` 維持原本的 TODO |
-| 測試 | ✅ 原本的 `test/ExampleTests.cpp`（11 個）只改 `OnePunch` 的建構方式；`test/SkillTests.cpp`（41 個）；`test/RoleTests.cpp`（20 個）；共 72 個全部通過 |
+| 測試 | ✅ 原本的 `test/ExampleTests.cpp`（11 個）只改 `OnePunch` 的建構方式；`test/SkillTests.cpp`（42 個）；`test/RoleTests.cpp`（20 個）；`test/AIActionTests.cpp`（11 個）；`test/HeroActionTests.cpp`（14 個）；共 98 個全部通過。每個測試的流程與通過標準見 [`test/TESTS.md`](test/TESTS.md) |
 
 ---
 
@@ -68,7 +69,7 @@
 - ✅ A10 已結案（決策 D29–D34）。
 - ✅ A11 已結案（決策 D35–D39）。**必要問題 A1–A11 全部結案，架構設計完成。**
 - ✅ 2026-10-13 進入實作：技能周邊 + 單元測試完成（§7）。
-- ⏸ **下一步**：確認 §7.2 的實作選擇；之後再決定是否實作 State 流程、`IAction`、Battle / RPG、Client 與整場比對測試。
+- ⏸ **下一步**：確認 §7.2 的實作選擇；之後再決定是否實作 State 流程、Battle / RPG、Client 與整場比對測試。
 - 之後依序：開放問題 O1–O5 視時間討論；開放問題 O1–O4 視時間討論。
 
 ### 收尾建議順序
@@ -199,6 +200,7 @@
 | D37 | 2026-10-12 | A11 | **英雄的 `IAction` 注入 `std::istream&`**：正式執行傳 `std::cin`，測試傳讀測資檔的 stream。 | 依 D4 只有英雄的 `IAction` 讀輸入，只注入這一處；不照抄 BigTwo 把 `plays` 一路傳遞 / 回傳穿過每一層；S1、S2 共用同一串輸入、MP 不足重選讀下一行都自然成立；`std::istream` 本身即可替換的輸入來源，不另設介面 |
 | D38 | 2026-10-12 | A11 | **測試時用 `rdbuf` 把 `std::cout` 導向字串收集輸出**，模組內部維持直接寫 `std::cout`。 | 輸出散落在 `doDamage`、`lossHp`、State 流程、技能等多處，注入 `ostream&` 要改整條呼叫鏈的簽名；需求只要求輸出正確，未要求輸出目的地可替換（列為 O6） |
 | D39 | 2026-10-12 | A11 | **用 gtest 參數化測試（`TEST_P`）比對**：每組 `.in` / `.out` 一個案例，逐行比對，失敗時報出第一個不同的行號，並把實際輸出寫到 `build/<名稱>.actual.txt` 供 diff。 | 10 組、每組數十到上百行，無法人工比對；一組一案例可直接看出哪個技能出錯 |
+| D40 | 2026-10-14 | A2（補充） | **召喚的史萊姆由 AI 操控，但和其他角色一樣「攜帶」決策者**：`Summon` 建出史萊姆後呼叫 `slime->setDecider(new AIAction())`，不把 AI 寫死在 `Slime` 類別裡；每隻史萊姆有自己的 `AIAction`（seed 從 0 開始、互不影響）。 | 需求：英雄以外的角色都由 AI 操控；沿用 D4「Role 持有 `IAction`」的同一套機制。取捨：`Summon`（外部擴充）因此依賴 `AIAction`；`AIAction` 歸屬模組或外部仍未決定 |
 
 ---
 
@@ -230,6 +232,7 @@ cd test && ./run_tests.sh    # Windows: run_tests.bat
 | I2 | **輸出名稱前綴**：`Troop` 記住自己的編號（`Troop(int id)`，預設 1），`Role::getDisplayName()` 回傳「[編號]名稱」。 | 召喚的史萊姆加入哪一軍就自動帶對的前綴 |
 | I3 | **`actorSide` 用 `int`（1 = T1、2 = T2）**，與輸出前綴一致。 | 最簡單的表示法 |
 | I4 | **一拳 80 × 3 沿用原本的迴圈**：目標在第 1、2 下就死時，剩下幾下仍會印傷害訊息（死亡訊息只印一次）。 | 照原本程式；需求未說明、測資沒有這種情況，要改的話是一行 |
+| I5 | **`AIAction` 在 S2 自動全選（m = 0 或 n ≤ m）時 seed 不 + 1**；S2 真的選目標時，選完 m 位才 + 1 一次。 | 需求「每做完一項決策 seed + 1」，自動全選不是 AI 的決策；`waterball-and-fireball-1v2` 中 Slime1 的行動順序（普通攻擊 → 火球 → 普通攻擊 → MP 不足 → 普通攻擊）只有這樣才對得上 |
 
 ### 7.3 2026-10-14：Role 與 Observer
 - **Observer**：7.1 已完成（`UntilDie(Role* dead)`、召喚 +30、詛咒 + 剩餘 MP、施放者已死不給）；本次只補測試（通知順序、只通知一次、移除後不通知、獎勵在死亡訊息之後）。
@@ -242,3 +245,20 @@ cd test && ./run_tests.sh    # Windows: run_tests.bat
 - 測試：新增 `test/RoleTests.cpp` 20 個，全部 72 個通過；刻意改壞（MP 邊界、回合倒數、`takeTurn` 未委派、`isHero`、`removeObserver`）都會被抓到。
 - 修正（2026-10-14）：`Role::setTroop()` 原本會 `RequireNonNull`，但 `Troop::removeRole()` 會呼叫 `setTroop(nullptr)`，導致 `removeRole` 一定丟例外；改為接受 `nullptr`（代表離開軍隊），並補上測試。
 
+### 7.4 2026-10-14：移除 Hero / AI 子類別、IAction / AIAction
+- **刪除** `Hero.hpp/.cpp`、`AI.hpp/.cpp`（D4）；`ExampleTests.cpp`、`main.cpp` 的 `new Hero(...)` 改為 `new Role(...)`（參數順序相同）。英雄改由 `setIdentity('h')` 標示（D6），決策交給 `IAction`。
+- **保留** `NonHero`、`Slime`：D4 只決定移除 `Hero` / `AI`；史萊姆是否保留子類別在討論中沒有決定（`Summon` 目前 `new Slime(...)`）。
+- **`IAction`**：原本的 `action()` 換成 `chooseAction(skills)` → `Skill*`、`chooseTargets(candidates, m)` → `vector<Role*>`，並加上 virtual 解構子。MP 檢查不在介面內（D5）。
+- **`AIAction`**：`seed`（預設 0，可由建構子指定）、`getSeed()`；規則見 §7.2 I5 與 `diagrams.md` ⑦。
+- **未做**：英雄的 `HeroAction`（D37，讀 `istream`）；「選擇行動：(0) …」「選擇 1 位目標: …」這兩行提示由 State 流程印（測資中 AI 也會印），等實作 State 流程時處理。
+- 測試：新增 `test/AIActionTests.cpp` 11 個（含重現測資 Slime1 的行動順序），`RoleTests` 的 `DummyAction` 改為新介面；全部 83 個通過。刻意改壞（自動全選也 + 1、公式少一位、每選一位就 + 1、S1 不 + 1、`n ≤ m` 寫成 `n < m`）都會被抓到。
+- CMake：`src/*/*.cmake` 的 `file(GLOB)` 加上 `CONFIGURE_DEPENDS`；`test/CMakeLists.txt` 的測試檔清單改為 `file(GLOB … CONFIGURE_DEPENDS *.cpp)`。新增 / 刪除 `.cpp` 後直接 build，CMake 會自動重新搜尋，不必手動重跑 `cmake -S . -B build`，也不必再改測試清單（已實測新增 / 刪除測試檔與原始檔）。
+- **召喚的史萊姆攜帶 `AIAction`（D40）**：`Summon::attack` 加上 `slime->setDecider(new AIAction())`；`SkillTests` 新增 `SummonedSlimeCarriesItsOwnAIAction`（共 84 個通過；拿掉 `setDecider` 會被抓到）。
+
+### 7.5 2026-10-14：HeroAction 與測試文件
+- **`HeroAction`**（`include/Role/HeroAction.hpp`、`src/Role/HeroAction.cpp`）：建構時注入 `std::istream&`（D37），正式執行傳 `std::cin`、測試傳 `istringstream`。
+  - S1：讀一行，選第 i 個行動；MP 不足由呼叫端再呼叫 → 讀下一行（需求「再次決策即 `<英雄決策-i+1>`」）。
+  - S2：n > m 時讀一行、以「, 」切開，依**輸入順序**回傳目標；m = 0 或 n ≤ m 時**不讀輸入**（D8；用 `waterball-and-fireball-1v2.in` 的 7 行決策驗證：自動全選若也讀行，行數會對不上）。
+  - 容錯：略過空白行、接受 `\r\n`；輸入用完丟 `std::runtime_error`、索引超出範圍丟 `std::out_of_range`、目標數字個數 ≠ m 丟 `std::invalid_argument`（測資保證格式正確，這些是除錯用）。
+- 測試：新增 `test/HeroActionTests.cpp` 14 個（含重現 `waterball-and-fireball-1v2`、`cheerup` 兩組測資的英雄決策），全部 98 個通過。
+- **測試文件** [`test/TESTS.md`](test/TESTS.md)：每個測試的目的、依據、準備資料、步驟與預期、通過標準；另含執行方式、共用工具、Mutation 檢查表（2026-10-14 全部重跑確認）與尚未涵蓋的範圍。**之後新增測試時要同步更新此文件**。

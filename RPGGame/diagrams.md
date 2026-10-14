@@ -4,14 +4,14 @@
 >
 > **依據：** [`CLAUDE.md`](CLAUDE.md) §5 設計決策 D1–D39（2026-10-12 架構設計完成）與 §7 實作紀錄。
 >
-> **2026-10-14 更新**：已實作的部分（技能周邊、Role、Observer）**改用程式裡的實際名稱**（例如 `attack`、`addSkill`、`State::decision`），並補上實作時的修正（`lossHp` 只印一次死亡、`setTroop(nullptr)`、`announce`、`handle` 回傳 `bool`）。尚未實作的部分（`IAction`、State 流程、`Battle`、`RPG`、Client）仍是**決定後的設計**，方法名稱為暫定，實作時可以改。下表標出各部分的狀態。
+> **2026-10-14 更新**：已實作的部分（技能周邊、Role、Observer、`IAction` / `AIAction` / `HeroAction`）**改用程式裡的實際名稱**（例如 `attack`、`addSkill`、`State::decision`），並補上實作時的修正（`lossHp` 只印一次死亡、`setTroop(nullptr)`、`announce`、`handle` 回傳 `bool`）。尚未實作的部分（State 流程、`Battle`、`RPG`、Client）仍是**決定後的設計**，方法名稱為暫定，實作時可以改。下表標出各部分的狀態。
 
 | Role | Class | 實作 |
 |---|---|---|
 | 關聯類別（兩軍對戰） | `Battle`（D1） | ⬜ |
 | Context（持有狀態與決策者） | `Role` | ✅ |
 | State（Template Method 骨架在抽象類別） | `State` ← `NormalState`、`PoisonedState`、`PetrochemicaledState`、`CheerupedState` | ✅ 傷害 / 回合數；⬜ `decision()` 流程 |
-| Strategy：決策者 | `IAction` ← `AIAction`、英雄的 `IAction`（暫稱 `HeroAction`） | ⬜ |
+| Strategy：決策者 | `IAction` ← `AIAction`、英雄的 `IAction`（暫稱 `HeroAction`） | ✅ |
 | Strategy：行動 | `Skill` ← `BasicAttack` + 10 種技能 | ✅ |
 | Observer | `SkillObserver` ← `SummonObserver`、`CurserObserver` | ✅ |
 | Chain of Responsibility | `OnePunchHandler` ← `HpHandler`、`PoisonPetrochemicalHandler`、`CheerupHandler`、`NormalHandler` | ✅ |
@@ -20,7 +20,7 @@
 
 | 改變 | 決策 |
 |---|---|
-| 移除 `Hero` / `AI` 這兩個 `Role` 子類別，改由 `Role` 持有 `IAction`；`seed` 移到 `AIAction` | D4（⬜ 子類別尚未刪除） |
+| 移除 `Hero` / `AI` 這兩個 `Role` 子類別，改由 `Role` 持有 `IAction`；`seed` 移到 `AIAction` | D4（✅ 2026-10-14 已刪除；`NonHero` / `Slime` 保留） |
 | 一次行動的流程由 `State` 主導，固定流程寫在 `State` 抽象類別 | D10、D12 |
 | 傷害一律經過 `actor.state.doDamage()` → `target.state.damage()` → `target.lossHp()` | D16、D17 |
 | 觀察者改為 pull model：`UntilDie(dead)` 帶入死者 | D18 |
@@ -46,7 +46,7 @@
 
 ## OOD — 類別圖
 
-類別圖拆成 6 張，每張只看一個面向，避免全部擠在一起：
+類別圖拆成 7 張，每張只看一個面向，避免全部擠在一起：
 
 | 圖 | 看什麼 |
 |---|---|
@@ -56,6 +56,7 @@
 | ④ 一拳攻擊（Chain of Responsibility） | handler 的繼承，以及每個 handler 判斷 / 建立哪些狀態 |
 | ⑤ 觀察者（Observer） | 誰被觀察、誰是觀察者、誰負責掛上觀察者 |
 | ⑥ 依賴方向：模組 vs 外部擴充 | 驗證需求 ②：刪除外部擴充的檔案，模組不受影響 |
+| ⑦ 決策者（Strategy） | `IAction` 介面、`AIAction` 的 seed 規則、與 `Role` 的關係 |
 
 ### 圖例
 
@@ -105,6 +106,8 @@ classDiagram
     }
     class IAction {
         <<interface>>
+        +chooseAction(skills) Skill
+        +chooseTargets(candidates, m) vector~Role~
     }
     class Skill {
         <<abstract>>
@@ -309,6 +312,7 @@ classDiagram
     Summon ..> Slime : new
     Summon ..> SummonObserver : new，掛在史萊姆上
     Summon ..> Troop : actor->getTroop()->addRole()
+    Summon ..> AIAction : new，setDecider 給史萊姆（D40）
     Curse ..> CurserObserver : new，掛在目標上
     Curse ..> SkillObserver : 檢查是否同一施咒者
     OnePunch "1" o-- "*" OnePunchHandler : handlers
@@ -474,6 +478,58 @@ classDiagram
 
 > 圖中外部擴充只挑代表（其他技能、狀態、handler 同理）。檢查方式：**所有箭頭都是「外部 → 模組」或「外部 → 外部」，沒有「模組 → 外部」**，所以刪掉外部擴充的檔案，模組仍能編譯（需求 ②③④）。`OnePunchHandler` 抽象類別、`AIAction` 歸屬哪一邊在討論中沒有明確決定，圖中暫放；`Slime` 程式裡是 `Role ← NonHero ← Slime`，這裡簡化成直接繼承 `Role`。
 
+### ⑦ 決策者（Strategy，✅ 2026-10-14）
+
+```mermaid
+classDiagram
+    direction LR
+    class Role {
+        -IAction decider
+        +setDecider(IAction)
+        +getDecider() IAction
+        +getSkills() vector~Skill~
+        +checkMp(Skill) bool
+    }
+    class IAction {
+        <<interface>>
+        +chooseAction(vector~Skill~ skills)* Skill
+        +chooseTargets(vector~Role~ candidates, int m)* vector~Role~
+    }
+    class AIAction {
+        -int seed
+        +AIAction(int seed = 0)
+        +chooseAction(skills) Skill
+        +chooseTargets(candidates, m) vector~Role~
+        +getSeed() int
+    }
+    class HeroAction {
+        -istream& input
+        +HeroAction(istream& input)
+        +chooseAction(skills) Skill
+        +chooseTargets(candidates, m) vector~Role~
+        -readDecision() vector~int~
+    }
+
+    Role "1" --> "0..1" IAction : decider
+    IAction <|.. AIAction
+    IAction <|.. HeroAction
+    IAction ..> Skill : 回傳選中的行動
+    IAction ..> Role : 回傳選中的目標
+    note for HeroAction "每個決策讀一行：1 或 0, 1, 2"
+```
+
+`AIAction` 的 seed 規則（需求「AI 決策」章節）：
+
+| 呼叫 | 回傳 | seed |
+|---|---|---|
+| `chooseAction(skills)` | `skills[seed % skills.size()]` | + 1（MP 不足由呼叫端再呼叫一次，所以重選也會 + 1） |
+| `chooseTargets(candidates, m)`，n > m | `u[s % n], u[(s + 1) % n], …, u[(s + m − 1) % n]` | 全部選完才 + 1（只加一次） |
+| `chooseTargets(candidates, m)`，m = 0 或 n ≤ m | 全部候選（略過 S2） | **不變**：不是 AI 做的決策（D8；已用 `waterball-and-fireball-1v2` 中 Slime1 的行動順序驗證） |
+
+- 「MP 是否足夠」不在 `IAction` 裡判斷：`IAction` 只回傳選擇，檢查與印「你缺乏 MP…」由 State 流程呼叫 `Role::checkMp()` 處理（D5、D9），所以新增 `IAction` 實作不會漏掉 MP 檢查。
+- 「n ≤ m 自動全選」由每個 `IAction` 實作自己判斷（D8 的取捨）：`AIAction` 不消耗 seed、`HeroAction` 不讀輸入行。
+- `HeroAction`：S1 讀一行選行動（MP 不足時再讀下一行）；S2 在 n > m 時讀一行 m 個數字，依輸入順序回傳（D37）。
+
 **圖中的符號說明**
 
 - `Candidates`：`struct { vector<Role*> roles; int m; }`，候選名單與要選的人數（D29）。
@@ -482,7 +538,7 @@ classDiagram
 - `getDisplayName()`：有軍隊時回傳「[編號]名稱」，沒有時只回傳名稱。
 - `enemiesOf` / `alliesOf` / `othersOf` 後面的 `$` 代表 static（D32）。
 - 每個技能子類別各自持有自己的**中文名稱**，輸出時用 `getName()`（D27）。
-- `IAction` 的 `chooseAction` / `chooseTargets` 是設計，程式裡目前仍是原本的 `action()`；`Hero` / `AI` / `NonHero` 子類別也還在（⬜ D4），所以 ①–⑤ 沒有畫它們。
+- `Hero` / `AI` 子類別已刪除（D4）；`NonHero` / `Slime` 仍保留在程式中（史萊姆是否保留子類別未決定），①–⑤ 沒有畫它們。
 
 ### 每個類別負責什麼
 
@@ -493,7 +549,7 @@ classDiagram
 | `Troop` | 管理角色名單與軍隊編號；`addRole` / `removeRole` 同時設定 / 清除角色的 `troop` | §7.2 I2、§7.3 |
 | `Role` | 持有 State、決策者、技能、觀察者；`takeTurn` 委派給 `state->decision()`；`checkMp` 只檢查、不扣、不印；`lossHp` 是 HP 減少的唯一出口（只在「活 → 死」那一刻印死亡、通知觀察者一次）；`setState` 釋放舊狀態並把新狀態綁回自己；回合數歸零時由 Role 換回 `NormalState` | D5、D9、D10、D11、D17 |
 | `State` | 固定流程（S1 → MP 檢查 → 算候選 → S2 → 扣 MP → `announce` → `attack`，⬜ 尚未實作）；`doDamage` 套用行動者的加成並印傷害訊息；`damage` 轉交 `lossHp` | D10、D12、D16 |
-| `IAction` | 只做兩個決策：選行動、選目標；n ≤ m 時自動全選也由它判斷（AI 可就地決定 seed 要不要 +1） | D4、D5、D7、D8 |
+| `IAction` | 只做兩個決策：選行動、選目標；n ≤ m 時自動全選也由它判斷；`AIAction` 自動全選時 seed 不變 | D4、D5、D7、D8 |
 | `Skill` | 宣告 MP、名稱；計算候選；`announce` 印 S3 的行動訊息；`attack` 內每造成一次傷害就呼叫一次 `actor->getState()->doDamage()` | D3、D16、D29、§7.2 I1 |
 | `SkillObserver` | 收到死者後自行讀資料、自行判斷施咒者 / 召喚者是否還活著 | D18 |
 | `Curse` | 從目標的 observer 清單判斷「同一施咒者不疊加」 | D19 |
@@ -759,4 +815,4 @@ sequenceDiagram
     end
 ```
 
-> 目前已有的單元測試（✅）：`ExampleTests.cpp` 11 個、`SkillTests.cpp` 41 個、`RoleTests.cpp` 20 個，共 72 個；輸出同樣用 `rdbuf` 收集（D38）。
+> 目前已有的單元測試（✅）：`ExampleTests.cpp` 11 個、`SkillTests.cpp` 42 個、`RoleTests.cpp` 20 個、`AIActionTests.cpp` 11 個、`HeroActionTests.cpp` 14 個，共 98 個（每個測試的流程與通過標準見 [`test/TESTS.md`](test/TESTS.md)）；輸出同樣用 `rdbuf` 收集（D38）。
