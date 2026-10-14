@@ -29,9 +29,8 @@ public:
     void exitState();
 
     // 行動者（擁有此狀態的角色）對 target 造成 n 點傷害：套用加成並印出傷害訊息（D16）
+    // 技能造成傷害的唯一通道（D47）
     virtual void doDamage(Role* target, int n);
-    // 擁有此狀態的角色受到 n 點傷害，轉交 Role::lossHp()（D16、D17）
-    virtual void damage(int n);
 
     // 一次行動的預設流程（D10、D12）：S1 選行動（MP 不足就印訊息並重選）→ S2 算候選、選目標 → S3 扣 MP、印行動訊息、執行
     //   t1 / t2 為已排除死者的兩軍名單，actorSide = 1 或 2（D30、D31）
@@ -41,6 +40,10 @@ public:
     friend class Role; // Add Role as a friend class
 
 protected:
+    // 擁有此狀態的角色受到 n 點傷害（不印訊息），轉交 Role::lossHp()（D16、D17）。
+    // 不公開（D47）：只能經由 doDamage()，或由狀態自己呼叫（例如中毒扣 30）
+    virtual void damage(int n);
+
     std::string name;        // Class name
     std::string displayName; // 中文名稱，由各狀態在建構子設定（新增狀態不必改 State，需求 ③）
 };

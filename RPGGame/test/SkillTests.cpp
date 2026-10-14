@@ -40,6 +40,7 @@
 #include "SkillObserver.hpp"
 #include "SummonObserver.hpp"
 #include "AIAction.hpp"
+#include "HeroAction.hpp"
 #include "CurserObserver.hpp"
 
 namespace {
@@ -89,10 +90,23 @@ protected:
     std::vector<Role*> alive1() const { return t1.getRoles(); }
     std::vector<Role*> alive2() const { return t2.getRoles(); }
 
-    // 執行技能並回傳輸出
+    // 執行技能並回傳輸出（只呼叫 attack()：不扣 MP、不付 HP 代價）
     Lines run(Skill& skill, Role* actor, const std::vector<Role*>& targets) {
         CoutCapture capture;
         skill.attack(actor, targets);
+        return capture.lines();
+    }
+
+    // 經過完整的 State 流程施放 actor 的第 index 個行動：S3 扣 MP、施放、支付 HP 代價（D47）
+    std::istringstream flowInput;
+    HeroAction flowDecider{flowInput};
+    Lines castThroughFlow(Role* actor, int index) {
+        flowInput.clear();
+        flowInput.str(std::to_string(index) + "\n");
+        actor->setDecider(&flowDecider);
+        int side = actor->getTroop() == &t1 ? 1 : 2;
+        CoutCapture capture;
+        actor->takeTurn(alive1(), alive2(), side);
         return capture.lines();
     }
 };
@@ -543,10 +557,12 @@ TEST_F(SkillBehaviorTest, SelfExplosionHitsOthersThenActorDiesLast) {
     Role* hero = add(t1, "英雄", 999999, 500, 30);
     Role* a1 = add(t1, "A", 100, 1000, 15);
     Role* a2 = add(t2, "A", 200, 1000, 15);
+    hero->addSkill(new SelfExplosion()); // (1) 自爆
 
-    SelfExplosion explosion;
-    Candidates c = explosion.getCandidates(hero, alive1(), alive2(), 1);
-    EXPECT_EQ(run(explosion, hero, c.roles), (Lines{
+    // 經過流程：施放後才支付 HP 代價（D47），所以「[1]英雄 死亡。」排在所有目標之後（D34）
+    Lines out = castThroughFlow(hero, 1);
+    Lines tail(out.end() - 4, out.end());
+    EXPECT_EQ(tail, (Lines{
         "[1]英雄 對 [1]A 造成 150 點傷害。",
         "[1]A 死亡。",
         "[1]英雄 對 [2]A 造成 150 點傷害。",
@@ -557,31 +573,51 @@ TEST_F(SkillBehaviorTest, SelfExplosionHitsOthersThenActorDiesLast) {
     EXPECT_EQ(a2->getHp(), 50);
 }
 
+TEST_F(SkillBehaviorTest, SelfExplosionCostsAllHpButAttackItselfDoesNotKill) {
+    Role* hero = add(t1, "英雄", 1234, 500, 0);
+    Role* slime = add(t2, "Slime", 1000, 0, 0);
+    SelfExplosion explosion;
+    EXPECT_EQ(run(explosion, hero, {slime}), (Lines{"[1]英雄 對 [2]Slime 造成 150 點傷害。"}));
+    EXPECT_EQ(hero->getHp(), 1234);             // attack() 只對目標施放
+    EXPECT_EQ(explosion.costHp(hero), 1234);    // 代價 = 目前全部 HP，由流程支付（D47）
+}
+
 TEST_F(SkillBehaviorTest, SelfExplosionDeathTriggersObservers) {
     Role* curser = add(t2, "Curser", 1000, 0, 0);
     Role* hero = add(t1, "英雄", 1000, 500, 0);
+    hero->addSkill(new SelfExplosion());
 
     Curse curse;
     run(curse, curser, {hero});
-    SelfExplosion explosion;
-    EXPECT_EQ(run(explosion, hero, {curser}), (Lines{
-        "[1]英雄 對 [2]Curser 造成 150 點傷害。",
-        "[1]英雄 死亡。",
-    }));
-    // 自爆的自殺也經過 lossHp → 通知觀察者（D17）；MP 由 State 流程扣，這裡仍是 500
-    EXPECT_EQ(curser->getHp(), 1000 - 150 + 500);
+    Lines out = castThroughFlow(hero, 1);
+    EXPECT_EQ(out.back(), "[1]英雄 死亡。");
+    // 支付 HP 代價也經過 lossHp → 通知觀察者（D17）；流程先扣了 200 MP，剩 300
+    EXPECT_EQ(curser->getHp(), 1000 - 150 + 300);
 }
 
 TEST_F(SkillBehaviorTest, CurserKilledByExplosionGainsNothing) {
     Role* curser = add(t2, "Curser", 100, 0, 0);
     Role* hero = add(t1, "英雄", 1000, 500, 0);
+    hero->addSkill(new SelfExplosion());
 
     Curse curse;
     run(curse, curser, {hero});
-    SelfExplosion explosion;
-    run(explosion, hero, {curser});
+    castThroughFlow(hero, 1);
     EXPECT_TRUE(hero->isDead());
     EXPECT_EQ(curser->getHp(), 0);
+}
+
+TEST_F(SkillBehaviorTest, OnlySelfExplosionCostsHp) {
+    Role* hero = add(t1, "英雄", 777, 0, 0);
+    std::vector<Skill*> noHpCost = {new BasicAttack(), new Waterball(), new Fireball(), new SelfHealing(),
+                                    new Petrochemical(), new Poison(), new Summon(), new Cheerup(),
+                                    new Curse(), new OnePunch(requirementChain())};
+    for (Skill* skill : noHpCost) {
+        SCOPED_TRACE(skill->getName());
+        EXPECT_EQ(skill->costHp(hero), 0); // 預設 0（D47）
+        delete skill;
+    }
+    EXPECT_EQ(SelfExplosion().costHp(hero), 777);
 }
 
 // =====================================================================
@@ -645,10 +681,14 @@ TEST_F(SkillBehaviorTest, CursedRoleDyingFromOtherHpLossStillRewardsCurser) {
 
     Curse curse;
     run(curse, hero, {slime});
+    slime->setState(new PoisonedState());
     {
         CoutCapture capture;
-        slime->lossHp(30); // 例如中毒扣血：所有 HP 減少都走 lossHp（D17）
-        EXPECT_EQ(capture.lines(), (Lines{"[2]Slime 死亡。"}));
+        slime->takeTurn(alive1(), alive2(), 2); // 中毒扣 30 致死：不是技能傷害，也要通知觀察者（D17）
+        EXPECT_EQ(capture.lines(), (Lines{
+            "輪到 [2]Slime (HP: 30, MP: 999, STR: 0, State: 中毒)。",
+            "[2]Slime 死亡。",
+        }));
     }
     EXPECT_EQ(hero->getHp(), 300 + 999);
 }

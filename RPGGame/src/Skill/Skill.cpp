@@ -8,6 +8,7 @@ Skill::~Skill() = default;
 // Getters
 std::string Skill::getName() const { return name; }
 int Skill::getMp() const { return mp; }
+int Skill::costHp(Role* actor) const { return 0; }
 
 // Setters
 void Skill::setName(const std::string& name) { this->name = name; }

@@ -32,7 +32,6 @@ public:
     void takeTurn(const std::vector<Role*>& t1, const std::vector<Role*>& t2, int actorSide);
 
     bool isDead() const;
-    void lossHp(int damage); // HP 減少的唯一出口：歸零當下印死亡訊息並通知觀察者（D17）
     bool checkMp(const Skill* skill) const; // S1：只檢查 MP 是否足夠，不扣除（D9）
     void setState(State* newState);
     State* getState() const;
@@ -62,6 +61,13 @@ public:
     void setIdentity(char identity);
     char getIdentity() const;
     bool isHero() const; // identity == 'h'（D6）
+
+private:
+    // HP 減少的唯一出口：歸零當下印死亡訊息並通知觀察者（D17）。
+    // 不公開（D47）：只有 State 能呼叫 —— 技能造成傷害一律走 actor->getState()->doDamage()，
+    // 狀態自己扣血（中毒）走 State::damage()，行動的 HP 代價（自爆）由 State::decision() 依 Skill::costHp() 支付
+    void lossHp(int damage);
+    friend class State;
 };
 
 #endif // ROLE_HPP

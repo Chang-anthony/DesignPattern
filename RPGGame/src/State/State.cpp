@@ -94,4 +94,11 @@ void State::decision(const std::vector<Role*>& t1, const std::vector<Role*>& t2,
     actor->lossMp(skill->getMp());
     skill->announce(actor, targets);
     skill->attack(actor, targets);
+
+    // 行動的 HP 代價（D47）：在施放之後才支付，所以自爆的「<自己> 死亡。」排在所有目標之後（D34）。
+    // 施放之後才詢問，施放途中得到的 HP（例如詛咒獎勵）也算在「全部 HP」裡
+    int hpCost = skill->costHp(actor);
+    if (hpCost > 0) {
+        actor->lossHp(hpCost);
+    }
 }

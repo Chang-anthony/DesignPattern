@@ -128,7 +128,9 @@ TEST(SkillTest, SelfExplosionTest) {
 
     skill->attack(actor, {target});
     EXPECT_EQ(target->getHp(), 350); // Assuming SelfExplosion deals 150 damage
-    EXPECT_EQ(actor->getHp(), 0); // Actor self-damage
+    // 自殺改為自爆的 HP 代價，由 State 流程在施放後支付（D47）；attack() 本身不再扣施放者的 HP
+    EXPECT_EQ(actor->getHp(), 500);
+    EXPECT_EQ(skill->costHp(actor), 500); // Actor self-damage = 全部 HP
 
 }
 TEST(SkillTest, SelfHealingTest) {

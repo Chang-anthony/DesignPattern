@@ -12,7 +12,7 @@ PoisonedState::~PoisonedState() {}
 
 void PoisonedState::decision(const std::vector<Role*>& t1, const std::vector<Role*>& t2, int actorSide) {
     Role* actor = utils::RequireNonNull(getRole());
-    actor->lossHp(30); // 走 lossHp：歸零時印「死亡。」並通知觀察者（D17）；不印傷害訊息
+    damage(30); // 自己受到 30 點傷害：不印傷害訊息，歸零時印「死亡。」並通知觀察者（D17、D47）
     if (actor->isDead()) {
         return;
     }

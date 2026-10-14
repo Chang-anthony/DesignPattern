@@ -30,6 +30,11 @@
 
 namespace {
 
+// 編譯期檢查（D47）：從外部（例如技能）能不能直接呼叫這些函式
+template <class R> concept CanCallLossHp = requires(R& r) { r.lossHp(1); };
+template <class S> concept CanCallDamage = requires(S& s) { s.damage(1); };
+template <class S> concept CanCallDoDamage = requires(S& s, Role* target) { s.doDamage(target, 1); };
+
 class CoutCapture {
 public:
     CoutCapture() : old(std::cout.rdbuf(buffer.rdbuf())) {}
@@ -93,6 +98,10 @@ class RoleTest : public ::testing::Test {
 protected:
     Troop t1{1};
     Troop t2{2};
+    Role attacker{1, 0, 0, "Attacker"}; // 不在任何軍隊：輸出名稱沒有前綴
+
+    // 讓 target 受到 n 點傷害：Role::lossHp 不公開（D47），測試也走正規通道 doDamage
+    void hurt(Role* target, int n) { attacker.getState()->doDamage(target, n); }
 
     Role* add(Troop& troop, const std::string& name, int hp, int mp, int str) {
         Role* role = new Role(hp, mp, str, name);
@@ -204,20 +213,20 @@ TEST_F(RoleTest, LossHpAnnouncesDeathOnlyWhenHpReachesZero) {
     Role* slime = add(t2, "Slime1", 100, 0, 0);
     {
         CoutCapture capture;
-        slime->lossHp(99);
-        EXPECT_TRUE(capture.lines().empty());
+        hurt(slime, 99);
+        EXPECT_EQ(capture.lines(), (Lines{"Attacker 對 [2]Slime1 造成 99 點傷害。"})); // 沒有死亡訊息
     }
     EXPECT_EQ(slime->getHp(), 1);
     {
         CoutCapture capture;
-        slime->lossHp(1);
-        EXPECT_EQ(capture.lines(), (Lines{"[2]Slime1 死亡。"}));
+        hurt(slime, 1);
+        EXPECT_EQ(capture.lines(), (Lines{"Attacker 對 [2]Slime1 造成 1 點傷害。", "[2]Slime1 死亡。"}));
     }
     EXPECT_TRUE(slime->isDead());
     {
         CoutCapture capture;
-        slime->lossHp(10); // 已死亡：不再印、不再通知
-        EXPECT_TRUE(capture.lines().empty());
+        hurt(slime, 10); // 已死亡：只有傷害訊息，不再印死亡、不再通知
+        EXPECT_EQ(capture.lines(), (Lines{"Attacker 對 [2]Slime1 造成 10 點傷害。"}));
     }
 }
 
@@ -240,8 +249,8 @@ TEST_F(RoleTest, ObserversAreNotifiedOnceInTheOrderTheyWereAdded) {
     target->addObserver(new RecordingObserver(b, &log, "b"));
 
     CoutCapture mute;
-    target->lossHp(10);
-    target->lossHp(10);
+    hurt(target, 10);
+    hurt(target, 10);
     EXPECT_EQ(log, (std::vector<std::string>{"a:T", "b:T"}));
 }
 
@@ -255,7 +264,7 @@ TEST_F(RoleTest, RemovedObserverIsNotNotified) {
     EXPECT_TRUE(target->getObservers().empty());
 
     CoutCapture mute;
-    target->lossHp(10);
+    hurt(target, 10);
     EXPECT_TRUE(log.empty());
 }
 
@@ -267,8 +276,8 @@ TEST_F(RoleTest, ObserverRewardsAreAppliedAfterDeathMessage) {
     target->addObserver(new SummonObserver(summoner));
 
     CoutCapture capture;
-    target->lossHp(10);
-    EXPECT_EQ(capture.lines(), (Lines{"[2]T 死亡。"}));
+    hurt(target, 10);
+    EXPECT_EQ(capture.lines(), (Lines{"Attacker 對 [2]T 造成 10 點傷害。", "[2]T 死亡。"})); // 獎勵本身不印訊息
     EXPECT_EQ(curser->getHp(), 170);   // + 剩餘 MP
     EXPECT_EQ(summoner->getHp(), 130); // + 30
 }
@@ -281,9 +290,9 @@ TEST_F(RoleTest, DeadObserverOwnersGetNoReward) {
     target->addObserver(new SummonObserver(summoner));
 
     CoutCapture mute;
-    curser->lossHp(10);
-    summoner->lossHp(10);
-    target->lossHp(10);
+    hurt(curser, 10);
+    hurt(summoner, 10);
+    hurt(target, 10);
     EXPECT_EQ(curser->getHp(), 0);
     EXPECT_EQ(summoner->getHp(), 0);
 }
@@ -375,6 +384,18 @@ TEST_F(RoleTest, CheerupBonusEndsWhenStateExpires) {
         attack.attack(servant, {slime}); // 回到正常狀態，傷害還原為 STR（0）
         EXPECT_EQ(capture.lines(), (Lines{"[1]Servant1 對 [2]Slime1 造成 0 點傷害。"}));
     }
+}
+
+// =====================================================================
+// 傷害只有一個公開通道（D47）
+// =====================================================================
+
+TEST_F(RoleTest, DoDamageIsTheOnlyPublicWayToReduceHp) {
+    // 這三行在編譯期就決定結果：若有人把 lossHp / damage 改回 public，測試會編譯失敗
+    static_assert(!CanCallLossHp<Role>, "Role::lossHp must not be public");
+    static_assert(!CanCallDamage<State>, "State::damage must not be public");
+    static_assert(CanCallDoDamage<State>, "State::doDamage is the public damage channel");
+    SUCCEED();
 }
 
 // =====================================================================

@@ -27,6 +27,8 @@ public:
     // Getters 
     std::string getName() const;
     int getMp() const;
+    // 施放這個行動要付出的 HP（D47），預設 0；在施放之後由 State::decision() 支付（不印傷害訊息）
+    virtual int costHp(Role* actor) const;
 
     // Setters
     void setName(const std::string& name);

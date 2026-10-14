@@ -171,7 +171,7 @@ TEST_F(StateFlowTest, HeroIsPromptedForTargetsOnlyWhenChoosing) {
 
     {
         CoutCapture mute;
-        s2->lossHp(80); // Slime2 死亡
+        hero->getState()->doDamage(s2, 80); // Slime2 死亡（lossHp 不公開，走正規通道，D47）
     }
     std::vector<Role*> aliveT2{s1};
     CoutCapture capture;
