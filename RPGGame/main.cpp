@@ -1,24 +1,26 @@
 /*
 * @author - (Anthony)
+*
+* RPG 主程式（Client）：解析輸入 → 建立兩軍 → 指定英雄的決策來源 → RPG 進行戰鬥。
+*
+* 用法：
+*   RPGGAME <測資.in>            讀測資：軍隊與英雄決策都來自檔案（輸出可與 <測資.out> 比對）
+*   RPGGAME --play <測資.in>     實際玩：軍隊來自檔案，英雄的每個決策由鍵盤輸入
+*   RPGGAME                      軍隊與英雄決策都從標準輸入讀（可用 RPGGAME < 測資.in）
+*   RPGGAME --help               顯示用法
 */
+#include <exception>
+#include <fstream>
 #include <iostream>
 #include <string>
-#include <stdio.h>
 #include <vector>
-#include <fstream>
-#include <Skill.hpp>
-#include <BasicAttack.hpp>
-#include <Poison.hpp>
-#include <Waterball.hpp>
-#include <Fireball.hpp>
-#include <SelfHealing.hpp>
-#include <Role.hpp>
 
-#include <Role.hpp>
-#include "SkillObserver.hpp"
-#include "CurserObserver.hpp"
-#include "Curse.hpp"
-#include <vector>
+#include "RPG.hpp"
+#include "Troop.hpp"
+#include "Role.hpp"
+#include "HeroAction.hpp"
+#include "RPG_parser.hpp"
+
 #ifdef _WIN32
 #ifndef WIN32_LEAN_AND_MEAN
 #define WIN32_LEAN_AND_MEAN
@@ -29,36 +31,68 @@
 #include <windows.h>
 #endif
 
+namespace {
 
+void printUsage(const std::string& program) {
+    std::cerr << "用法：\n"
+              << "  " << program << " <測資.in>          讀測資：軍隊與英雄決策都來自檔案\n"
+              << "  " << program << " --play <測資.in>   實際玩：軍隊來自檔案，英雄決策由鍵盤輸入\n"
+              << "  " << program << "                    軍隊與英雄決策都從標準輸入讀\n";
+}
 
-int main()
+// troopInput：軍隊定義的來源；heroInput：英雄決策的來源（D37）。兩者可以是同一個串流。
+int play(std::istream& troopInput, std::istream& heroInput) {
+    RPGSetup setup = RPG_parser::parse(troopInput);
+    HeroAction heroDecider(heroInput);
+    setup.hero->setDecider(&heroDecider);
+
+    RPG rpg;
+    rpg.GameStart(setup.t1, setup.t2);
+    rpg.GameEnd();
+    return 0;
+}
+
+int playFile(const std::string& path, bool heroFromKeyboard) {
+    std::ifstream file(path);
+    if (!file) {
+        std::cerr << "錯誤：無法開啟檔案 " << path << std::endl;
+        return 1;
+    }
+    return heroFromKeyboard ? play(file, std::cin) : play(file, file);
+}
+
+} // namespace
+
+int main(int argc, char** argv)
 {
 #ifdef _WIN32
-    // 原始碼是 UTF-8，將 console 輸出改為 UTF-8 才能正確顯示中文
+    // 原始碼是 UTF-8，將 console 輸出 / 輸入改為 UTF-8 才能正確顯示與讀取中文
     SetConsoleOutputCP(CP_UTF8);
+    SetConsoleCP(CP_UTF8);
 #endif
 
-    Skill* skill = new Curse();
+    const std::string program = argc > 0 ? argv[0] : "RPGGAME";
+    std::vector<std::string> args(argv + 1, argv + argc);
 
-    Role* actor = new Role(500, 500, 50, "h");
-    Role* actor2 = new Role(500, 500, 50, "h");
-    Role* target = new Role(500, 500, 50, "h");
-    
-    skill->attack(actor, {target});
-    std::vector<SkillObserver*> observser = target->getObservers();
-    Role* test5 = observser[0]->getRole(); // Assuming Curse adds one observer
-
-    skill->attack(actor2, {target});
-    std::vector<SkillObserver*> observser2 = target->getObservers();
-    Role* test3 = observser2[0]->getRole(); // Assuming Curse adds one observer
-    Role* test4 = observser2[1]->getRole(); // Assuming Curse adds one observer
-
-    skill->attack(actor, {target});
-    std::vector<SkillObserver*> observser3 = target->getObservers();
-    Role* test = observser3[0]->getRole(); // Assuming Curse adds one observer
-    Role* test2 = observser3[1]->getRole(); // Assuming Curse adds one observer
-
-    std::cout << "按下 Enter鍵 已結束遊戲" << std::endl;
-    std::system("pause");
-    return 0;
+    try {
+        if (args.empty()) {
+            return play(std::cin, std::cin);
+        }
+        if (args[0] == "-h" || args[0] == "--help") {
+            printUsage(program);
+            return 0;
+        }
+        if (args.size() == 1) {
+            return playFile(args[0], false);
+        }
+        if (args.size() == 2 && args[0] == "--play") {
+            return playFile(args[1], true);
+        }
+        printUsage(program);
+        return 1;
+    } catch (const std::exception& e) {
+        // 例如：輸入格式錯誤、未知技能、英雄的決策輸入用完
+        std::cerr << "錯誤：" << e.what() << std::endl;
+        return 1;
+    }
 }

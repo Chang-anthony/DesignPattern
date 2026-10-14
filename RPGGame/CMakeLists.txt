@@ -85,7 +85,7 @@ list(APPEND INCS ${LIB_INCS})
 
 include(${UTILS_PATH}/utils.cmake)
 set(COMM_INCS ${UTILS_INCS} ${__TEST_UTILS_INCS})
-set(COMM_SRCS ${__TEST_UTILS__SRCS})
+set(COMM_SRCS ${__TEST_UTILS__SRCS} ${__RPG_CLIENT_SRCS})
 # ==================
 
 # set(EXECUTABLE_OUTPUT_PATH ${PROJECT_BINARY_DIR})

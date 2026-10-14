@@ -1,17 +1,12 @@
 /*
- * State 行動流程（State::decision）的單元測試，以及用 testcases/ 整場重播驗證流程。
+ * State 行動流程（State::decision）的單元測試。
  *  - 依據：need/need.md「遊戲流程」「角色狀態」「輸出格式」、CLAUDE.md 決策 D5、D8–D12、D16、D17、D29
  *  - 輸出以 rdbuf 導向字串收集（D38）
- *  - TestcaseReplayTest 用「測試用的簡易 Battle 迴圈」驅動（Battle / RPG 尚未實作），等正式的 Battle 完成後改用正式流程
+ *  - 整場測資比對在 TestcaseReplayTests.cpp
  */
 #include <gtest/gtest.h>
 
-#include <filesystem>
-#include <fstream>
-#include <functional>
 #include <iostream>
-#include <map>
-#include <memory>
 #include <sstream>
 #include <string>
 #include <vector>
@@ -30,18 +25,9 @@
 #include "BasicAttack.hpp"
 #include "Waterball.hpp"
 #include "Fireball.hpp"
-#include "SelfHealing.hpp"
-#include "Petrochemical.hpp"
-#include "Poison.hpp"
 #include "Summon.hpp"
 #include "SelfExplosion.hpp"
-#include "Cheerup.hpp"
 #include "Curse.hpp"
-#include "OnePunch.hpp"
-#include "HpHandler.hpp"
-#include "PoisonPetrochemicalHandler.hpp"
-#include "CheerupHandler.hpp"
-#include "NormalHandler.hpp"
 
 namespace {
 
@@ -365,140 +351,5 @@ TEST_F(StateFlowTest, SelfExplosionThroughFlow) {
     EXPECT_TRUE(a->isDead());
     EXPECT_EQ(b->getHp(), 150);
 }
-
-// =====================================================================
-// 用 testcases/ 整場重播（測試用的簡易 Battle 迴圈）
-// =====================================================================
-
-const std::filesystem::path kTestcaseDir = std::filesystem::path(__FILE__).parent_path().parent_path() / "testcases";
-
-Lines readLines(const std::filesystem::path& path) {
-    std::ifstream in(path);
-    Lines lines;
-    std::string line;
-    while (std::getline(in, line)) {
-        if (!line.empty() && line.back() == '\r') line.pop_back();
-        lines.push_back(line);
-    }
-    while (!lines.empty() && lines.back().empty()) lines.pop_back();
-    return lines;
-}
-
-// Client 端的技能建造函式（D26）：測試用版本
-Skill* createSkill(const std::string& name) {
-    static const std::map<std::string, std::function<Skill*()>> factory = {
-        {"水球", [] { return new Waterball(); }},
-        {"火球", [] { return new Fireball(); }},
-        {"自我治療", [] { return new SelfHealing(); }},
-        {"石化", [] { return new Petrochemical(); }},
-        {"下毒", [] { return new Poison(); }},
-        {"召喚", [] { return new Summon(); }},
-        {"自爆", [] { return new SelfExplosion(); }},
-        {"鼓舞", [] { return new Cheerup(); }},
-        {"詛咒", [] { return new Curse(); }},
-        {"一拳攻擊", [] {
-             return new OnePunch({new HpHandler(), new PoisonPetrochemicalHandler(), new CheerupHandler(), new NormalHandler()});
-         }},
-    };
-    return factory.at(name)();
-}
-
-struct Game {
-    Troop t1{1};
-    Troop t2{2};
-    std::istringstream heroInput;
-    std::unique_ptr<HeroAction> heroDecider;
-    Role* hero = nullptr;
-};
-
-// 解析 .in（D36 的簡化版）：軍隊行建角色、T1 第一位是英雄（D6），其餘行是英雄決策（D37）
-void load(Game& game, const Lines& in) {
-    Troop* current = nullptr;
-    size_t i = 0;
-    std::string heroLines;
-    for (; i < in.size(); i++) {
-        const std::string& line = in[i];
-        if (line == "#軍隊-1-開始") { current = &game.t1; continue; }
-        if (line == "#軍隊-2-開始") { current = &game.t2; continue; }
-        if (line == "#軍隊-1-結束") { current = nullptr; continue; }
-        if (line == "#軍隊-2-結束") { i++; break; }
-        if (current == nullptr) continue;
-        std::istringstream ss(line);
-        std::string name, skillName;
-        int hp, mp, str;
-        ss >> name >> hp >> mp >> str;
-        Role* role = new Role(hp, mp, str, name);
-        while (ss >> skillName) role->addSkill(createSkill(skillName));
-        current->addRole(role);
-        if (game.hero == nullptr) {
-            game.hero = role;
-            role->setIdentity('h');
-        } else {
-            role->setDecider(new AIAction());
-        }
-    }
-    for (; i < in.size(); i++) heroLines += in[i] + "\n";
-    game.heroInput.str(heroLines);
-    game.heroDecider = std::make_unique<HeroAction>(game.heroInput);
-    game.hero->setDecider(game.heroDecider.get());
-}
-
-std::vector<Role*> alive(const Troop& troop) {
-    std::vector<Role*> result;
-    for (Role* role : troop.getRoles()) {
-        if (!role->isDead()) result.push_back(role);
-    }
-    return result;
-}
-
-// 測試用的 Battle 迴圈（D1、D11、D20、D30）：T1 → T2、每圈重讀人數、跳過死者、每次行動後檢查結束、回合結束倒數
-Lines play(Game& game) {
-    CoutCapture capture;
-    auto ended = [&] { return game.hero->isDead() || game.t1.Annihilated() || game.t2.Annihilated(); };
-    for (int round = 0; round < 1000 && !ended(); round++) {
-        for (int side = 1; side <= 2 && !ended(); side++) {
-            Troop& troop = side == 1 ? game.t1 : game.t2;
-            for (size_t idx = 0; idx < troop.getRoles().size() && !ended(); idx++) {
-                Role* role = troop.getRoles()[idx];
-                if (role->isDead()) continue;
-                role->takeTurn(alive(game.t1), alive(game.t2), side);
-            }
-        }
-        for (Role* role : game.t1.getRoles()) role->endThisRound();
-        for (Role* role : game.t2.getRoles()) role->endThisRound();
-    }
-    std::cout << (game.hero->isDead() ? "你失敗了！" : "你獲勝了！") << std::endl;
-    return capture.lines();
-}
-
-class TestcaseReplayTest : public ::testing::TestWithParam<std::string> {};
-
-TEST_P(TestcaseReplayTest, OutputMatchesExpectedFile) {
-    const std::string name = GetParam();
-    Lines in = readLines(kTestcaseDir / (name + ".in"));
-    Lines expected = readLines(kTestcaseDir / (name + ".out"));
-    ASSERT_FALSE(in.empty()) << "找不到 " << (kTestcaseDir / (name + ".in")).string();
-    ASSERT_FALSE(expected.empty());
-
-    Game game;
-    load(game, in);
-    Lines actual = play(game);
-
-    size_t n = std::min(actual.size(), expected.size());
-    for (size_t i = 0; i < n; i++) {
-        ASSERT_EQ(actual[i], expected[i]) << name << ".out 第 " << (i + 1) << " 行不同";
-    }
-    EXPECT_EQ(actual.size(), expected.size()) << "行數不同";
-}
-
-INSTANTIATE_TEST_SUITE_P(AllTestcases, TestcaseReplayTest,
-                         ::testing::Values("cheerup", "curse", "one-punch", "only-basic-attack", "petrochemical",
-                                           "poison", "self-explosion", "self-healing", "summon",
-                                           "waterball-and-fireball-1v2"),
-                         [](const ::testing::TestParamInfo<std::string>& info) {
-                             std::string s = info.param;
-                             for (char& ch : s) if (ch == '-') ch = '_';
-                             return s;
-                         });
 
 } // namespace
