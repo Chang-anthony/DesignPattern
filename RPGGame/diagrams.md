@@ -38,7 +38,7 @@
 | `Role::addAction` / `actions` | `Role::addSkill` / `skills`、`getSkills()` | 同上 |
 | `State::takeTurn(t1, t2, actorSide)` | `State::decision(t1, t2, actorSide)` | 保留原本的 `decision`；`Role::takeTurn` 委派給它 |
 | `Troop::size()` / `getRole(i)` | `Troop::getRoles()` | 程式沒有 `size` / `getRole`；`Battle` 每圈重新呼叫 `getRoles()`，達到 D20「每圈重讀人數」 |
-| `Battle` 的 `t1` / `t2` | `Battle::ally` / `enemy` | 保留原本的成員名稱；`ally` = T1（英雄所在）、`enemy` = T2（O2 命名問題仍是開放問題） |
+| `Battle` 的 `t1` / `t2` | `Battle::heroTroop` / `opponentTroop` | 以陣營命名：`heroTroop` = T1（英雄方，先行動）、`opponentTroop` = T2（D45）；不用 `ally` / `enemy`，避免與詞彙表「友軍 / 敵軍」混淆 |
 | （無） | `Battle::isHeroAlive()` | 戰鬥結束後 `RPG` 用來決定印「你獲勝了！」或「你失敗了！」（§7.2 I9） |
 | 技能建造函式、RPG parser | `RPG_parser::createSkill(name)`、`RPG_parser::parse(istream)` | Client 端，放在 `test/libary`（D26、D36，§7.2 I10） |
 | （無） | `Skill::announce(actor, targets)` | §7.2 I1：S3 的行動訊息 |
@@ -87,8 +87,8 @@ classDiagram
         +GameEnd()
     }
     class Battle {
-        -Troop ally
-        -Troop enemy
+        -Troop heroTroop
+        -Troop opponentTroop
         -Role hero
         +startBattle()
         +isHeroAlive() bool
