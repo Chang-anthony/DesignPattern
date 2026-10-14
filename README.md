@@ -328,24 +328,35 @@ logframework/include/
 
 📐 **Diagrams:** [`RPGGame/diagrams.md`](RPGGame/diagrams.md) — class + sequence diagrams
 
-*Work in progress (current development branch).*
+Turn-based battle between two troops. All 10 official testcases in `RPGGame/testcases/` reproduce their expected output exactly. Design decisions and implementation notes: [`RPGGame/CLAUDE.md`](RPGGame/CLAUDE.md); every unit test with its pass criteria: [`RPGGame/test/TESTS.md`](RPGGame/test/TESTS.md).
 
 ```
 RPGGame/include/
 ├── Game/            RPG, Battle, Troop
-├── Role/            Role ← Hero / AI / NonHero ← Slime, IAction ← AIAction   # Strategy for decisions
+├── Role/            Role ← NonHero ← Slime, IAction ← AIAction / HeroAction   # Strategy for decisions
 ├── Skill/           Skill ← BasicAttack, Waterball, Fireball, SelfHealing, Petrochemical, Poison,
 │                            Summon, SelfExplosion, Cheerup, Curse, OnePunch
 ├── State/           State ← NormalState, PoisonedState, PetrochemicaledState, CheerupedState
 ├── Observer/        SkillObserver ← SummonObserver, CurserObserver
 └── OnePunchHandler/ OnePunchHandler ← HpHandler, PoisonPetrochemicalHandler, CheerupHandler, NormalHandler
+
+RPGGame/test/libary/RPG_parser   client side: parses the input format and maps skill names to Skill objects
+RPGGame/main.cpp                 client: wires parser, HeroAction and RPG together
 ```
 
 **Concept:** combines several patterns in one game:
-- **State** – a role’s status (poisoned, petrified, cheered up) changes what it can do each turn and lasts a set number of rounds.
-- **Observer** – `Summon` and `Curse` register observers on a role; when that role dies, the observers react (reactions are still stubs).
+- **State** – a role’s status (poisoned, petrified, cheered up) changes what it can do each turn and lasts a set number of rounds. The base `State::decision()` holds the default turn flow (Template Method); petrified skips it, poisoned loses 30 HP first.
+- **Observer** – `Summon` and `Curse` register observers on a role; when that role dies, the observers reward the summoner (+30 HP) or each curser (+ remaining MP).
 - **Chain of Responsibility** – `OnePunch` has different effects depending on the target (high HP, poisoned/petrified, cheered up, normal); each case is a handler.
-- **Strategy** – human input vs AI decision (`IAction`), and each skill is its own class with a common `Skill` interface.
+- **Strategy** – who decides (`IAction`: `HeroAction` reads input, `AIAction` follows the seed rule), and each skill is its own class with a common `Skill` interface.
+
+**Run** (from `RPGGame/` after building):
+
+```bash
+./build/bin/RPGGAME testcases/poison.in          # replay a testcase (output matches testcases/poison.out)
+./build/bin/RPGGAME --play testcases/poison.in   # play: troops from the file, hero decisions from the keyboard
+./build/bin/RPGGAME < testcases/poison.in        # read everything from standard input
+```
 
 ---
 

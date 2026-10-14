@@ -4,11 +4,12 @@
 >
 > **依據：** [`CLAUDE.md`](CLAUDE.md) §5 設計決策 D1–D39（2026-10-12 架構設計完成）與 §7 實作紀錄。
 >
-> **2026-10-14 更新**：已實作的部分（技能周邊、Role、Observer、`IAction` / `AIAction` / `HeroAction`、State 行動流程）**改用程式裡的實際名稱**（例如 `attack`、`addSkill`、`State::decision`），並補上實作時的修正（`lossHp` 只印一次死亡、`setTroop(nullptr)`、`announce`、`handle` 回傳 `bool`）。尚未實作的部分（`Battle`、`RPG`、Client）仍是**決定後的設計**，方法名稱為暫定，實作時可以改。下表標出各部分的狀態。
+> **2026-10-14 更新**：**全部已實作**（技能周邊、Role、Observer、`IAction` / `AIAction` / `HeroAction`、State 行動流程、`Battle`、`RPG`、Client 的 parser 與 `main.cpp`），圖中**使用程式裡的實際名稱**（例如 `attack`、`addSkill`、`State::decision`），並補上實作時的修正（`lossHp` 只印一次死亡、`setTroop(nullptr)`、`announce`、`handle` 回傳 `bool`）。下表標出各部分的狀態。
 
 | Role | Class | 實作 |
 |---|---|---|
-| 關聯類別（兩軍對戰） | `Battle`（D1） | ⬜ |
+| 遊戲 / 關聯類別（兩軍對戰） | `RPG`、`Battle`（D1） | ✅ |
+| Client（模組外部） | `RPG_parser`（`test/libary`）、`main.cpp` | ✅ |
 | Context（持有狀態與決策者） | `Role` | ✅ |
 | State（Template Method 骨架在抽象類別） | `State` ← `NormalState`、`PoisonedState`、`PetrochemicaledState`、`CheerupedState` | ✅ |
 | Strategy：決策者 | `IAction` ← `AIAction`、英雄的 `IAction`（暫稱 `HeroAction`） | ✅ |
@@ -36,7 +37,10 @@
 | `Skill::doAction(actor, targets)` | `Skill::attack(actor, targets)` | 保留 Anthony 原本的名稱 |
 | `Role::addAction` / `actions` | `Role::addSkill` / `skills`、`getSkills()` | 同上 |
 | `State::takeTurn(t1, t2, actorSide)` | `State::decision(t1, t2, actorSide)` | 保留原本的 `decision`；`Role::takeTurn` 委派給它 |
-| `Troop::size()` / `getRole(i)` | `Troop::getRoles()` | 程式沒有 `size` / `getRole`；Battle 每圈重新呼叫 `getRoles()` 也能達到 D20「每圈重讀人數」 |
+| `Troop::size()` / `getRole(i)` | `Troop::getRoles()` | 程式沒有 `size` / `getRole`；`Battle` 每圈重新呼叫 `getRoles()`，達到 D20「每圈重讀人數」 |
+| `Battle` 的 `t1` / `t2` | `Battle::ally` / `enemy` | 保留原本的成員名稱；`ally` = T1（英雄所在）、`enemy` = T2（O2 命名問題仍是開放問題） |
+| （無） | `Battle::isHeroAlive()` | 戰鬥結束後 `RPG` 用來決定印「你獲勝了！」或「你失敗了！」（§7.2 I9） |
+| 技能建造函式、RPG parser | `RPG_parser::createSkill(name)`、`RPG_parser::parse(istream)` | Client 端，放在 `test/libary`（D26、D36，§7.2 I10） |
 | （無） | `Skill::announce(actor, targets)` | §7.2 I1：S3 的行動訊息 |
 | （無） | `Skill::othersOf(actor, t1, t2)` | 自爆用：全場其他角色，T1 → T2 |
 | （無） | `OnePunchHandler::handle(actor, target) bool` | 包住 `match` + `doHandle`，成立時回傳 `true` |
@@ -83,10 +87,14 @@ classDiagram
         +GameEnd()
     }
     class Battle {
-        -Troop t1
-        -Troop t2
+        -Troop ally
+        -Troop enemy
+        -Role hero
         +startBattle()
+        +isHeroAlive() bool
         -isEnd() bool
+        -endRound()
+        -aliveRoles(Troop)$ vector~Role~
     }
     class Troop {
         -int id
@@ -548,11 +556,12 @@ classDiagram
 
 | 類別 | 責任 | 決策 |
 |---|---|---|
-| `RPG` | 註冊兩支軍隊、建立並啟動 `Battle`、接收結果 | D1 |
-| `Battle` | 依 T1 → T2、用索引 + 每圈重讀人數輪流（召喚的史萊姆本回合就能行動）、跳過死者；整理 T1 / T2 活著的名單；每次行動後判斷是否結束（英雄死亡 / 一方殲滅）；每回合結束呼叫 `endThisRound()` | D1、D11、D20、D30、D31 |
+| `RPG` | `GameStart(t1, t2)` 建立並啟動 `Battle`，結束後依 `isHeroAlive()` 印「你獲勝了！」/「你失敗了！」；`GameEnd()` 釋放 `Battle` | D1、§7.2 I9 |
+| `Battle` | 開始時找出 identity 為 `'h'` 的英雄（找不到丟例外）；依 T1 → T2、用索引 + 每圈重讀人數輪流（召喚的史萊姆本回合就能行動）、跳過死者；交給 `takeTurn` 的是兩軍**活著的**名單；**每次行動後**判斷是否結束（英雄死亡 / 一方殲滅）；每回合結束對所有角色 `endThisRound()` | D1、D6、D11、D20、D30、D31 |
+| `RPG_parser`（Client） | `parse(istream)`：讀兩軍、T1 第一位設為英雄、其他角色裝 `AIAction`，讀到 `#軍隊-2-結束` 就停（剩下的輸入給 `HeroAction`）；`createSkill(name)`：中文名稱 → 技能、一拳注入需求順序的鏈 | D6、D21、D26、D36、D37、§7.2 I10 |
 | `Troop` | 管理角色名單與軍隊編號；`addRole` / `removeRole` 同時設定 / 清除角色的 `troop` | §7.2 I2、§7.3 |
 | `Role` | 持有 State、決策者、技能、觀察者；`takeTurn` 委派給 `state->decision()`；`checkMp` 只檢查、不扣、不印；`lossHp` 是 HP 減少的唯一出口（只在「活 → 死」那一刻印死亡、通知觀察者一次）；`setState` 釋放舊狀態並把新狀態綁回自己；回合數歸零時由 Role 換回 `NormalState` | D5、D9、D10、D11、D17 |
-| `State` | 固定流程（S1 → MP 檢查 → 算候選 → S2 → 扣 MP → `announce` → `attack`，⬜ 尚未實作）；`doDamage` 套用行動者的加成並印傷害訊息；`damage` 轉交 `lossHp` | D10、D12、D16 |
+| `State` | `decision()` 預設流程（S1 → MP 檢查 → 算候選 → S2 → 扣 MP → `announce` → `attack`）；`doDamage` 套用行動者的加成並印傷害訊息；`damage` 轉交 `lossHp` | D10、D12、D16 |
 | `IAction` | 只做兩個決策：選行動、選目標；n ≤ m 時自動全選也由它判斷；`AIAction` 自動全選時 seed 不變 | D4、D5、D7、D8 |
 | `Skill` | 宣告 MP、名稱；計算候選；`announce` 印 S3 的行動訊息；`attack` 內每造成一次傷害就呼叫一次 `actor->getState()->doDamage()` | D3、D16、D29、§7.2 I1 |
 | `SkillObserver` | 收到死者後自行讀資料、自行判斷施咒者 / 召喚者是否還活著 | D18 |
@@ -565,50 +574,49 @@ classDiagram
 |---|---|---|
 | **模組內部** | `RPG`、`Battle`、`Troop`、`Role`、`State`、`NormalState`、`IAction`、`Skill`、`BasicAttack`、`SkillObserver` | D1、D11、D28、D32 |
 | **外部擴充**（可直接刪檔，不影響模組） | 10 種技能（含 `OnePunch`）、具體的 `OnePunchHandler`；`Curse` / `CurserObserver` 等技能專屬的觀察者；技能帶出的狀態（中毒、石化、鼓舞） | D19、D23、D24、需求 ② |
-| **Client** | 讀測資 / 輸入、名稱 → 技能的建造函式、組裝一拳攻擊的處理鏈、建立角色與軍隊、決定每個角色的 `IAction` | D21、D26、D36、D37 |
+| **Client** | `main.cpp`、`test/libary/RPG_parser`：讀測資 / 輸入、名稱 → 技能的建造函式、組裝一拳攻擊的處理鏈、建立角色與軍隊、決定每個角色的 `IAction` | D21、D26、D36、D37 |
 
 > 討論中沒有明確決定、圖中暫時這樣畫的：`OnePunchHandler` 抽象類別歸在哪一邊、`AIAction` / `HeroAction` 屬於模組還是 Client、召喚的史萊姆是否保留 `Slime` 子類別（程式目前用 `Slime`，圖中直接用 `Role` 表示）。
 
 ---
 
-## OOD — 循序圖：Client 組裝與啟動（⬜ 尚未實作）
+## OOD — 循序圖：Client 組裝與啟動（✅ `main.cpp` + `RPG_parser`）
 
 ```mermaid
 sequenceDiagram
     autonumber
-    participant C as Client（main / 測試）
-    participant F as 技能建造函式
-    participant OP as OnePunch
+    participant M as main.cpp
+    participant P as RPG_parser
     participant TR as Troop
     participant R as Role
+    participant H as HeroAction
     participant G as RPG
 
-    C->>C: 解析 .in：軍隊行 + 英雄決策行
-    C->>TR: new Troop(1) / new Troop(2)
-    loop 每位角色
-        C->>R: new Role(hp, mp, str, name)
+    M->>M: 依參數選輸入：<br/>檔案（軍隊 + 決策）／--play 檔案 + 鍵盤／標準輸入
+    M->>P: parse(troopInput)
+    P->>TR: new Troop(1)、new Troop(2)
+    loop 每個「名稱 HP MP STR 技能…」行
+        P->>R: new Role(hp, mp, str, name)
         Note right of R: 建構時自動加入 BasicAttack（第 0 項）
-        loop 該角色的每個技能名稱
-            C->>F: create("火球" / "一拳攻擊" / …)
-            alt 一拳攻擊
-                F->>OP: new OnePunch([HpHandler, PoisonPetrochemicalHandler, CheerupHandler, NormalHandler])
-                Note right of OP: 順序由 Client 決定
-            end
-            F-->>C: Skill*
-            C->>R: addSkill(skill)
+        loop 每個技能名稱
+            P->>P: createSkill("火球" / "一拳攻擊" / …)
+            Note right of P: 一拳攻擊：new OnePunch(<br/>[Hp, PoisonPetrochemical, Cheerup, Normal])
+            P->>R: addSkill(skill)
         end
-        alt T1 的第一位
-            C->>R: setIdentity('h')、setDecider(HeroAction(istream))
-        else 其他角色
-            C->>R: setDecider(AIAction（seed = 0）)
-        end
-        C->>TR: addRole(role)
-        TR->>R: setTroop(this)
+        P->>TR: addRole(role)（setTroop(this)）
     end
-    C->>G: GameStart(t1, t2)
+    P->>R: T1 第一位：setIdentity('h')
+    P->>R: 其他角色：setDecider(new AIAction())
+    P-->>M: RPGSetup{t1, t2, hero}（輸入停在第一行英雄決策）
+    M->>H: new HeroAction(heroInput)
+    M->>R: hero->setDecider(heroAction)
+    M->>G: GameStart(t1, t2)
+    G->>G: new Battle(t1, t2)、startBattle()
+    G->>G: 印「你獲勝了！」或「你失敗了！」
+    M->>G: GameEnd()
 ```
 
-> 正式執行時 `HeroAction` 讀 `std::cin`；測試時讀測資檔剩下的英雄決策行（D37）。S1 和 S2 共用同一串輸入。
+> `heroInput`（D37）：讀測資時是**同一個檔案串流**（parser 讀完軍隊後剩下的就是決策行）；`--play` 時是 `std::cin`；不帶參數時軍隊與決策都來自 `std::cin`。S1 和 S2 共用同一串輸入。
 
 ## OOD — 循序圖：角色加入 / 離開軍隊（✅ 2026-10-14 修正）
 
@@ -632,7 +640,7 @@ sequenceDiagram
 
 > 召喚（`Summon::attack`）用 `actor->getTroop()->addRole(slime)` 把史萊姆加到施放者所屬軍隊的隊尾，所以史萊姆自動帶對的前綴（D20、§7.2 I2）。目前程式沒有地方呼叫 `removeRole`；死者仍留在名單中，由 Battle 跳過。
 
-## OOD — 循序圖：一回合與一次行動（✅ State 流程；⬜ Battle）
+## OOD — 循序圖：一回合與一次行動（✅）
 
 ```mermaid
 sequenceDiagram
@@ -690,7 +698,7 @@ sequenceDiagram
     end
 ```
 
-> 本圖已實作的部分（✅）：`Role::takeTurn` 之後的整段流程（「輪到 …」、S1–S3、石化 / 中毒）、`endThisRound`。外層的 Battle 迴圈（⬜）目前由測試用的簡易迴圈代替，已用 `testcases/` 10 組整場重播驗證（見 [`test/TESTS.md`](test/TESTS.md) RP）。
+> 整張圖都已實作（✅）：`Battle::startBattle()` 的回合迴圈、`Role::takeTurn` 之後的整段流程、`endThisRound`。已用 `testcases/` 10 組整場比對驗證（見 [`test/TESTS.md`](test/TESTS.md) RP）。
 
 ## OOD — 循序圖：傷害、死亡與觀察者（✅）
 
@@ -801,27 +809,28 @@ stateDiagram-v2
 
 **round 的計算**（D11）：施加當下的回合算第 1 回合。例：第 1 回合被石化 → round = 3；第 1、2、3 回合結束時各 −1，第 3 回合結束歸零 → 第 4 回合恢復正常，所以第 1、2、3 回合都被跳過。正常狀態 round = 0，不倒數。被覆寫時新狀態重新從 3 開始。
 
-## 測試：整場輸入 → 輸出比對（D35–D39，⬜ 正式版待 Battle / RPG；目前用測試用迴圈重播）
+## 測試：整場輸入 → 輸出比對（D35–D39，✅）
 
 ```mermaid
 sequenceDiagram
     autonumber
     participant T as TEST_P（每組 .in / .out 一個案例）
-    participant P as RPG parser（test/libary）
+    participant P as RPG_parser（test/libary）
     participant G as RPG
     participant O as ostringstream
 
-    T->>P: parse("testcases/<名稱>.in")
-    P-->>T: t1, t2（英雄的 HeroAction 讀剩下的決策行）
+    T->>P: parse(ifstream("testcases/<名稱>.in"))
+    P-->>T: t1, t2, hero（串流停在英雄決策行）
+    T->>T: hero->setDecider(new HeroAction(同一個串流))
     T->>O: std::cout.rdbuf(O)
-    T->>G: GameStart(t1, t2)
+    T->>G: GameStart(t1, t2)、GameEnd()
     T->>T: 還原 std::cout
-    T->>T: 和 <名稱>.out 逐行比對
+    T->>T: 和 <名稱>.out 逐行比對（含最後的「你獲勝了！」）
     opt 不一致
-        T->>T: 報出第一個不同的行號，寫出 build/<名稱>.actual.txt
+        T->>T: 報出第一個不同的行號，寫出 <名稱>.actual.txt（測試執行時的目前目錄）
     end
 ```
 
-> 目前已有的測試（✅）：`ExampleTests.cpp` 11 個、`SkillTests.cpp` 43 個、`RoleTests.cpp` 20 個、`AIActionTests.cpp` 11 個、`HeroActionTests.cpp` 15 個、`StateFlowTests.cpp` 26 個（含 10 組測資整場重播），共 126 個（每個測試的流程與通過標準見 [`test/TESTS.md`](test/TESTS.md)）；輸出同樣用 `rdbuf` 收集（D38）。
+> 這和 `RPGGAME <測資.in>` 走的是同一條路（`main.cpp` 的 `play(file, file)`），所以主程式的輸出也會和 `.out` 相同。
 >
-> 目前的整場重播在 `StateFlowTests.cpp` 內自帶簡易 parser 與 Battle 迴圈；正式的 parser（`test/libary`）與 `Battle` / `RPG` 完成後，改成上圖的流程。
+> 目前的測試（✅）：`ExampleTests.cpp` 11、`SkillTests.cpp` 43、`RoleTests.cpp` 20、`AIActionTests.cpp` 11、`HeroActionTests.cpp` 15、`StateFlowTests.cpp` 16、`BattleTests.cpp` 10、`ParserTests.cpp` 8、`TestcaseReplayTests.cpp` 11（10 組測資 + 測資清單檢查），共 145 個。每個測試的流程與通過標準見 [`test/TESTS.md`](test/TESTS.md)；輸出用 `rdbuf` 收集（D38）。

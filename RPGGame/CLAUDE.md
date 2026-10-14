@@ -15,7 +15,7 @@
 - 討論後若 Anthony 決定修改設計，才依他的決定更新 `diagrams.md`。
 
 ### 1.2 實作
-- **目前階段：實作中（2026-10-13 起）**。Anthony 決定本專案的演算法都不自己寫，由 Claude 實作。**原則：Anthony 原本寫好、能用的程式照原本的保留，只改設計決策要求變動的地方，不重寫**。目前只做「技能周邊」（見 §7），State 流程、`AIAction`、`Battle`、`RPG` 等維持原本的 TODO。
+- **目前階段：實作中（2026-10-13 起）**。Anthony 決定本專案的演算法都不自己寫，由 Claude 實作。**原則：Anthony 原本寫好、能用的程式照原本的保留，只改設計決策要求變動的地方，不重寫**。2026-10-14 起全部實作完成（技能、Role、Observer、決策者、State 流程、`Battle`、`RPG`、parser、`main.cpp`，見 §7）。
 - 實作階段：一般、簡單的邏輯由 Claude 直接實作；Anthony 會指定**他要自己動手**的區塊，這些區塊 Claude 只講概念與步驟、寫框架（宣告、簽名、空本體 + `// TODO:`），寫完再 review。
 
 ### 1.3 紀錄
@@ -42,7 +42,7 @@
 
 ---
 
-## 3. 目前程式快照（2026-10-14，技能周邊 + Role / Observer + 決策者 + State 行動流程完成後）
+## 3. 目前程式快照（2026-10-14，全部實作完成；10 組測資整場輸出一致）
 
 | 區塊 | 現況 |
 |---|---|
@@ -52,8 +52,9 @@
 | `State/` | ✅ `doDamage` / `damage`（D16）、受到鼓舞 +50、計時狀態回合數 3（D11）；移除 `entryState` / `exitState` 裡的除錯輸出；**`State::decision()` 是預設行動流程（S1 → S2 → S3，D10、D12）**，石化覆寫成整段跳過、中毒覆寫成先扣 30 再沿用預設流程；各狀態持有中文名稱 `getDisplayName()`（§7.6） |
 | `Role/` | ✅ `lossHp()`：歸零當下印死亡並通知觀察者（D17）；建立時自動加入普通攻擊（D28）；`getDisplayName()`；`checkMp(Skill*)` 只檢查（D9，取代 `checkActionLossMp`）；`endThisRound()`（D11）；`takeTurn(t1, t2, actorSide)` 交給 `state->decision(...)`（D10）；決策者 `setDecider / getDecider`（D4）；英雄識別 `setIdentity / isHero`（D6）；✅ `Hero` / `AI` 子類別已刪除（D4）；`NonHero` / `Slime` 保留 |
 | `IAction` / `AIAction` / `HeroAction` | ✅ `IAction`：`chooseAction(skills)`、`chooseTargets(candidates, m)`（D4、D5、D7、D8）；`AIAction`：seed 規則（§7.2 I5）；`HeroAction`：從注入的 `istream` 讀英雄決策（D37，§7.5） |
-| `Game/` | ✅ `Troop` 新增軍隊編號（輸出前綴）；⬜ `Battle`、`RPG` 維持原本的 TODO |
-| 測試 | ✅ `ExampleTests.cpp` 11、`SkillTests.cpp` 43、`RoleTests.cpp` 20、`AIActionTests.cpp` 11、`HeroActionTests.cpp` 15、`StateFlowTests.cpp` 26（含 `testcases/` 10 組整場重播，全部與 `.out` 逐行一致），共 126 個全部通過。每個測試的流程與通過標準見 [`test/TESTS.md`](test/TESTS.md) |
+| `Game/` | ✅ `Troop` 新增軍隊編號（輸出前綴）；`Battle::startBattle()` 回合迴圈（D1、D11、D20、D30、D31）、`isHeroAlive()`；`RPG::GameStart()` 啟動戰鬥並印勝負（§7.2 I9）；`RPG::makeAction()`、`Troop::StartBattle()` 維持原樣（未使用，見 §7.7） |
+| Client | ✅ `test/libary/RPG_parser`：解析輸入、技能建造函式（D26、D36，§7.2 I10）；`main.cpp`：讀測資 / `--play` 實際玩 / 標準輸入三種用法（§7.2 I11） |
+| 測試 | ✅ `ExampleTests.cpp` 11、`SkillTests.cpp` 43、`RoleTests.cpp` 20、`AIActionTests.cpp` 11、`HeroActionTests.cpp` 15、`StateFlowTests.cpp` 16、`BattleTests.cpp` 10、`ParserTests.cpp` 8、`TestcaseReplayTests.cpp` 11（`testcases/` 10 組用正式的 parser + RPG 整場比對，加上測資清單檢查），共 145 個全部通過；主程式 `RPGGAME <測資.in>` 的輸出也與 10 組 `.out` 完全相同。每個測試的流程與通過標準見 [`test/TESTS.md`](test/TESTS.md) |
 
 ---
 
@@ -69,7 +70,8 @@
 - ✅ A10 已結案（決策 D29–D34）。
 - ✅ A11 已結案（決策 D35–D39）。**必要問題 A1–A11 全部結案，架構設計完成。**
 - ✅ 2026-10-13 進入實作：技能周邊 + 單元測試完成（§7）。
-- ⏸ **下一步**：確認 §7.2 的實作選擇（I1–I8）；之後實作 `Battle` / `RPG`、Client（parser、技能建造函式）與正式的整場比對測試（D35–D39）。
+- ✅ 2026-10-14：全部實作完成，10 組測資整場輸出與 `.out` 一致（§7.7）。
+- ⏸ **下一步**：確認 §7.2 的實作選擇（I1–I11）；開放問題 O1–O6 視時間討論。
 - 之後依序：開放問題 O1–O5 視時間討論；開放問題 O1–O4 視時間討論。
 
 ### 收尾建議順序
@@ -210,8 +212,11 @@
 cd RPGGame
 cmake -S . -B build
 cmake --build build
-./build/RPGGAME              # 主程式
-cd test && ./run_tests.sh    # Windows: run_tests.bat
+./build/bin/RPGGAME testcases/poison.in          # 讀測資跑整場（輸出可與 testcases/poison.out 比對）
+./build/bin/RPGGAME --play testcases/poison.in   # 實際玩：軍隊來自檔案，英雄決策由鍵盤輸入
+./build/bin/RPGGAME < testcases/poison.in        # 全部從標準輸入
+./build/bin/SimpleTest                           # 單元測試；Windows (MinGW) build 完會自動執行
+cd test && ./run_tests.sh                        # Windows: run_tests.bat
 ```
 
 ---
@@ -236,6 +241,9 @@ cd test && ./run_tests.sh    # Windows: run_tests.bat
 | I6 | **「輪到 X (HP: …, MP: …, STR: …, State: …)。」由 `Role::takeTurn` 在交給狀態之前印**。 | 石化也要印（需求）；`testcases/poison.out` 印的是中毒扣 30 **之前**的 HP，所以要在狀態效果之前印。放在 Role 而不是各狀態，石化 / 中毒不必各自重印 |
 | I7 | **「選擇 m 位目標: (0) … (1) …」由 `HeroAction::chooseTargets` 在真的要選（n > m）時印**；「選擇行動：(0) …」由 `State::decision()` 印、每個角色都印。 | 需求寫明 S2 提示只在「英雄的回合」；10 組測資中只有英雄印過這行。放在 `HeroAction`，State 流程不必判斷 `isHero()` |
 | I8 | **每個狀態在建構子設定自己的中文名稱 `displayName`**，`State::getDisplayName()` 回傳；原本的 `getName()`（類別名稱）保留。 | 與 D27（技能各自持有中文名稱）同樣理由：新增 / 刪除狀態不必改 `State`（需求 ③）；`ExampleTests` 仍用 `getName()` 比對類別名稱 |
+| I9 | **勝負由 `RPG` 印**：`Battle::startBattle()` 跑到結束，`RPG::GameStart()` 再依 `Battle::isHeroAlive()` 印「你獲勝了！」或「你失敗了！」。`Battle` 在 `startBattle()` 開始時從兩軍找出 identity 為 `'h'` 的英雄，找不到就丟例外。 | D1「Battle 判斷是否結束並把結果回報給 RPG」；保留原本 `void startBattle()` 的簽名，用查詢函式回報結果 |
+| I10 | **Parser 介面 `RPG_parser::parse(std::istream&)`**：讀到 `#軍隊-2-結束` 就停，串流剩下的就是英雄決策；T1 第一位 `setIdentity('h')`，其他角色 `setDecider(new AIAction())`；**英雄的決策者由呼叫端設定**。技能建造函式 `RPG_parser::createSkill(name)` 也在這裡。放在 `test/libary`（D36），以 `__RPG_CLIENT_SRCS` 編進 `RPGGAME_LIB`，主程式與測試共用。 | 用串流而不是檔名（BigTwo 的做法），讀測資時同一個檔案串流可直接交給 `HeroAction`（D37）；`--play` 時改交 `std::cin`。不放進 `__TEST_UTILS__SRCS`，因為 `SimpleTest_LIB` 看不到模組的標頭檔 |
+| I11 | **`main.cpp` 三種用法**：`RPGGAME <測資.in>`（軍隊與決策都來自檔案）、`RPGGAME --play <測資.in>`（軍隊來自檔案、決策由鍵盤輸入）、`RPGGAME`（都從標準輸入，可 `< 測資.in`）；錯誤（檔案打不開、格式錯誤、未知技能、決策用完）印到 stderr 並回傳 1。原本結尾的 `std::system("pause")` 拿掉。 | 讀測資模式的輸出必須和 `.out` 完全相同，不能多印；`pause` 會讓 exe 一直執行，造成之前 build 時 `RPGGAME.exe: Permission denied` |
 
 ### 7.3 2026-10-14：Role 與 Observer
 - **Observer**：7.1 已完成（`UntilDie(Role* dead)`、召喚 +30、詛咒 + 剩餘 MP、施放者已死不給）；本次只補測試（通知順序、只通知一次、移除後不通知、獎勵在死亡訊息之後）。
@@ -279,3 +287,15 @@ cd test && ./run_tests.sh    # Windows: run_tests.bat
   - `TestcaseReplayTest` 10 個：在測試內用簡易 parser + Battle 迴圈（T1 → T2、每圈重讀人數、跳過死者、每次行動後檢查結束、回合結束 `endThisRound`）重播 `testcases/` 全部 10 組，**輸出與 `.out` 逐行完全一致**。這是測試用的鷹架，正式的 `Battle` / `RPG` / parser 完成後改用正式流程。
   - `SkillTests` 新增 `OnePunchStopsHittingOnceTargetDies`；`RoleTests` 的 `takeTurn` 測試改為檢查「輪到 …」；`HeroActionTests` 新增 S2 提示測試，fixture 把輸出靜音。
   - 共 126 個全部通過；刻意改壞 15 種流程細節（見 `TESTS.md` §9）都會被抓到。
+
+### 7.7 2026-10-14：Battle、RPG、parser 與 main.cpp
+- **`Battle`**（在原本的 `Battle(Troop* ally, Troop* enemy)` 上補齊；`ally` = T1、`enemy` = T2）：
+  - `startBattle()`：找出英雄（I9）→ 每回合 T1 再 T2；用索引走訪且每圈重讀 `getRoles().size()`（召喚的史萊姆本回合就行動，D20）；跳過死者；把兩軍**活著的**名單與 actorSide 交給 `takeTurn`（D30、D31）；**每次行動後**檢查「英雄死亡或任一方殲滅」，成立就立即結束；回合結束對所有角色 `endThisRound()`（D11）。
+  - `isHeroAlive()`：給 `RPG` 判斷勝負。
+- **`RPG::GameStart()`**：原本就會 `new Battle` 並 `startBattle()`，補上最後印勝負（I9）。`RPG::makeAction()`（原本的空 TODO）與 `Troop::StartBattle()` 在目前設計中沒有用到，保留不動，要不要刪由 Anthony 決定。
+- **Client**：`test/libary/RPG_parser.hpp/.cpp`（I10）、`test/libary/test.cmake` 新增 `__RPG_CLIENT_SRCS`、根目錄 `CMakeLists.txt` 把它加進 `COMM_SRCS`；`main.cpp` 改寫成三種用法（I11），原本測試詛咒用的範例程式碼移除。
+- **測試**：
+  - `BattleTests.cpp` 10 個：需要英雄、結束條件（敵軍殲滅、英雄死亡但 T1 還有人）、輪流順序與跳過死者、召喚的史萊姆同回合行動、回合結束倒數、`RPG` 印勝負。
+  - `ParserTests.cpp` 8 個：兩軍屬性與技能、英雄與 AI、讀完停在決策行、CRLF 與空白行、10 種技能名稱、一拳的處理鏈、未知技能、各種格式錯誤。
+  - `TestcaseReplayTests.cpp` 11 個：原本 `StateFlowTests` 裡的測試用鷹架（簡易 parser + 迴圈）**移除**，改用正式的 `RPG_parser` + `HeroAction` + `RPG`；不一致時寫出 `<名稱>.actual.txt`（D39）；另加一個測試確認 `testcases/` 的每個 `.in` 都有被跑到。
+  - 共 145 個全部通過；`RPGGAME` 主程式三種用法對 10 組測資的輸出都與 `.out` 相同（含 LF / CRLF 檔案）；刻意改壞 Battle / RPG / parser 的 14 個地方都會被抓到（見 `TESTS.md`）。

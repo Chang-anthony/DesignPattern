@@ -4,7 +4,7 @@
 
 - 需求：[`../need/need.md`](../need/need.md)　設計決策 D1–D40 與實作紀錄：[`../CLAUDE.md`](../CLAUDE.md)　圖：[`../diagrams.md`](../diagrams.md)
 - 測試框架：GoogleTest（`TEST` / `TEST_F`），C++20
-- 最後更新：2026-10-14（加入 State 行動流程），共 **126** 個測試，全部通過
+- 最後更新：2026-10-14（加入 Battle、RPG、parser、main.cpp），共 **145** 個測試，全部通過；主程式的手動驗證見 §11
 
 ---
 
@@ -33,7 +33,7 @@ cmake --build build                 # Windows (MinGW)：build 完會自動執行
 
 | 項目 | 標準 |
 |---|---|
-| 結果 | 最後一行為 `[  PASSED  ] 126 tests.`，沒有任何 `[  FAILED  ]` |
+| 結果 | 最後一行為 `[  PASSED  ] 145 tests.`，沒有任何 `[  FAILED  ]` |
 | 程式結束 | 測試程式正常結束（沒有 crash / segmentation fault）；crash 視同失敗 |
 | 新增測試檔 | `test/CMakeLists.txt` 以 `file(GLOB … CONFIGURE_DEPENDS *.cpp)` 收集，新增 / 刪除 `test/*.cpp` 後直接 build 即可，不必修改 CMake |
 | 單一測試 | 該測試內**所有** `EXPECT_*` / `ASSERT_*` 都成立；`ASSERT_*` 失敗會立即中止該測試（後續檢查不執行） |
@@ -48,8 +48,10 @@ cmake --build build                 # Windows (MinGW)：build 完會自動執行
 | AI | `AIActionTests.cpp` | `AIActionTest` | 11 | `AIAction`：seed 規則（S1、S2、自動全選） |
 | HA | `HeroActionTests.cpp` | `HeroActionTest` | 15 | `HeroAction`：從輸入讀英雄決策（S1、S2、提示、格式容錯、錯誤處理） |
 | ST | `StateFlowTests.cpp` | `StateFlowTest` | 16 | `State::decision()` 行動流程、「輪到 …」、石化 / 中毒 / 鼓舞 |
-| RP | `StateFlowTests.cpp` | `AllTestcases/TestcaseReplayTest` | 10 | `testcases/` 10 組整場重播，輸出逐行比對 |
-| | | **合計** | **126** | |
+| RP | `TestcaseReplayTests.cpp` | `AllTestcases/TestcaseReplayTest`、`TestcaseListTest` | 11 | `testcases/` 10 組用正式 parser + RPG 整場比對、測資清單檢查 |
+| PA | `ParserTests.cpp` | `ParserTest` | 8 | Client 端 `RPG_parser`：解析輸入、技能建造函式、錯誤處理 |
+| BT | `BattleTests.cpp` | `BattleTest` | 10 | `Battle` 回合迴圈、結束條件、`RPG` 宣布勝負 |
+| | | **合計** | **145** | |
 
 ### 1.4 測試共用的工具與慣例
 
@@ -67,7 +69,8 @@ cmake --build build                 # Windows (MinGW)：build 完會自動執行
 | `namesOf(roles)` | AI、HA | 把 `vector<Role*>` 轉成名字清單，方便比對 |
 | `HeroActionTest::mute` | HA | fixture 成員 `CoutCapture`：把 `chooseTargets` 印的提示靜音；要檢查提示的測試在裡面再開一個 `CoutCapture`（巢狀導向，結束時還原到外層） |
 | `StateFlowTest::turn(role)` | ST | 依角色所屬軍隊決定 actorSide，呼叫 `takeTurn(t1.getRoles(), t2.getRoles(), side)` 並回傳**完整輸出** |
-| `readLines` / `createSkill` / `load` / `play` | RP | 測試用的 parser 與 Battle 迴圈（見 §8.1） |
+| `readExpected` / `playTestcase` | RP | 讀 `.out`（去 `\r`、去檔尾空行）／用正式的 `RPG_parser` + `HeroAction` + `RPG` 跑一組測資（見 §8） |
+| `addHero` / `addAI` / `runBattle` / `turnHeaders` | BT | 建立英雄與 AI 角色、執行 `startBattle()` 收集輸出、只取「輪到 …」行（見 §10） |
 
 輸出格式依 `testcases/*.out`：傷害「`<行動者> 對 <目標> 造成 <N> 點傷害。`」、死亡「`<角色> 死亡。`」，名稱一律帶軍隊前綴。
 
@@ -1037,30 +1040,29 @@ X 對 a 造成 N 點傷害。 [a 死亡。] …                  ← attack
 
 ---
 
-## 8. RP — `StateFlowTests.cpp`（`AllTestcases/TestcaseReplayTest`，10 個）
+## 8. RP — `TestcaseReplayTests.cpp`（`AllTestcases/TestcaseReplayTest` 10 個 + `TestcaseListTest` 1 個）
 
-用 `testcases/` 的 10 組 `.in` 跑**整場遊戲**，輸出與 `.out` **逐行**比對。因為 `Battle` / `RPG` / 正式 parser 尚未實作，這組測試在檔案內自帶**測試用的鷹架**；正式版完成後改用正式流程（D35–D39）。
+用 `testcases/` 的 10 組 `.in` 跑**整場遊戲**，輸出與 `.out` **逐行**比對（D35–D39）。走的是正式流程，與主程式 `RPGGAME <測資.in>` 相同：
 
-### 8.1 測試用鷹架
+```
+ifstream in("testcases/<名稱>.in")
+RPGSetup setup = RPG_parser::parse(in)        // 讀兩軍，串流停在第一行英雄決策
+setup.hero->setDecider(new HeroAction(in))   // 同一個串流：剩下的行就是英雄決策
+RPG rpg; rpg.GameStart(t1, t2); rpg.GameEnd() // 在 CoutCapture 內，收集所有輸出（含「你獲勝了！」）
+```
 
-| 函式 | 做什麼 | 對應的設計 |
-|---|---|---|
-| `readLines(path)` | 讀檔、去掉行尾 `\r`、去掉檔尾空行 | — |
-| `createSkill(name)` | 中文技能名 → `Skill*`；一拳攻擊注入需求順序的處理鏈 | D26、D21 |
-| `load(game, lines)` | 解析 `#軍隊-1-開始` … `#軍隊-2-結束` 之間的「名稱 HP MP STR 技能…」；T1 第一位設為英雄（`setIdentity('h')` + `HeroAction`），其他角色 `new AIAction()`；之後的每一行都放進英雄的輸入串流 | D6、D36、D37 |
-| `play(game)` | 每回合：T1 → T2；用索引走訪並**每圈重讀人數**（召喚的史萊姆本回合就行動）；跳過死者；把**活著的** T1 / T2 名單交給 `takeTurn`；**每次行動後**檢查「英雄死亡或任一方殲滅」；回合結束對所有角色 `endThisRound()`；最後印「你獲勝了！」或「你失敗了！」；最多 1000 回合防止無窮迴圈 | D1、D11、D20、D30、D31 |
-
-### 8.2 每一組的流程與通過標準
+### 8.1 每一組的流程與通過標準
 
 **流程**（10 組都一樣）：
 
-1. 讀 `testcases/<名稱>.in`、`<名稱>.out`；任何一個讀不到 → `ASSERT` 失敗並印出路徑。
-2. `load` 建立兩軍與決策者。
-3. `play` 跑整場並收集輸出。
-4. 從第 1 行開始逐行比對；第一個不同的行會**立即停止**並報告「`<名稱>.out 第 N 行不同`」與兩邊的內容。
-5. 最後比對行數。
+1. 確認 `testcases/<名稱>.in`、`<名稱>.out` 都存在；不存在 → `ASSERT` 失敗並印出路徑（測資目錄由 `__FILE__` 推得：`test/` 的上一層 `testcases/`）。
+2. 讀 `.out`：去掉行尾 `\r`（測資檔是 Windows 換行）與檔尾空行。
+3. 依上面的流程跑整場並收集輸出。
+4. 若輸出與 `.out` 不同：把實際輸出寫到「測試執行時的目前目錄」下的 `<名稱>.actual.txt`（Windows 自動執行時是 `build/bin/`），可直接用 diff 對照。
+5. 從第 1 行開始逐行比對；第一個不同的行**立即停止**，報告「`<名稱>.out 第 N 行不同`」與兩邊的內容。
+6. 最後比對行數。
 
-**通過標準**：每一行都相同，且行數相同。
+**通過標準**：每一行都相同（包含最後一行「你獲勝了！」/「你失敗了！」），且行數相同。
 
 | # | 測試名稱（`…/OutputMatchesExpectedFile/<參數>`） | `.out` 行數 | 這組主要驗證 |
 |---|---|---|---|
@@ -1075,11 +1077,181 @@ X 對 a 造成 N 點傷害。 [a 死亡。] …                  ← attack
 | RP-09 | `summon` | 128 | 史萊姆加入隊尾且本回合行動、死亡時召喚者 +30 |
 | RP-10 | `waterball-and-fireball-1v2` | 52 | 需求範例；AI 的 seed、MP 不足重選 |
 
-失敗時的看法：訊息中的行號對應 `.out` 的行號，打開兩個檔案對照該行前後即可找到是哪個角色的哪一步出錯。
+#### RP-11 `TestcaseListTest.EveryInputFileIsReplayed`
+- **目的**：確認上表列的就是 `testcases/` 裡**全部**的 `.in`；之後新增測資卻忘了加進 `INSTANTIATE_TEST_SUITE_P` 時會失敗。
+- **步驟與預期**：列出 `testcases/*.in` 的檔名（不含副檔名）並排序 → 等於上表 10 個名稱。
+- **通過標準**：兩個清單完全相同。
 
 ---
 
-## 9. 測試有效性（Mutation 檢查）
+## 9. PA — `ParserTests.cpp`（`ParserTest`，8 個）
+
+Client 端的 `RPG_parser`（D26、D36，§7.2 I10）。多數測試共用下面這段輸入（`kInput`）：
+
+```
+#軍隊-1-開始
+英雄 300 500 100 火球 水球
+Ally 100 0 10
+#軍隊-1-結束
+#軍隊-2-開始
+攻擊力超強的BOSS 270 9999 399 石化 自爆
+#軍隊-2-結束
+1
+0, 1
+```
+
+#### PA-01 `ParsesBothTroops`
+- **步驟與預期**：`parse(kInput)` →
+  1. `t1->getId() == 1`、`t2->getId() == 2`；T1 有 2 位、T2 有 1 位
+  2. 英雄：`[1]英雄`、`300 / 500 / 100`、行動 `普通攻擊、火球、水球`
+  3. Ally：`[1]Ally`、行動只有 `普通攻擊`
+  4. BOSS：`[2]攻擊力超強的BOSS`、`270 / 9999 / 399`、行動 `普通攻擊、石化、自爆`
+- **通過標準**：全部相符（普通攻擊由 Role 自動加入，D28）。
+
+#### PA-02 `FirstRoleOfTroop1IsTheHeroAndOthersAreAI`
+- **步驟與預期**：`setup.hero` 是 T1 第一位且 `isHero()`；英雄的 `getDecider()` 為 `nullptr`（由呼叫端決定，D37）；Ally、BOSS 不是英雄，決策者都是 `AIAction`，而且是不同的物件
+- **通過標準**：全部成立。
+
+#### PA-03 `StopsRightAfterTroop2SoHeroDecisionsRemain`
+- **步驟與預期**：`parse` 之後在同一個串流 `getline` 兩次 → `"1"`、`"0, 1"`
+- **通過標準**：parser 沒有多讀，英雄決策完整留給 `HeroAction`。
+
+#### PA-04 `AcceptsWindowsLineEndingsAndBlankLines`
+- **步驟與預期**：每行以 `\r\n` 結尾、開頭與中間有空行 → 英雄行動 `普通攻擊、火球`；`Slime1` 的名稱沒有殘留 `\r`、STR `49`
+- **通過標準**：全部成立。
+
+#### PA-05 `CreatesEveryRequirementSkillByChineseName`
+- **步驟與預期**：對 `水球、火球、自我治療、石化、下毒、召喚、自爆、鼓舞、詛咒、一拳攻擊` 各呼叫 `createSkill` → 不是 `nullptr`，且 `getName()` 等於傳入的名稱
+- **通過標準**：10 個都成立。
+
+#### PA-06 `OnePunchGetsTheRequirementChain`
+- **步驟與預期**：`createSkill("一拳攻擊")` 是 `OnePunch`；打 `600 HP` 的目標 → 輸出 `[1]英雄 對 [2]Slime 造成 300 點傷害。`
+- **通過標準**：規則 1 生效，代表處理鏈已依需求順序注入（D21）。
+
+#### PA-07 `UnknownSkillIsRejected`
+- **步驟與預期**：`createSkill("隕石")` 與含「隕石」的輸入 `parse` → 都丟 `std::invalid_argument`
+- **通過標準**：兩者都丟例外。
+
+#### PA-08 `MalformedInputIsRejected`
+- **步驟與預期**：以下 8 種輸入 `parse` 都丟 `std::invalid_argument`：空的、缺少開始標記、軍隊 1 沒有結束、缺少軍隊 2、軍隊 2 沒有結束、HP 不是數字、欄位不足、軍隊 1 沒有角色
+- **通過標準**：8 種都丟例外（`SCOPED_TRACE` 會標出是哪一種）。
+
+---
+
+## 10. BT — `BattleTests.cpp`（`BattleTest`，10 個）
+
+`Battle` 的回合迴圈與 `RPG` 的勝負宣告（D1、D6、D11、D20、D30、D31，§7.2 I9）。每個情境都設計成會自然結束；英雄用 `HeroAction` + 固定的輸入，其他角色用 `AIAction`。
+
+> 共同準備：fixture 的 `addHero(hp, mp, str, 決策行, 技能)` 建立英雄（`setIdentity('h')`）加入 T1；`addAI(troop, 名稱, hp, mp, str)` 建立 AI 角色；`runBattle(battle)` 在 `CoutCapture` 內呼叫 `startBattle()`；`turnHeaders(lines)` 只留下「輪到 …」的行，用來檢查順序。
+
+#### BT-01 `RequiresAHero`
+- **步驟與預期**：兩軍都只有 AI 角色 → `startBattle()` 丟 `std::invalid_argument`
+- **通過標準**：丟例外，而不是用空指標判斷英雄。
+
+#### BT-02 `RejectsMissingTroops`
+- **步驟與預期**：`Battle(nullptr, &t2)`、`Battle(&t1, nullptr)` → 都丟 `std::invalid_argument`
+- **通過標準**：兩者都丟例外。
+
+#### BT-03 `EndsAsSoonAsEnemyTroopIsAnnihilated`
+- **準備**：英雄 `500 / 0 / 100`（決策 `0`）；Slime1 `100 HP`、STR `999`。
+- **步驟與預期**：輸出剛好 5 行：「輪到 [1]英雄 …」、`選擇行動：(0) 普通攻擊`、`[1]英雄 攻擊 [2]Slime1。`、100 傷害、`[2]Slime1 死亡。`；`isHeroAlive()` 為真
+- **通過標準**：T2 被殲滅後立即結束，Slime1 沒有輪到。
+
+#### BT-04 `EndsAsSoonAsHeroDiesEvenMidRound`
+- **目的**：英雄死亡就結束，即使英雄所在的軍隊還有人活著（不能只檢查殲滅）。
+- **準備**：T1 = 英雄 `10 HP`（決策 `0`、`0`）、Ally `1000 HP`；T2 = S1（STR 50，`AIAction(1)` 讓它打英雄）、S2。
+- **步驟與預期**：「輪到」依序只有 英雄、Ally、S1；最後一行 `[1]英雄 死亡。`；英雄死亡、Ally 活著、`isHeroAlive()` 為假
+- **通過標準**：S2 沒有輪到。
+
+#### BT-05 `TroopOneActsBeforeTroopTwoAndDeadRolesAreSkipped`
+- **準備**：英雄 `1000 / 0 / 100`（6 行決策 `0`）；T2 = S1 `100 HP`、S2 `350 HP`（STR 0）。
+- **步驟與預期**：
+  1. 「輪到」依序為：英雄、S2（350）、英雄、S2（250）、英雄、S2（150）、英雄、S2（50）、英雄 — 第 1 回合英雄打死 S1，之後 S1 不再輪到
+  2. `選擇 1 位目標:` 只出現 **1** 次（第 1 回合有 2 位候選；之後 Battle 只給活著的角色，只剩 S2 → 自動選）
+- **通過標準**：順序、跳過死者、候選只含活著的角色都成立。
+
+#### BT-06 `SummonedSlimeActsInTheSameRound`
+- **準備**：英雄 `1000 / 150 / 0`（行動：普通攻擊、召喚；決策 `1`）；T2 = S1 `50 HP`。
+- **步驟與預期**：「輪到」依序為 英雄、`[1]Slime (HP: 100, MP: 0, STR: 50, State: 正常)`；最後一行 `[2]S1 死亡。`
+- **通過標準**：史萊姆加入 T1 隊尾，在 T2 之前、同一回合就行動（D20）。
+
+#### BT-07 `TimedStatesCountDownAtEndOfEachRound`
+- **準備**：英雄 `1000 / 80 / 1`（行動：普通攻擊、下毒；決策 `1 / 1 / 0 / 0 / 0 / 0`）；Slime1 `94 HP`、STR 0。
+- **步驟與預期**：Slime1 的「輪到」依序為：
+  1. `HP: 94 … State: 中毒`（第 1 回合被下毒，−30 → 64）
+  2. `HP: 63 … State: 中毒`（第 2 回合；英雄下毒 MP 不足改普通攻擊）
+  3. `HP: 32 … State: 中毒`（第 3 回合，−30 → 2；回合結束換回正常）
+  4. `HP: 1 … State: 正常`（第 4 回合不再扣血）
+
+  → 第 5 回合 Slime1 被英雄打死
+- **通過標準**：中毒剛好持續 3 回合（含施加當下的回合，D11），由 Battle 在回合結束倒數。
+
+#### BT-08 `RPGAnnouncesVictoryWhenHeroSurvives`
+- **步驟與預期**：同 BT-03 的情境，改用 `RPG::GameStart` + `GameEnd` → 最後一行 `你獲勝了！`，倒數第二行 `[2]Slime1 死亡。`
+- **通過標準**：兩行都相符。
+
+#### BT-09 `RPGAnnouncesDefeatWhenHeroDies`
+- **準備**：英雄 `10 HP`、STR 0；Slime1 STR 50。
+- **步驟與預期**：最後一行 `你失敗了！`，倒數第二行 `[1]英雄 死亡。`
+- **通過標準**：兩行都相符。
+
+#### BT-10 `RPGRejectsMissingTroops`
+- **步驟與預期**：`GameStart(nullptr, &t2)`、`GameStart(&t1, nullptr)` → 都丟 `std::invalid_argument`
+- **通過標準**：兩者都丟例外。
+
+---
+
+## 11. 主程式 `RPGGAME` 的手動驗證
+
+`main.cpp` 沒有單元測試（它只是把 parser、`HeroAction`、`RPG` 接起來，這條路已由 RP 測試覆蓋）；以下是對執行檔本身的檢查，每次改到 `main.cpp` 或 Client 後建議跑一次。
+
+### 11.1 三種用法
+
+| 指令 | 軍隊來源 | 英雄決策來源 | 用途 |
+|---|---|---|---|
+| `RPGGAME testcases/<名稱>.in` | 檔案 | 同一個檔案 | 重播測資，輸出應與 `<名稱>.out` 相同 |
+| `RPGGAME --play testcases/<名稱>.in` | 檔案 | 鍵盤（`std::cin`） | 實際玩：依畫面上的「選擇行動」「選擇 m 位目標」輸入數字（多個以「, 」隔開） |
+| `RPGGAME` | 標準輸入 | 標準輸入 | 可用 `RPGGAME < testcases/<名稱>.in` |
+| `RPGGAME --help` | — | — | 顯示用法 |
+
+錯誤時（檔案打不開、輸入格式錯誤、未知技能、英雄決策用完）在 stderr 印「錯誤：…」並回傳 **1**；正常結束回傳 **0**。
+
+### 11.2 驗證步驟與通過標準
+
+Linux / macOS / Git Bash（在 `RPGGame/` 底下）：
+
+```bash
+for f in testcases/*.in; do
+  n=${f%.in}
+  ./build/bin/RPGGAME "$f" | diff -q <(sed 's/\r$//' "$n.out") - > /dev/null && echo "PASS $n" || echo "FAIL $n"
+done
+```
+
+Windows PowerShell（在 `RPGGame/` 底下）：
+
+```powershell
+[Console]::OutputEncoding = [System.Text.Encoding]::UTF8   # 讓 PowerShell 用 UTF-8 讀取程式輸出
+Get-ChildItem testcases\*.in | ForEach-Object {
+  $actual = & .\build\bin\RPGGAME.exe $_.FullName
+  $expected = Get-Content ($_.FullName -replace '\.in$', '.out') -Encoding UTF8
+  if (Compare-Object $actual $expected) { "FAIL $($_.Name)" } else { "PASS $($_.Name)" }
+}
+```
+
+| 檢查 | 通過標準 | 2026-10-14 結果 |
+|---|---|---|
+| 讀測資模式 × 10 組 | 全部 PASS | ✅ |
+| 標準輸入模式（`< 測資.in`）× 10 組 | 全部 PASS | ✅ |
+| `--play` 模式，把測資的決策行從標準輸入餵入 × 10 組 | 全部 PASS | ✅ |
+| 測資轉成 LF 換行 × 10 組 | 全部 PASS | ✅ |
+| `--play` 但決策行不足 | 印到停住的地方，stderr「錯誤：HeroAction: no more hero decisions in input」、回傳 1 | ✅ |
+| 檔案不存在 | stderr「錯誤：無法開啟檔案 …」、回傳 1 | ✅ |
+| 未知技能 | stderr「錯誤：RPG_parser: unknown skill …」、回傳 1 | ✅ |
+| 參數錯誤 / `--help` | 印用法；參數錯誤回傳 1、`--help` 回傳 0 | ✅ |
+
+---
+
+## 12. 測試有效性（Mutation 檢查）
 
 確認測試真的能抓到錯誤：刻意把程式改壞，測試必須失敗（或 crash）；檢查完再還原。
 
@@ -1118,16 +1290,29 @@ X 對 a 造成 N 點傷害。 [a 死亡。] …                  ← attack
 | 「輪到 …」在狀態效果之後才印 | RL-16、ST-02–ST-07、ST-11、ST-12、ST-14–ST-16、RP（10 組） |
 | 狀態中文名稱錯誤（中毒寫成石化） | ST-01、ST-11、ST-12、RP-03、RP-06 |
 | 英雄從不印目標提示 | HA-15、ST-06、RP（6 組） |
+| Battle：T2 先於 T1 | BT-03–BT-09、RP（10 組） |
+| Battle：每回合開始時就固定人數（召喚的史萊姆不在本回合行動） | BT-06、RP-09 |
+| Battle：不跳過死者 | BT-05、RP（6 組） |
+| Battle：候選名單包含死者 | BT-05、RP（6 組） |
+| Battle：只在回合結束才檢查是否結束 | BT-04、RP-01、RP-02、RP-09 |
+| Battle：不檢查英雄死亡（只看殲滅） | BT-04 |
+| Battle：回合結束不倒數 | BT-07、RP-05、RP-06 |
+| RPG：勝負訊息相反 | BT-08、BT-09、RP（10 組） |
+| Parser：英雄沒有標記 `'h'` | PA-02、RP（10 組） |
+| Parser：英雄也裝上 AI | PA-02 |
+| Parser：讀過 `#軍隊-2-結束` 還繼續讀 | PA-01–PA-04、RP（10 組） |
+| Parser：不去掉行尾 `\r` | PA-04、RP（10 組） |
+| Parser：一拳處理鏈順序錯誤 | PA-06、RP-03 |
+| Parser：不檢查軍隊 1 是否有角色 | PA-08（測試程式 crash，視同失敗） |
 
-> 最後一次全部重跑：2026-10-14，上表每一列都至少有一個測試失敗；還原後 126 個全部通過。
+> 最後一次全部重跑：2026-10-14，上表每一列都至少有一個測試失敗；還原後 145 個全部通過。
 
 ---
 
-## 10. 尚未涵蓋（等對應功能實作後補上）
+## 13. 尚未涵蓋
 
-| 範圍 | 原因 | 之後的測試 |
-|---|---|---|
-| 正式的 `Battle`：輪流順序、跳過死者、召喚的史萊姆本回合行動、結束條件、`endThisRound` | 尚未實作；目前由 RP 的測試用迴圈代替 | Battle 單元測試；RP 改用正式 `Battle` |
-| `RPG`：啟動戰鬥、印「你獲勝了！」/「你失敗了！」 | 尚未實作；目前由 `play()` 代印 | RPG 單元測試 |
-| 正式 parser（`test/libary`）與 Client 的技能建造函式 | 尚未實作；目前由 RP 的 `load()` / `createSkill()` 代替 | parser 單元測試；RP 改用正式 parser（D36） |
-| 失敗時寫出 `build/<名稱>.actual.txt` | D39 的一部分，尚未做 | 正式整場比對時加入 |
+| 範圍 | 原因 / 現況 |
+|---|---|
+| `main.cpp` 的單元測試 | 只負責把 parser、`HeroAction`、`RPG` 接起來，這條路已由 RP 覆蓋；執行檔本身用 §11 手動驗證 |
+| Windows 主控台以鍵盤輸入中文（不帶參數、軍隊從鍵盤輸入） | 已設定 `SetConsoleCP(CP_UTF8)`，但各版本 Windows 主控台的行為不同，沒有自動測試；建議用 `--play <測資.in>`（軍隊從檔案讀，只需要輸入數字） |
+| 物件釋放（記憶體） | 角色、技能、決策者大多以裸指標建立，沒有統一釋放（開放問題 O1），測試不檢查記憶體洩漏 |
