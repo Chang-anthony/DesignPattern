@@ -4,7 +4,7 @@
 
 - 需求：[`../need/need.md`](../need/need.md)　設計決策 D1–D40 與實作紀錄：[`../CLAUDE.md`](../CLAUDE.md)　圖：[`../diagrams.md`](../diagrams.md)
 - 測試框架：GoogleTest（`TEST` / `TEST_F`），C++20
-- 最後更新：2026-10-14（加入 Battle、RPG、parser、main.cpp），共 **145** 個測試，全部通過；主程式的手動驗證見 §11
+- 最後更新：2026-10-14（加入 Battle、RPG、parser、main.cpp），共 **146** 個測試，全部通過；主程式的手動驗證見 §11
 
 ---
 
@@ -33,7 +33,7 @@ cmake --build build                 # Windows (MinGW)：build 完會自動執行
 
 | 項目 | 標準 |
 |---|---|
-| 結果 | 最後一行為 `[  PASSED  ] 145 tests.`，沒有任何 `[  FAILED  ]` |
+| 結果 | 最後一行為 `[  PASSED  ] 146 tests.`，沒有任何 `[  FAILED  ]` |
 | 程式結束 | 測試程式正常結束（沒有 crash / segmentation fault）；crash 視同失敗 |
 | 新增測試檔 | `test/CMakeLists.txt` 以 `file(GLOB … CONFIGURE_DEPENDS *.cpp)` 收集，新增 / 刪除 `test/*.cpp` 後直接 build 即可，不必修改 CMake |
 | 單一測試 | 該測試內**所有** `EXPECT_*` / `ASSERT_*` 都成立；`ASSERT_*` 失敗會立即中止該測試（後續檢查不執行） |
@@ -44,14 +44,14 @@ cmake --build build                 # Windows (MinGW)：build 完會自動執行
 |---|---|---|---|---|
 | EX | `ExampleTests.cpp` | `SkillTest` | 11 | Anthony 原本的技能測試（只檢查 HP / MP / 狀態，不檢查輸出） |
 | SK | `SkillTests.cpp` | `SkillBehaviorTest` | 43 | 技能：名稱、MP、候選、輸出訊息、傷害、狀態、召喚、詛咒、一拳攻擊 |
-| RL | `RoleTests.cpp` | `RoleTest` | 20 | `Role`：屬性、軍隊、MP、HP 與死亡、觀察者、狀態與回合倒數 |
+| RL | `RoleTests.cpp` | `RoleTest` | 21 | `Role`：屬性、軍隊、MP、HP 與死亡、觀察者、狀態與回合倒數 |
 | AI | `AIActionTests.cpp` | `AIActionTest` | 11 | `AIAction`：seed 規則（S1、S2、自動全選） |
 | HA | `HeroActionTests.cpp` | `HeroActionTest` | 15 | `HeroAction`：從輸入讀英雄決策（S1、S2、提示、格式容錯、錯誤處理） |
 | ST | `StateFlowTests.cpp` | `StateFlowTest` | 16 | `State::decision()` 行動流程、「輪到 …」、石化 / 中毒 / 鼓舞 |
 | RP | `TestcaseReplayTests.cpp` | `AllTestcases/TestcaseReplayTest`、`TestcaseListTest` | 11 | `testcases/` 10 組用正式 parser + RPG 整場比對、測資清單檢查 |
 | PA | `ParserTests.cpp` | `ParserTest` | 8 | Client 端 `RPG_parser`：解析輸入、技能建造函式、錯誤處理 |
 | BT | `BattleTests.cpp` | `BattleTest` | 10 | `Battle` 回合迴圈、結束條件、`RPG` 宣布勝負 |
-| | | **合計** | **145** | |
+| | | **合計** | **146** | |
 
 ### 1.4 測試共用的工具與慣例
 
@@ -557,7 +557,7 @@ Anthony 原本寫的技能測試。每個測試都直接呼叫 `skill->attack(ac
 
 ---
 
-## 4. RL — `RoleTests.cpp`（`RoleTest`，20 個）
+## 4. RL — `RoleTests.cpp`（`RoleTest`，21 個）
 
 `Role` 本身的責任：屬性、所屬軍隊、MP 檢查、HP 與死亡、觀察者、狀態與回合倒數。
 
@@ -704,6 +704,16 @@ Anthony 原本寫的技能測試。每個測試都直接呼叫 `skill->attack(ac
   2. `endThisRound()` 三次
   3. 普通攻擊 → `["[1]Servant1 對 [2]Slime1 造成 0 點傷害。"]`
 - **通過標準**：狀態到期後加成消失。
+
+#### RL-21 `SlimeHasTheStatsGivenByRequirement`（2026-10-14 新增）
+- **目的**：史萊姆的數值由 `Slime` 自己持有，符合需求的描述。
+- **依據**：需求「召喚」（史萊姆擁有 100 HP、0 MP、50 STR，沒有任何技能，初始為正常狀態）；D43、D44。
+- **步驟與預期**：`Slime slime;` →
+  1. 名稱 `"Slime"`、HP `100`、MP `0`、STR `50`
+  2. 行動只有 1 個，且是 `BasicAttack`
+  3. 狀態是 `NormalState`；`isHero()` 為假
+  4. `getDecider()` 為 `nullptr`（決策者由 `Summon` 裝上，D40）
+- **通過標準**：全部成立。
 
 ---
 
@@ -1304,8 +1314,9 @@ Get-ChildItem testcases\*.in | ForEach-Object {
 | Parser：不去掉行尾 `\r` | PA-04、RP（10 組） |
 | Parser：一拳處理鏈順序錯誤 | PA-06、RP-03 |
 | Parser：不檢查軍隊 1 是否有角色 | PA-08（測試程式 crash，視同失敗） |
+| `Slime()` 的 STR 寫錯（50 → 49） | RL-21、SK-23、ST-15、BT-06、RP-09 |
 
-> 最後一次全部重跑：2026-10-14，上表每一列都至少有一個測試失敗；還原後 145 個全部通過。
+> 最後一次全部重跑：2026-10-14，上表每一列都至少有一個測試失敗；還原後 146 個全部通過。
 
 ---
 

@@ -21,7 +21,7 @@
 
 | 改變 | 決策 |
 |---|---|
-| 移除 `Hero` / `AI` 這兩個 `Role` 子類別，改由 `Role` 持有 `IAction`；`seed` 移到 `AIAction` | D4（✅ 2026-10-14 已刪除；`NonHero` / `Slime` 保留） |
+| 移除 `Hero` / `AI` 這兩個 `Role` 子類別，改由 `Role` 持有 `IAction`；`seed` 移到 `AIAction` | D4（✅ 2026-10-14 已刪除）；`NonHero` 也刪除，`Slime` 直接繼承 `Role`（D43） |
 | 一次行動的流程由 `State` 主導，固定流程寫在 `State` 抽象類別 | D10、D12 |
 | 傷害一律經過 `actor.state.doDamage()` → `target.state.damage()` → `target.lossHp()` | D16、D17 |
 | 觀察者改為 pull model：`UntilDie(dead)` 帶入死者 | D18 |
@@ -321,7 +321,7 @@ classDiagram
     Petrochemical ..> PetrochemicaledState : new
     Poison ..> PoisonedState : new
     Cheerup ..> CheerupedState : new
-    Summon ..> Slime : new
+    Summon ..> Slime : new Slime()（數值由 Slime 持有，D44）
     Summon ..> SummonObserver : new，掛在史萊姆上
     Summon ..> Troop : actor->getTroop()->addRole()
     Summon ..> AIAction : new，setDecider 給史萊姆（D40）
@@ -447,6 +447,8 @@ classDiagram
         class BasicAttack
         class SkillObserver
         class OnePunchHandler
+        class AIAction
+        class HeroAction
     }
     namespace 外部擴充 {
         class Fireball
@@ -457,7 +459,6 @@ classDiagram
         class Slime
         class OnePunch
         class NormalHandler
-        class AIAction
     }
 
     RPG --> Battle
@@ -486,9 +487,11 @@ classDiagram
     OnePunchHandler <|-- NormalHandler
     NormalHandler ..> NormalState
     IAction <|.. AIAction
+    IAction <|.. HeroAction
+    Summon ..> AIAction
 ```
 
-> 圖中外部擴充只挑代表（其他技能、狀態、handler 同理）。檢查方式：**所有箭頭都是「外部 → 模組」或「外部 → 外部」，沒有「模組 → 外部」**，所以刪掉外部擴充的檔案，模組仍能編譯（需求 ②③④）。`OnePunchHandler` 抽象類別、`AIAction` 歸屬哪一邊在討論中沒有明確決定，圖中暫放；`Slime` 程式裡是 `Role ← NonHero ← Slime`，這裡簡化成直接繼承 `Role`。
+> 圖中外部擴充只挑代表（其他技能、狀態、handler 同理）。檢查方式：**所有箭頭都是「外部 → 模組」或「外部 → 外部」，沒有「模組 → 外部」**，所以刪掉外部擴充的檔案，模組仍能編譯（需求 ②③④）。`AIAction`、`HeroAction`、抽象的 `OnePunchHandler` 屬於模組內部（D41）：新的 AI 或一拳規則在外部實作 `IAction` / `OnePunchHandler` 即可，`Summon ..> AIAction` 也是「外部 → 模組」；`Slime` 直接繼承 `Role`（D43）。
 
 ### ⑦ 決策者（Strategy，✅ 2026-10-14）
 
@@ -550,7 +553,7 @@ classDiagram
 - `getDisplayName()`：有軍隊時回傳「[編號]名稱」，沒有時只回傳名稱。
 - `enemiesOf` / `alliesOf` / `othersOf` 後面的 `$` 代表 static（D32）。
 - 每個技能子類別各自持有自己的**中文名稱**，輸出時用 `getName()`（D27）。
-- `Hero` / `AI` 子類別已刪除（D4）；`NonHero` / `Slime` 仍保留在程式中（史萊姆是否保留子類別未決定），①–⑤ 沒有畫它們。
+- `Hero` / `AI` 子類別已刪除（D4），`NonHero` 也已刪除（D43）；召喚用的 `Slime` 直接繼承 `Role`，只畫在 ③ 與 ⑥。
 
 ### 每個類別負責什麼
 
@@ -572,11 +575,10 @@ classDiagram
 
 | 範圍 | 包含 | 決策 |
 |---|---|---|
-| **模組內部** | `RPG`、`Battle`、`Troop`、`Role`、`State`、`NormalState`、`IAction`、`Skill`、`BasicAttack`、`SkillObserver` | D1、D11、D28、D32 |
-| **外部擴充**（可直接刪檔，不影響模組） | 10 種技能（含 `OnePunch`）、具體的 `OnePunchHandler`；`Curse` / `CurserObserver` 等技能專屬的觀察者；技能帶出的狀態（中毒、石化、鼓舞） | D19、D23、D24、需求 ② |
+| **模組內部** | `RPG`、`Battle`、`Troop`、`Role`、`State`、`NormalState`、`IAction`、`AIAction`、`HeroAction`、`Skill`、`BasicAttack`、`SkillObserver`、`OnePunchHandler`（抽象類別） | D1、D11、D28、D32、D41 |
+| **外部擴充**（可直接刪檔，不影響模組） | 10 種技能（含 `OnePunch`）、具體的一拳 handler（`HpHandler` 等）、新增的 AI（實作 `IAction`）；`Curse` / `CurserObserver` 等技能專屬的觀察者；技能帶出的狀態（中毒、石化、鼓舞） | D19、D23、D24、需求 ② |
 | **Client** | `main.cpp`、`test/libary/RPG_parser`：讀測資 / 輸入、名稱 → 技能的建造函式、組裝一拳攻擊的處理鏈、建立角色與軍隊、決定每個角色的 `IAction` | D21、D26、D36、D37 |
 
-> 討論中沒有明確決定、圖中暫時這樣畫的：`OnePunchHandler` 抽象類別歸在哪一邊、`AIAction` / `HeroAction` 屬於模組還是 Client、召喚的史萊姆是否保留 `Slime` 子類別（程式目前用 `Slime`，圖中直接用 `Role` 表示）。
 
 ---
 

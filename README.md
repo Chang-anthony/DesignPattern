@@ -333,7 +333,7 @@ Turn-based battle between two troops. All 10 official testcases in `RPGGame/test
 ```
 RPGGame/include/
 ├── Game/            RPG, Battle, Troop
-├── Role/            Role ← NonHero ← Slime, IAction ← AIAction / HeroAction   # Strategy for decisions
+├── Role/            Role ← Slime, IAction ← AIAction / HeroAction   # Strategy for decisions
 ├── Skill/           Skill ← BasicAttack, Waterball, Fireball, SelfHealing, Petrochemical, Poison,
 │                            Summon, SelfExplosion, Cheerup, Curse, OnePunch
 ├── State/           State ← NormalState, PoisonedState, PetrochemicaledState, CheerupedState

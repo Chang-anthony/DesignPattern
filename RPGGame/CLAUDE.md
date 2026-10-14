@@ -50,9 +50,9 @@
 | `OnePunchHandler/` | ✅ 移除 `next` 指標，改由 `OnePunch` 以 `vector` 注入（D21、D23）；`handle / match / doHandle` 帶入 `actor`（D22）；用 `dynamic_cast` 判斷狀態（D25） |
 | `Observer/` | ✅ `UntilDie(Role* dead)`（pull model，D18）；`SummonObserver` +30、`CurserObserver` + 剩餘 MP，施放者已死就不給 |
 | `State/` | ✅ `doDamage` / `damage`（D16）、受到鼓舞 +50、計時狀態回合數 3（D11）；移除 `entryState` / `exitState` 裡的除錯輸出；**`State::decision()` 是預設行動流程（S1 → S2 → S3，D10、D12）**，石化覆寫成整段跳過、中毒覆寫成先扣 30 再沿用預設流程；各狀態持有中文名稱 `getDisplayName()`（§7.6） |
-| `Role/` | ✅ `lossHp()`：歸零當下印死亡並通知觀察者（D17）；建立時自動加入普通攻擊（D28）；`getDisplayName()`；`checkMp(Skill*)` 只檢查（D9，取代 `checkActionLossMp`）；`endThisRound()`（D11）；`takeTurn(t1, t2, actorSide)` 交給 `state->decision(...)`（D10）；決策者 `setDecider / getDecider`（D4）；英雄識別 `setIdentity / isHero`（D6）；✅ `Hero` / `AI` 子類別已刪除（D4）；`NonHero` / `Slime` 保留 |
+| `Role/` | ✅ `lossHp()`：歸零當下印死亡並通知觀察者（D17）；建立時自動加入普通攻擊（D28）；`getDisplayName()`；`checkMp(Skill*)` 只檢查（D9，取代 `checkActionLossMp`）；`endThisRound()`（D11）；`takeTurn(t1, t2, actorSide)` 交給 `state->decision(...)`（D10）；決策者 `setDecider / getDecider`（D4）；英雄識別 `setIdentity / isHero`（D6）；✅ `Hero` / `AI` 子類別已刪除（D4）；`NonHero` 已刪除、`Slime` 直接繼承 `Role`（D43）並以 `Slime()` 持有需求數值（D44） |
 | `IAction` / `AIAction` / `HeroAction` | ✅ `IAction`：`chooseAction(skills)`、`chooseTargets(candidates, m)`（D4、D5、D7、D8）；`AIAction`：seed 規則（§7.2 I5）；`HeroAction`：從注入的 `istream` 讀英雄決策（D37，§7.5） |
-| `Game/` | ✅ `Troop` 新增軍隊編號（輸出前綴）；`Battle::startBattle()` 回合迴圈（D1、D11、D20、D30、D31）、`isHeroAlive()`；`RPG::GameStart()` 啟動戰鬥並印勝負（§7.2 I9）；`RPG::makeAction()`、`Troop::StartBattle()` 維持原樣（未使用，見 §7.7） |
+| `Game/` | ✅ `Troop` 新增軍隊編號（輸出前綴）；`Battle::startBattle()` 回合迴圈（D1、D11、D20、D30、D31）、`isHeroAlive()`；`RPG::GameStart()` 啟動戰鬥並印勝負（§7.2 I9）；`RPG::makeAction()`、`Troop::StartBattle()` 已刪除（D42） |
 | Client | ✅ `test/libary/RPG_parser`：解析輸入、技能建造函式（D26、D36，§7.2 I10）；`main.cpp`：讀測資 / `--play` 實際玩 / 標準輸入三種用法（§7.2 I11） |
 | 測試 | ✅ `ExampleTests.cpp` 11、`SkillTests.cpp` 43、`RoleTests.cpp` 20、`AIActionTests.cpp` 11、`HeroActionTests.cpp` 15、`StateFlowTests.cpp` 16、`BattleTests.cpp` 10、`ParserTests.cpp` 8、`TestcaseReplayTests.cpp` 11（`testcases/` 10 組用正式的 parser + RPG 整場比對，加上測資清單檢查），共 145 個全部通過；主程式 `RPGGAME <測資.in>` 的輸出也與 10 組 `.out` 完全相同。每個測試的流程與通過標準見 [`test/TESTS.md`](test/TESTS.md) |
 
@@ -153,7 +153,7 @@
 ### 4.2 開放問題（超出需求，可聊可不改）
 
 - **O1. 物件擁有權**：全用裸指標，召喚的 `Slime` 由誰釋放沒有定義。要不要用 `std::unique_ptr` 表達擁有權？（需求未要求）
-- **O2. `Troop` 與 `Battle` 的責任**：`Troop::StartBattle()` 會 `new Battle`；`Battle` 的成員叫 `ally` / `enemy`，但友敵其實是相對於角色的。（需求只要求能判斷英雄死亡 / 軍隊殲滅，怎麼放是品味問題）
+- **O2. `Troop` 與 `Battle` 的責任**：~~`Troop::StartBattle()` 會 `new Battle`~~（D42 已刪除）；`Battle` 的成員叫 `ally` / `enemy`，但友敵其實是相對於角色的。（需求只要求能判斷英雄死亡 / 軍隊殲滅，怎麼放是品味問題）
 - **O3. 命名與詞彙表**：需求用語是「行動」包含「普通攻擊」與「技能」；`BasicAttack` 繼承 `Skill`、`SelfHealing` 也要實作 `attack()`。是否要讓命名貼近詞彙表？（輸出格式的差異屬 A11 / A5，命名本身不是需求）
 - **O4. 防止技能繞過傷害通道**：`Role` 的扣血函式若為 public，新技能可能直接扣血而跳過狀態的傷害加成。可用存取權限（private + friend / 只開放給 State）或團隊約定處理。（需求只要求能擴充，未要求防呆；D13 的 `doAction(actor, targets)` 已拿得到行動者）
 - **O5. 技能名稱重複定義**：Client 的建造函式（D26）與技能本身（D27）各寫一次「火球」，改名或拼錯時兩邊可能不一致。（需求的測資名稱固定，Anthony 決定先假設不會寫錯）
@@ -202,7 +202,11 @@
 | D37 | 2026-10-12 | A11 | **英雄的 `IAction` 注入 `std::istream&`**：正式執行傳 `std::cin`，測試傳讀測資檔的 stream。 | 依 D4 只有英雄的 `IAction` 讀輸入，只注入這一處；不照抄 BigTwo 把 `plays` 一路傳遞 / 回傳穿過每一層；S1、S2 共用同一串輸入、MP 不足重選讀下一行都自然成立；`std::istream` 本身即可替換的輸入來源，不另設介面 |
 | D38 | 2026-10-12 | A11 | **測試時用 `rdbuf` 把 `std::cout` 導向字串收集輸出**，模組內部維持直接寫 `std::cout`。 | 輸出散落在 `doDamage`、`lossHp`、State 流程、技能等多處，注入 `ostream&` 要改整條呼叫鏈的簽名；需求只要求輸出正確，未要求輸出目的地可替換（列為 O6） |
 | D39 | 2026-10-12 | A11 | **用 gtest 參數化測試（`TEST_P`）比對**：每組 `.in` / `.out` 一個案例，逐行比對，失敗時報出第一個不同的行號，並把實際輸出寫到 `build/<名稱>.actual.txt` 供 diff。 | 10 組、每組數十到上百行，無法人工比對；一組一案例可直接看出哪個技能出錯 |
-| D40 | 2026-10-14 | A2（補充） | **召喚的史萊姆由 AI 操控，但和其他角色一樣「攜帶」決策者**：`Summon` 建出史萊姆後呼叫 `slime->setDecider(new AIAction())`，不把 AI 寫死在 `Slime` 類別裡；每隻史萊姆有自己的 `AIAction`（seed 從 0 開始、互不影響）。 | 需求：英雄以外的角色都由 AI 操控；沿用 D4「Role 持有 `IAction`」的同一套機制。取捨：`Summon`（外部擴充）因此依賴 `AIAction`；`AIAction` 歸屬模組或外部仍未決定 |
+| D40 | 2026-10-14 | A2（補充） | **召喚的史萊姆由 AI 操控，但和其他角色一樣「攜帶」決策者**：`Summon` 建出史萊姆後呼叫 `slime->setDecider(new AIAction())`，不把 AI 寫死在 `Slime` 類別裡；每隻史萊姆有自己的 `AIAction`（seed 從 0 開始、互不影響）。 | 需求：英雄以外的角色都由 AI 操控；沿用 D4「Role 持有 `IAction`」的同一套機制。取捨：`Summon`（外部擴充）因此依賴 `AIAction`；依 D41 `AIAction` 屬於模組內部，這是「外部 → 模組」的依賴，方向正確 |
+| D41 | 2026-10-14 | 實作後補充（模組邊界） | **`AIAction`、`HeroAction` 與抽象的 `OnePunchHandler` 屬於模組內部**。要擴充時，在模組外部新增實作（新的 AI、新的一拳規則 handler），只依賴它該依賴的介面（`IAction`、`OnePunchHandler`），模組內部不必改動。具體的一拳 handler（`HpHandler` 等）仍是外部擴充（D24）。 | 介面與需求要求的兩種決策者是模組提供的能力；新增實作只往模組方向依賴（需求 ①④），刪除外部的實作不影響模組 |
+| D42 | 2026-10-14 | 實作後補充（O2） | **刪除 `RPG::makeAction()` 與 `Troop::StartBattle()`**：一次行動已委派給 `Role::takeTurn` → `State::decision()`（D10），建立與啟動戰鬥已由 `RPG::GameStart()` 負責（D1），這兩個函式不再需要。`Troop` 因此不再認識 `Battle`。 | 該委派的都已委派；留著沒用的入口會讓人誤以為有第二條流程 |
+| D43 | 2026-10-14 | 實作後補充（D4 延伸） | **刪除 `NonHero`，`Slime` 改為直接繼承 `Role`**。`Slime` 保留，因為 `Summon` 用它建立召喚的史萊姆。 | 「是不是英雄」由 `Role` 的 identity 判斷（D6），不需要 `NonHero` 這層繼承；`NonHero` 建構子只是重設一次 `NormalState`，`Role` 建構時本來就會設 |
+| D44 | 2026-10-14 | 實作後補充（D43 延伸） | **史萊姆的數值由 `Slime` 自己持有**：建構子改為 `Slime()`，內部呼叫 `Role(100, 0, 50, "Slime")`；`Summon` 只寫 `new Slime()`，再裝上觀察者與 `AIAction`。 | 需求對史萊姆的描述（100 HP、0 MP、50 STR、沒有技能）集中在 `Slime`，`Summon` 只負責「召喚」這個動作；與 D27（技能各自持有名稱）同樣的思路。已排除：刪掉 `Slime`、由 `Summon` 直接 `new Role(...)`（史萊姆這個概念只剩一行數字） |
 
 ---
 
@@ -258,7 +262,7 @@ cd test && ./run_tests.sh                        # Windows: run_tests.bat
 
 ### 7.4 2026-10-14：移除 Hero / AI 子類別、IAction / AIAction
 - **刪除** `Hero.hpp/.cpp`、`AI.hpp/.cpp`（D4）；`ExampleTests.cpp`、`main.cpp` 的 `new Hero(...)` 改為 `new Role(...)`（參數順序相同）。英雄改由 `setIdentity('h')` 標示（D6），決策交給 `IAction`。
-- **保留** `NonHero`、`Slime`：D4 只決定移除 `Hero` / `AI`；史萊姆是否保留子類別在討論中沒有決定（`Summon` 目前 `new Slime(...)`）。
+- **保留** `NonHero`、`Slime`（之後由 D43 刪除 `NonHero`）：D4 只決定移除 `Hero` / `AI`；史萊姆是否保留子類別在討論中沒有決定（`Summon` 目前 `new Slime(...)`）。
 - **`IAction`**：原本的 `action()` 換成 `chooseAction(skills)` → `Skill*`、`chooseTargets(candidates, m)` → `vector<Role*>`，並加上 virtual 解構子。MP 檢查不在介面內（D5）。
 - **`AIAction`**：`seed`（預設 0，可由建構子指定）、`getSeed()`；規則見 §7.2 I5 與 `diagrams.md` ⑦。
 - **未做**：英雄的 `HeroAction`（D37，讀 `istream`）；「選擇行動：(0) …」「選擇 1 位目標: …」這兩行提示等實作 State 流程時處理（**更正**：只有「選擇行動」每個角色都印；「選擇 m 位目標」只有英雄印，見 §7.2 I7）。
@@ -292,7 +296,7 @@ cd test && ./run_tests.sh                        # Windows: run_tests.bat
 - **`Battle`**（在原本的 `Battle(Troop* ally, Troop* enemy)` 上補齊；`ally` = T1、`enemy` = T2）：
   - `startBattle()`：找出英雄（I9）→ 每回合 T1 再 T2；用索引走訪且每圈重讀 `getRoles().size()`（召喚的史萊姆本回合就行動，D20）；跳過死者；把兩軍**活著的**名單與 actorSide 交給 `takeTurn`（D30、D31）；**每次行動後**檢查「英雄死亡或任一方殲滅」，成立就立即結束；回合結束對所有角色 `endThisRound()`（D11）。
   - `isHeroAlive()`：給 `RPG` 判斷勝負。
-- **`RPG::GameStart()`**：原本就會 `new Battle` 並 `startBattle()`，補上最後印勝負（I9）。`RPG::makeAction()`（原本的空 TODO）與 `Troop::StartBattle()` 在目前設計中沒有用到，保留不動，要不要刪由 Anthony 決定。
+- **`RPG::GameStart()`**：原本就會 `new Battle` 並 `startBattle()`，補上最後印勝負（I9）。`RPG::makeAction()`（原本的空 TODO）與 `Troop::StartBattle()` 在目前設計中沒有用到，Anthony 決定刪除（D42）。
 - **Client**：`test/libary/RPG_parser.hpp/.cpp`（I10）、`test/libary/test.cmake` 新增 `__RPG_CLIENT_SRCS`、根目錄 `CMakeLists.txt` 把它加進 `COMM_SRCS`；`main.cpp` 改寫成三種用法（I11），原本測試詛咒用的範例程式碼移除。
 - **測試**：
   - `BattleTests.cpp` 10 個：需要英雄、結束條件（敵軍殲滅、英雄死亡但 T1 還有人）、輪流順序與跳過死者、召喚的史萊姆同回合行動、回合結束倒數、`RPG` 印勝負。
