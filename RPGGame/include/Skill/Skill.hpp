@@ -38,7 +38,7 @@ public:
     // S3 的行動訊息：預設「X 對 a, b 使用了 名稱。」，沒有目標時「X 使用了 名稱。」
     virtual void announce(Role* actor, const std::vector<Role*>& targets) const;
 
-    // Update the virtual function to accept two parameters
+    // 施放這個行動（含普通攻擊）：attack 在本專案的意思是「施放」，不限於造成傷害（例如自我治療、下毒也實作它，D46）
     // 每造成一次傷害就呼叫一次 actor->getState()->doDamage(target, n)（D16）
     virtual void attack(Role* actor, std::vector<Role*> targets) = 0;
 

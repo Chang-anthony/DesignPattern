@@ -154,7 +154,7 @@
 
 - **O1. 物件擁有權**：全用裸指標，召喚的 `Slime` 由誰釋放沒有定義。要不要用 `std::unique_ptr` 表達擁有權？（需求未要求）
 - **O2. `Troop` 與 `Battle` 的責任** ✅ 結案（D42、D45）：`Troop::StartBattle()` 已刪除（`Troop` 不再認識 `Battle`）；`Battle` 的成員改名為陣營 `heroTroop` / `opponentTroop`。
-- **O3. 命名與詞彙表**：需求用語是「行動」包含「普通攻擊」與「技能」；`BasicAttack` 繼承 `Skill`、`SelfHealing` 也要實作 `attack()`。是否要讓命名貼近詞彙表？（輸出格式的差異屬 A11 / A5，命名本身不是需求）
+- **O3. 命名與詞彙表** ✅ 結案（D46）：維持 `Skill` / `attack()` 命名，`attack` 意指「施放行動」，已在 `Skill.hpp` 註明。
 - **O4. 防止技能繞過傷害通道**：`Role` 的扣血函式若為 public，新技能可能直接扣血而跳過狀態的傷害加成。可用存取權限（private + friend / 只開放給 State）或團隊約定處理。（需求只要求能擴充，未要求防呆；D13 的 `doAction(actor, targets)` 已拿得到行動者）
 - **O5. 技能名稱重複定義**：Client 的建造函式（D26）與技能本身（D27）各寫一次「火球」，改名或拼錯時兩邊可能不一致。（需求的測資名稱固定，Anthony 決定先假設不會寫錯）
 - **O6. 輸出目的地可替換**：模組直接寫 `std::cout`（D38），測試靠 `rdbuf` 導向。若要讓輸出可注入（`ostream&` 或輸出介面），需改整條呼叫鏈。（需求未要求）
@@ -208,6 +208,7 @@
 | D43 | 2026-10-14 | 實作後補充（D4 延伸） | **刪除 `NonHero`，`Slime` 改為直接繼承 `Role`**。`Slime` 保留，因為 `Summon` 用它建立召喚的史萊姆。 | 「是不是英雄」由 `Role` 的 identity 判斷（D6），不需要 `NonHero` 這層繼承；`NonHero` 建構子只是重設一次 `NormalState`，`Role` 建構時本來就會設 |
 | D44 | 2026-10-14 | 實作後補充（D43 延伸） | **史萊姆的數值由 `Slime` 自己持有**：建構子改為 `Slime()`，內部呼叫 `Role(100, 0, 50, "Slime")`；`Summon` 只寫 `new Slime()`，再裝上觀察者與 `AIAction`。 | 需求對史萊姆的描述（100 HP、0 MP、50 STR、沒有技能）集中在 `Slime`，`Summon` 只負責「召喚」這個動作；與 D27（技能各自持有名稱）同樣的思路。已排除：刪掉 `Slime`、由 `Summon` 直接 `new Role(...)`（史萊姆這個概念只剩一行數字） |
 | D45 | 2026-10-14 | O2 | **`Battle` 的兩支軍隊改名為陣營：`heroTroop`（英雄方，T1，先行動）與 `opponentTroop`（對手方，T2）**，取代原本的 `ally` / `enemy`。 | Anthony 認為 `Battle` 應該知道哪一軍是英雄方。不用 `ally` / `enemy`，因為需求詞彙表的「友軍 / 敵軍」是相對於某個角色而言（T2 的角色行動時，T1 是它的敵軍），容易混淆。已排除：維持 `ally` / `enemy`、以輪流順序命名 `t1` / `t2` |
+| D46 | 2026-10-14 | O3 | **維持 `Skill` / `attack()` 的命名**：`Skill` 是所有行動（含普通攻擊）的抽象，`attack(actor, targets)` 的意思是「施放這個行動」，不限於造成傷害。只在 `Skill.hpp` 的宣告加上註解說明，不改名。 | Anthony 認為這不是問題：`Skill` 只是用來抽象描述技能，`attack` 當成施放。改名（例如 `cast` / `perform`）要動 11 個技能、測試與文件，換來的只是用詞更貼近詞彙表 |
 
 ---
 
