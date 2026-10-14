@@ -26,6 +26,7 @@
 #include "SkillObserver.hpp"
 #include "SummonObserver.hpp"
 #include "CurserObserver.hpp"
+#include "Slime.hpp"
 
 namespace {
 
@@ -374,6 +375,24 @@ TEST_F(RoleTest, CheerupBonusEndsWhenStateExpires) {
         attack.attack(servant, {slime}); // 回到正常狀態，傷害還原為 STR（0）
         EXPECT_EQ(capture.lines(), (Lines{"[1]Servant1 對 [2]Slime1 造成 0 點傷害。"}));
     }
+}
+
+// =====================================================================
+// 史萊姆（D43、D44）
+// =====================================================================
+
+TEST_F(RoleTest, SlimeHasTheStatsGivenByRequirement) {
+    // 需求「召喚」：史萊姆擁有 100 HP、0 MP、50 STR，沒有任何技能，並且初始為正常狀態
+    Slime slime;
+    EXPECT_EQ(slime.getName(), "Slime");
+    EXPECT_EQ(slime.getHp(), 100);
+    EXPECT_EQ(slime.getMp(), 0);
+    EXPECT_EQ(slime.getStr(), 50);
+    ASSERT_EQ(slime.getSkills().size(), 1u);
+    EXPECT_NE(dynamic_cast<BasicAttack*>(slime.getSkills()[0]), nullptr); // 只有普通攻擊（D28）
+    EXPECT_NE(dynamic_cast<NormalState*>(slime.getState()), nullptr);
+    EXPECT_FALSE(slime.isHero());
+    EXPECT_EQ(slime.getDecider(), nullptr); // 決策者由 Summon 裝上（D40）
 }
 
 } // namespace

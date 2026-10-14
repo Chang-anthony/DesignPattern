@@ -25,10 +25,6 @@ void RPG::GameStart(Troop* troop1, Troop* troop2)
     std::cout << (battle->isHeroAlive() ? "你獲勝了！" : "你失敗了！") << std::endl;
 }
 
-//TODO:
-void RPG::makeAction(Role* role) {
-}
-
 void RPG::GameEnd() {
     if (battle) {
         delete battle;

@@ -22,9 +22,6 @@ public:
     void GameStart(Troop* troop1, Troop* troop2);
     void GameEnd();
 
-protected:
-    void makeAction(Role* role);
-
 };
 
 #endif // RPG_HPP

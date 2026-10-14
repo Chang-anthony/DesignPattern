@@ -14,7 +14,7 @@ Summon::Summon()  : Skill() {
 
 void Summon::attack(Role* actor, std::vector<Role*> targets) {
     Troop* troop = actor->getTroop();
-    Slime* slime = new Slime(100, 0, 50, "Slime");
+    Slime* slime = new Slime(); // 史萊姆的數值由 Slime 自己持有（D44）
     SummonObserver* observer = new SummonObserver(actor);
     slime->addObserver(observer);
     slime->setDecider(new AIAction()); // 英雄以外的角色都由 AI 操控；史萊姆和其他角色一樣透過 setDecider 攜帶決策者（D4、D40）

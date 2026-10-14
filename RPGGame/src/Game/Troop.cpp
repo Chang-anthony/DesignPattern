@@ -1,5 +1,4 @@
 #include "Troop.hpp"
-#include "Battle.hpp"
 #include "Role.hpp"
 #include <iostream>
 #include "utils.h"
@@ -40,9 +39,3 @@ bool Troop::Annihilated() const {
     }
     return true; // All roles are dead
 }
-
-Battle* Troop::StartBattle(Troop* enemy) {
-    utils::RequireNonNull(enemy);
-    return new Battle(this, enemy);
-} 
-
