@@ -42,13 +42,9 @@ std::vector<Employee*> RealDatabase::getSubordinatesById(int id)
 
 Employee* RealDatabase::readDataByid(int id)
 {
-    if (id == 0) {
+    if (id <= 0 || id >= static_cast<int>(lines.size())) {
         return nullptr;
     }
-
-    if ((lines.size() - 1) < id) {
-        return nullptr;
-    } 
     std::string data = lines[id];
     //parse data
     std::istringstream ss(data);
@@ -66,7 +62,7 @@ Employee* RealDatabase::readDataByid(int id)
     return employee;
 }
 
-std::vector<Employee*> RealDatabase::readSubordinates(std::vector<std::string> datas, std::string subordinates)
+std::vector<Employee*> RealDatabase::readSubordinates(const std::vector<std::string>& datas, const std::string& subordinates)
 {
     std::vector<int> subordinatesId;
     std::istringstream ssSubordinates(subordinates);

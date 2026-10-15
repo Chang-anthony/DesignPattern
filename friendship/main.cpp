@@ -6,6 +6,15 @@
 #include <stdio.h>
 #include <vector>
 #include <fstream>
+#ifdef _WIN32
+#ifndef WIN32_LEAN_AND_MEAN
+#define WIN32_LEAN_AND_MEAN
+#endif
+#ifndef NOMINMAX
+#define NOMINMAX
+#endif
+#include <windows.h>
+#endif
 
 std::vector<std::string> ReadFile(std::string path);
 
@@ -31,6 +40,10 @@ std::vector<std::string> ReadFile(std::string path)
 
 int main()
 {
+#ifdef _WIN32
+    // 原始碼是 UTF-8，將 console 輸出改為 UTF-8 才能正確顯示中文
+    SetConsoleOutputCP(CP_UTF8);
+#endif
 
     std::string path = "C:\\Users\\JCCanthony\\Desktop\\DesignPatternCode\\friendship\\script.txt";
     std::vector<std::string> lines = ReadFile(path);

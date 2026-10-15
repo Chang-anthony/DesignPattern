@@ -19,6 +19,8 @@ public:
     Employee* getEmployeeById(int id) override;
     std::vector<Employee*> getSubordinatesById(int id) override;
 
+    bool isLoaded() const { return realDatabase != nullptr; }
+
 protected:
     RealDatabase* realDatabase;
     friend class RealDatabase;

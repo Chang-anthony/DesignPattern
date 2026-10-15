@@ -17,6 +17,26 @@ Employee::Employee(int id, std::string name, int age, std::vector<Employee*> sub
     this->subordinates = subordinates;
 }
 
+int Employee::getId() const
+{
+    return id;
+}
+
+std::string Employee::getName() const
+{
+    return name;
+}
+
+int Employee::getAge() const
+{
+    return age;
+}
+
+std::vector<Employee*> Employee::getSubordinates() const
+{
+    return subordinates;
+}
+
 Employee::~Employee()
 {
 }

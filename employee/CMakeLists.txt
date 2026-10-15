@@ -114,6 +114,7 @@ target_include_directories(${PROJECT_NAME}_LIB PUBLIC ${INCS} ${COMM_INCS})
 # 链接库到可执行文件
 target_link_libraries(${PROJECT_NAME} PRIVATE ${PROJECT_NAME}_LIB)
 target_link_libraries(${PROJECT_NAME} PRIVATE jsoncpp_lib)
+target_compile_definitions(${PROJECT_NAME} PRIVATE EMPLOYEE_DATA_PATH="${PROJECT_SOURCE_DIR}/data.data")
 
 # 设置单个目标的输出目录（可选，通常全局设置已经足够）
 # set_target_properties(${PROJECT_NAME} PROPERTIES
