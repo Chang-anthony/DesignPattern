@@ -51,6 +51,7 @@ private:
     std::streambuf* old;
 };
 
+// 角色由 fixture 的 Troop 擁有、決策者由 Role 擁有（D49）：各測試 new 出決策者交給 setDecider 即可
 class StateFlowTest : public ::testing::Test {
 protected:
     Troop t1{1};
@@ -87,8 +88,8 @@ TEST_F(StateFlowTest, StatesHaveChineseDisplayNames) {
 TEST_F(StateFlowTest, TurnStartsWithHeaderShowingStatsAndState) {
     Role* hero = add(t1, "英雄", 300, 500, 100);
     add(t2, "Slime1", 200, 60, 49);
-    AIAction ai;
-    hero->setDecider(&ai);
+    AIAction* ai = new AIAction();
+    hero->setDecider(ai);
 
     Lines out = turn(hero);
     ASSERT_FALSE(out.empty());
@@ -102,8 +103,8 @@ TEST_F(StateFlowTest, TurnStartsWithHeaderShowingStatsAndState) {
 TEST_F(StateFlowTest, NormalFlowPrintsMenuThenActionAndDamage) {
     Role* hero = add(t1, "英雄", 300, 500, 100);
     Role* slime = add(t2, "Slime1", 200, 60, 49, {new Fireball()});
-    AIAction ai; // seed 0 → 普通攻擊
-    slime->setDecider(&ai);
+    AIAction* ai = new AIAction(); // seed 0 → 普通攻擊
+    slime->setDecider(ai);
 
     EXPECT_EQ(turn(slime), (Lines{
         "輪到 [2]Slime1 (HP: 200, MP: 60, STR: 49, State: 正常)。",
@@ -120,8 +121,8 @@ TEST_F(StateFlowTest, ChosenActionCostsMpBeforeExecuting) {
     add(t2, "Slime1", 200, 60, 49);
     add(t2, "Slime2", 200, 200, 50);
     std::istringstream input("1\n");
-    HeroAction decider(input);
-    hero->setDecider(&decider);
+    HeroAction* decider = new HeroAction(input);
+    hero->setDecider(decider);
 
     EXPECT_EQ(turn(hero), (Lines{
         "輪到 [1]英雄 (HP: 300, MP: 500, STR: 100, State: 正常)。",
@@ -136,8 +137,8 @@ TEST_F(StateFlowTest, ChosenActionCostsMpBeforeExecuting) {
 TEST_F(StateFlowTest, InsufficientMpPrintsMessageAndAsksAgain) {
     Role* hero = add(t1, "英雄", 300, 500, 100);
     Role* slime = add(t2, "Slime1", 150, 10, 49, {new Fireball()});
-    AIAction ai(1); // seed 1 → 火球（MP 不足）→ seed 2 → 普通攻擊
-    slime->setDecider(&ai);
+    AIAction* ai = new AIAction(1); // seed 1 → 火球（MP 不足）→ seed 2 → 普通攻擊
+    slime->setDecider(ai);
 
     EXPECT_EQ(turn(slime), (Lines{
         "輪到 [2]Slime1 (HP: 150, MP: 10, STR: 49, State: 正常)。",
@@ -148,7 +149,7 @@ TEST_F(StateFlowTest, InsufficientMpPrintsMessageAndAsksAgain) {
         "[2]Slime1 對 [1]英雄 造成 49 點傷害。",
     }));
     EXPECT_EQ(slime->getMp(), 10); // 不合法的行動不扣 MP
-    EXPECT_EQ(ai.getSeed(), 3);    // 選了兩次行動；目標只有 1 位 → 自動全選不消耗 seed
+    EXPECT_EQ(ai->getSeed(), 3);    // 選了兩次行動；目標只有 1 位 → 自動全選不消耗 seed
     EXPECT_EQ(hero->getHp(), 251);
 }
 
@@ -157,8 +158,8 @@ TEST_F(StateFlowTest, HeroIsPromptedForTargetsOnlyWhenChoosing) {
     Role* s1 = add(t2, "Slime1", 200, 60, 49);
     Role* s2 = add(t2, "Slime2", 200, 200, 50);
     std::istringstream input("1\n1\n1\n");
-    HeroAction decider(input);
-    hero->setDecider(&decider);
+    HeroAction* decider = new HeroAction(input);
+    hero->setDecider(decider);
 
     EXPECT_EQ(turn(hero), (Lines{
         "輪到 [1]英雄 (HP: 300, MP: 500, STR: 100, State: 正常)。",
@@ -188,8 +189,8 @@ TEST_F(StateFlowTest, AIChoosesTargetsWithoutPrompt) {
     add(t1, "A", 500, 0, 0);
     Role* b = add(t1, "B", 500, 0, 0);
     Role* slime = add(t2, "Slime1", 200, 100, 0, {new Waterball()});
-    AIAction ai(1); // S1：seed 1 → 水球（seed 變 2）；S2：候選 (A, B)、選 1 位 → u[2 % 2] = A（seed 變 3）
-    slime->setDecider(&ai);
+    AIAction* ai = new AIAction(1); // S1：seed 1 → 水球（seed 變 2）；S2：候選 (A, B)、選 1 位 → u[2 % 2] = A（seed 變 3）
+    slime->setDecider(ai);
 
     Lines out = turn(slime);
     EXPECT_EQ(out, (Lines{
@@ -199,7 +200,7 @@ TEST_F(StateFlowTest, AIChoosesTargetsWithoutPrompt) {
         "[2]Slime1 對 [1]A 造成 120 點傷害。",
     }));
     EXPECT_EQ(b->getHp(), 500);
-    EXPECT_EQ(ai.getSeed(), 3);
+    EXPECT_EQ(ai->getSeed(), 3);
 }
 
 TEST_F(StateFlowTest, RoleWithoutDeciderCannotAct) {
@@ -216,12 +217,12 @@ TEST_F(StateFlowTest, RoleWithoutDeciderCannotAct) {
 TEST_F(StateFlowTest, PetrifiedRoleOnlyPrintsHeader) {
     Role* hero = add(t1, "英雄", 400, 99999, 30);
     Role* boss = add(t2, "BOSS", 270, 9999, 399);
-    AIAction ai;
-    boss->setDecider(&ai);
+    AIAction* ai = new AIAction();
+    boss->setDecider(ai);
     boss->setState(new PetrochemicaledState());
 
     EXPECT_EQ(turn(boss), (Lines{"輪到 [2]BOSS (HP: 270, MP: 9999, STR: 399, State: 石化)。"}));
-    EXPECT_EQ(ai.getSeed(), 0); // 沒有問決策者
+    EXPECT_EQ(ai->getSeed(), 0); // 沒有問決策者
     EXPECT_EQ(hero->getHp(), 400);
 }
 
@@ -229,20 +230,20 @@ TEST_F(StateFlowTest, PetrifiedHeroDoesNotConsumeInput) {
     Role* hero = add(t1, "英雄", 400, 99999, 30, {new Waterball()});
     add(t2, "BOSS", 270, 9999, 399);
     std::istringstream input("1\n");
-    HeroAction decider(input);
-    hero->setDecider(&decider);
+    HeroAction* decider = new HeroAction(input);
+    hero->setDecider(decider);
     hero->setState(new PetrochemicaledState());
 
     EXPECT_EQ(turn(hero).size(), 1u);
     CoutCapture mute;
-    EXPECT_EQ(decider.chooseAction(hero->getSkills())->getName(), "水球"); // 「1」這行還在
+    EXPECT_EQ(decider->chooseAction(hero->getSkills())->getName(), "水球"); // 「1」這行還在
 }
 
 TEST_F(StateFlowTest, PoisonedRoleLoses30BeforeActing) {
     Role* hero = add(t1, "英雄", 1000, 500, 0);
     Role* slime = add(t2, "Slime1", 120, 90, 50);
-    AIAction ai;
-    slime->setDecider(&ai);
+    AIAction* ai = new AIAction();
+    slime->setDecider(ai);
     slime->setState(new PoisonedState());
 
     EXPECT_EQ(turn(slime), (Lines{
@@ -258,8 +259,8 @@ TEST_F(StateFlowTest, PoisonedRoleLoses30BeforeActing) {
 TEST_F(StateFlowTest, PoisonedRoleDyingCannotAct) {
     Role* hero = add(t1, "英雄", 1000, 500, 0);
     Role* slime = add(t2, "Slime1", 30, 90, 50);
-    AIAction ai;
-    slime->setDecider(&ai);
+    AIAction* ai = new AIAction();
+    slime->setDecider(ai);
     slime->setState(new PoisonedState());
 
     EXPECT_EQ(turn(slime), (Lines{
@@ -267,15 +268,15 @@ TEST_F(StateFlowTest, PoisonedRoleDyingCannotAct) {
         "[2]Slime1 死亡。",
     }));
     EXPECT_TRUE(slime->isDead());
-    EXPECT_EQ(ai.getSeed(), 0);
+    EXPECT_EQ(ai->getSeed(), 0);
     EXPECT_EQ(hero->getHp(), 1000);
 }
 
 TEST_F(StateFlowTest, PoisonDeathTriggersObservers) {
     Role* hero = add(t1, "英雄", 300, 500, 0);
     Role* slime = add(t2, "Slime1", 30, 70, 0);
-    AIAction ai;
-    slime->setDecider(&ai);
+    AIAction* ai = new AIAction();
+    slime->setDecider(ai);
     {
         CoutCapture mute;
         Curse().attack(hero, {slime});
@@ -288,8 +289,8 @@ TEST_F(StateFlowTest, PoisonDeathTriggersObservers) {
 TEST_F(StateFlowTest, CheeredRoleUsesDefaultFlowWithBonus) {
     Role* servant = add(t1, "Servant1", 1000, 0, 0);
     Role* slime = add(t2, "Slime1", 500, 0, 0);
-    AIAction ai;
-    servant->setDecider(&ai);
+    AIAction* ai = new AIAction();
+    servant->setDecider(ai);
     servant->setState(new CheerupedState());
 
     EXPECT_EQ(turn(servant), (Lines{
@@ -309,8 +310,8 @@ TEST_F(StateFlowTest, SummonedSlimeActsWithItsOwnAI) {
     Role* hero = add(t1, "英雄", 500, 10000, 30, {new Summon()});
     Role* enemy = add(t2, "Slime1", 1000, 0, 99);
     std::istringstream input("1\n");
-    HeroAction decider(input);
-    hero->setDecider(&decider);
+    HeroAction* decider = new HeroAction(input);
+    hero->setDecider(decider);
 
     EXPECT_EQ(turn(hero), (Lines{
         "輪到 [1]英雄 (HP: 500, MP: 10000, STR: 30, State: 正常)。",
@@ -335,8 +336,8 @@ TEST_F(StateFlowTest, SelfExplosionThroughFlow) {
     Role* a = add(t2, "A", 100, 0, 0);
     Role* b = add(t2, "B", 300, 0, 0);
     std::istringstream input("1\n");
-    HeroAction decider(input);
-    hero->setDecider(&decider);
+    HeroAction* decider = new HeroAction(input);
+    hero->setDecider(decider);
 
     EXPECT_EQ(turn(hero), (Lines{
         "輪到 [1]英雄 (HP: 500, MP: 200, STR: 0, State: 正常)。",

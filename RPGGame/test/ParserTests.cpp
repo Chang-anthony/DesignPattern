@@ -64,6 +64,8 @@ TEST(ParserTest, ParsesBothTroops) {
     EXPECT_EQ(boss->getMp(), 9999);
     EXPECT_EQ(boss->getStr(), 399);
     EXPECT_EQ(skillNames(boss), (Names{"普通攻擊", "石化", "自爆"}));
+    delete setup.t1; // Client 擁有 parse 回傳的兩軍（D49）
+    delete setup.t2;
 }
 
 TEST(ParserTest, FirstRoleOfTroop1IsTheHeroAndOthersAreAI) {
@@ -80,16 +82,20 @@ TEST(ParserTest, FirstRoleOfTroop1IsTheHeroAndOthersAreAI) {
         EXPECT_NE(dynamic_cast<AIAction*>(role->getDecider()), nullptr); // 英雄以外由 AI 操控
     }
     EXPECT_NE(setup.t1->getRoles()[1]->getDecider(), setup.t2->getRoles()[0]->getDecider()); // 每人一個 AI
+    delete setup.t1; // Client 擁有 parse 回傳的兩軍（D49）
+    delete setup.t2;
 }
 
 TEST(ParserTest, StopsRightAfterTroop2SoHeroDecisionsRemain) {
     std::istringstream input(kInput);
-    RPG_parser::parse(input);
+    RPGSetup setup = RPG_parser::parse(input);
     std::string line;
     ASSERT_TRUE(std::getline(input, line));
     EXPECT_EQ(line, "1");
     ASSERT_TRUE(std::getline(input, line));
     EXPECT_EQ(line, "0, 1");
+    delete setup.t1; // Client 擁有 parse 回傳的兩軍（D49）
+    delete setup.t2;
 }
 
 TEST(ParserTest, AcceptsWindowsLineEndingsAndBlankLines) {
@@ -100,6 +106,8 @@ TEST(ParserTest, AcceptsWindowsLineEndingsAndBlankLines) {
     EXPECT_EQ(skillNames(setup.hero), (Names{"普通攻擊", "火球"}));
     EXPECT_EQ(setup.t2->getRoles()[0]->getName(), "Slime1"); // 名稱沒有殘留 '\r'
     EXPECT_EQ(setup.t2->getRoles()[0]->getStr(), 49);
+    delete setup.t1; // Client 擁有 parse 回傳的兩軍（D49）
+    delete setup.t2;
 }
 
 TEST(ParserTest, CreatesEveryRequirementSkillByChineseName) {

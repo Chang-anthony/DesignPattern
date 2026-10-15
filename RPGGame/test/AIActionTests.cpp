@@ -122,8 +122,7 @@ TEST_F(AIActionTest, NoTargetSkillSkipsSelectionWithoutUsingSeed) {
 
 TEST_F(AIActionTest, RoleUsesAIActionThroughIActionInterface) {
     Role role(100, 0, 10, "Slime", {new Poison()});
-    AIAction ai;
-    role.setDecider(&ai);
+    role.setDecider(new AIAction()); // Role 擁有決策者（D49）
 
     IAction* decider = role.getDecider();
     EXPECT_NE(dynamic_cast<BasicAttack*>(decider->chooseAction(role.getSkills())), nullptr);

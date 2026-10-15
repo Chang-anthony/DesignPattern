@@ -178,9 +178,8 @@ TEST_F(HeroActionTest, ThrowsWhenTargetCountDiffersFromM) {
 
 TEST_F(HeroActionTest, RoleCarriesHeroActionThroughIActionInterface) {
     std::istringstream input("2\n");
-    HeroAction decider(input);
     hero.setIdentity('h');
-    hero.setDecider(&decider);
+    hero.setDecider(new HeroAction(input)); // Role 擁有決策者（D49）
 
     EXPECT_TRUE(hero.isHero());
     EXPECT_EQ(hero.getDecider()->chooseAction(hero.getSkills())->getName(), "水球");

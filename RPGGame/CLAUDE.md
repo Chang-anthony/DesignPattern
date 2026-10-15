@@ -47,14 +47,14 @@
 | 區塊 | 現況 |
 |---|---|
 | `Skill/` | ✅ 保留原本的 `attack()`、`setName` / `setMp` 寫法；名稱改中文（D27）；移除 `targetEnemy` / `targetFriend` 與巨集，改為 `getCandidates()`（D29、D33）；新增 `announce()`（§7 I1）；傷害改走 `actor->getState()->doDamage()`（D16）；`costHp(actor)`：行動的 HP 代價，預設 0、自爆 = 全部 HP（D47） |
-| `OnePunchHandler/` | ✅ 移除 `next` 指標，改由 `OnePunch` 以 `vector` 注入（D21、D23）；`handle / match / doHandle` 帶入 `actor`（D22）；用 `dynamic_cast` 判斷狀態（D25） |
+| `OnePunchHandler/` | ✅ 移除 `next` 指標，改由 `OnePunch` 以 `vector` 注入（D21、D23）；`handle / match / doHandle` 帶入 `actor`（D22）；用 `dynamic_cast` 判斷狀態（D25）；`OnePunch` 擁有處理鏈，解構時釋放（D49） |
 | `Observer/` | ✅ `UntilDie(Role* dead)`（pull model，D18）；`SummonObserver` +30、`CurserObserver` + 剩餘 MP，施放者已死就不給 |
 | `State/` | ✅ `doDamage` / `damage`（D16）、受到鼓舞 +50、計時狀態回合數 3（D11）；移除 `entryState` / `exitState` 裡的除錯輸出；**`State::decision()` 是預設行動流程（S1 → S2 → S3，D10、D12）**，石化覆寫成整段跳過、中毒覆寫成先扣 30 再沿用預設流程；各狀態持有中文名稱 `getDisplayName()`（§7.6）；`damage()` 改為 protected，`decision()` 在施放後支付 `Skill::costHp()`（D47） |
-| `Role/` | ✅ `lossHp()`：歸零當下印死亡並通知觀察者（D17）；建立時自動加入普通攻擊（D28）；`getDisplayName()`；`checkMp(Skill*)` 只檢查（D9，取代 `checkActionLossMp`）；`endThisRound()`（D11）；`takeTurn(t1, t2, actorSide)` 交給 `state->decision(...)`（D10）；決策者 `setDecider / getDecider`（D4）；英雄識別 `setIdentity / isHero`（D6）；✅ `Hero` / `AI` 子類別已刪除（D4）；`NonHero` 已刪除、`Slime` 直接繼承 `Role`（D43）並以 `Slime()` 持有需求數值（D44）；`lossHp()` 改為 private、只開放給 `State`（D47） |
+| `Role/` | ✅ `lossHp()`：歸零當下印死亡並通知觀察者（D17）；建立時自動加入普通攻擊（D28）；`getDisplayName()`；`checkMp(Skill*)` 只檢查（D9，取代 `checkActionLossMp`）；`endThisRound()`（D11）；`takeTurn(t1, t2, actorSide)` 交給 `state->decision(...)`（D10）；決策者 `setDecider / getDecider`（D4）；英雄識別 `setIdentity / isHero`（D6）；✅ `Hero` / `AI` 子類別已刪除（D4）；`NonHero` 已刪除、`Slime` 直接繼承 `Role`（D43）並以 `Slime()` 持有需求數值（D44）；`lossHp()` 改為 private、只開放給 `State`（D47）；解構時也釋放觀察者與決策者，`setDecider` 換掉時釋放舊的、禁止複製（D49） |
 | `IAction` / `AIAction` / `HeroAction` | ✅ `IAction`：`chooseAction(skills)`、`chooseTargets(candidates, m)`（D4、D5、D7、D8）；`AIAction`：seed 規則（§7.2 I5）；`HeroAction`：從注入的 `istream` 讀英雄決策（D37，§7.5） |
-| `Game/` | ✅ `Troop` 新增軍隊編號（輸出前綴）；`Battle::startBattle()` 回合迴圈（D1、D11、D20、D30、D31）、`isHeroAlive()`；`RPG::GameStart()` 啟動戰鬥並印勝負（§7.2 I9）；`RPG::makeAction()`、`Troop::StartBattle()` 已刪除（D42） |
-| Client | ✅ `test/libary/RPG_parser`：解析輸入、技能建造函式（D26、D36，§7.2 I10）；`main.cpp`：讀測資 / `--play` 實際玩 / 標準輸入三種用法（§7.2 I11） |
-| 測試 | ✅ `ExampleTests.cpp` 11、`SkillTests.cpp` 45、`RoleTests.cpp` 22、`AIActionTests.cpp` 11、`HeroActionTests.cpp` 15、`StateFlowTests.cpp` 16、`BattleTests.cpp` 10、`ParserTests.cpp` 8、`TestcaseReplayTests.cpp` 11（`testcases/` 10 組用正式的 parser + RPG 整場比對，加上測資清單檢查），共 149 個全部通過；主程式 `RPGGAME <測資.in>` 的輸出也與 10 組 `.out` 完全相同。每個測試的流程與通過標準見 [`test/TESTS.md`](test/TESTS.md) |
+| `Game/` | ✅ `Troop` 新增軍隊編號（輸出前綴）；`Battle::startBattle()` 回合迴圈（D1、D11、D20、D30、D31）、`isHeroAlive()`；`RPG::GameStart()` 啟動戰鬥並印勝負（§7.2 I9）；`RPG::makeAction()`、`Troop::StartBattle()` 已刪除（D42）；`Troop` 擁有角色（含召喚的史萊姆），解構時釋放、禁止複製（D49） |
+| Client | ✅ `test/libary/RPG_parser`：解析輸入、技能建造函式（D26、D36，§7.2 I10）；`main.cpp`：讀測資 / `--play` 實際玩 / 標準輸入三種用法（§7.2 I11）；Client 擁有並釋放兩支 `Troop`，英雄的 `HeroAction` 以 `new` 交給 Role；parser 格式錯誤時自行釋放已建立的物件（D49） |
+| 測試 | ✅ `ExampleTests.cpp` 11、`SkillTests.cpp` 46、`RoleTests.cpp` 25、`AIActionTests.cpp` 11、`HeroActionTests.cpp` 15、`StateFlowTests.cpp` 16、`BattleTests.cpp` 10、`ParserTests.cpp` 8、`TestcaseReplayTests.cpp` 11（`testcases/` 10 組用正式的 parser + RPG 整場比對，加上測資清單檢查），共 153 個全部通過；主程式 `RPGGAME <測資.in>` 的輸出也與 10 組 `.out` 完全相同。每個測試的流程與通過標準見 [`test/TESTS.md`](test/TESTS.md) |
 
 ---
 
@@ -71,8 +71,8 @@
 - ✅ A11 已結案（決策 D35–D39）。**必要問題 A1–A11 全部結案，架構設計完成。**
 - ✅ 2026-10-13 進入實作：技能周邊 + 單元測試完成（§7）。
 - ✅ 2026-10-14：全部實作完成，10 組測資整場輸出與 `.out` 一致（§7.7）。
-- ✅ 2026-10-15：開放問題 O2–O5 結案（D42–D48）。
-- ⏸ **下一步**：開放問題 O1、O6 視時間討論。
+- ✅ 2026-10-15：開放問題 O2–O5 結案（D42–D48）；O1 結案（D49）。
+- ⏸ **下一步**：開放問題 O6 視時間討論。
 
 ### 收尾建議順序
 主流程是骨架，其他問題都掛在它上面，所以建議依序：
@@ -152,7 +152,7 @@
 
 ### 4.2 開放問題（超出需求，可聊可不改）
 
-- **O1. 物件擁有權**：全用裸指標，召喚的 `Slime` 由誰釋放沒有定義。要不要用 `std::unique_ptr` 表達擁有權？（需求未要求）
+- **O1. 物件擁有權** ✅ 結案（D49）：擁有權順著「誰裝著誰」：Client 擁有兩支 `Troop` → `Troop` 擁有角色 → `Role` 擁有狀態、技能、觀察者、決策者 → `OnePunch` 擁有處理鏈；以裸指標 + 解構子 `delete` 實作，不用 `std::unique_ptr`。
 - **O2. `Troop` 與 `Battle` 的責任** ✅ 結案（D42、D45）：`Troop::StartBattle()` 已刪除（`Troop` 不再認識 `Battle`）；`Battle` 的成員改名為陣營 `heroTroop` / `opponentTroop`。
 - **O3. 命名與詞彙表** ✅ 結案（D46）：維持 `Skill` / `attack()` 命名，`attack` 意指「施放行動」，已在 `Skill.hpp` 註明。
 - **O4. 防止技能繞過傷害通道** ✅ 結案（D47）：`lossHp` private、`damage` protected，技能只能用 `doDamage`；自爆的自殺改為 `costHp()` 由流程支付；`RoleTests` 以 static_assert 在編譯期檢查。
@@ -211,6 +211,7 @@
 | D46 | 2026-10-14 | O3 | **維持 `Skill` / `attack()` 的命名**：`Skill` 是所有行動（含普通攻擊）的抽象，`attack(actor, targets)` 的意思是「施放這個行動」，不限於造成傷害。只在 `Skill.hpp` 的宣告加上註解說明，不改名。 | Anthony 認為這不是問題：`Skill` 只是用來抽象描述技能，`attack` 當成施放。改名（例如 `cast` / `perform`）要動 11 個技能、測試與文件，換來的只是用詞更貼近詞彙表 |
 | D47 | 2026-10-14 | O4 | **技能造成傷害只能走 `doDamage`，由編譯器強制**：`Role::lossHp` 改為 private（`friend class State`）、`State::damage` 改為 protected；中毒改呼叫自己的 `damage(30)`。**自爆的自殺改視為技能的「HP 代價」**：`Skill` 新增 `virtual int costHp(Role* actor) const`（預設 0），`SelfExplosion` 回傳全部 HP；`State::decision()` 在 `attack()` 之後支付（不印傷害訊息，死亡訊息自然排在所有目標之後，D34）。 | Anthony 要求技能的寫法統一、不要多一個 `die()` 入口；自殺與 MP 一樣是施放的代價，由流程支付。代價：`Skill` 多一個 virtual；直接呼叫 `attack()` 的自爆測試改成經過流程 |
 | D48 | 2026-10-15 | O5 | **技能名稱維持兩處定義，不改**：輸入名稱留在 Client 的 `RPG_parser::createSkill`（D26），輸出名稱留在各技能的建構子（D27）。 | Anthony 認為不是大問題：兩邊不一致時 PA-05 會失敗；日後若有其他需求（例如技能種類變多、名稱可設定）再補 factory mapping。已排除（目前）：名稱只寫一次的註冊機制 |
+| D49 | 2026-10-15 | O1 | **擁有權順著「誰裝著誰」**：Client（`main` / 測試）擁有兩支 `Troop`；`Troop` 擁有加入的角色（含召喚加入的史萊姆），解構時釋放，`removeRole` 交回呼叫端；`Role` 擁有狀態、技能、觀察者與**決策者**，`setDecider` 換掉時釋放舊的；`OnePunch` 擁有注入的處理鏈。英雄的 `HeroAction` 改由 `main` 以 `new` 交給 Role。**以裸指標 + 解構子 `delete` 實作，不用 `std::unique_ptr`**。 | Anthony：結束時由 Troop 自動釋放角色，Role 釋放自己持有的；決策者也歸 Role 擁有（若改由 Client 擁有，召喚途中產生的 `AIAction` 沒人知道要釋放）。`unique_ptr` 主要是讓型別保護記憶體，但需求沒有要求，用 `delete` 改動最小。已排除（目前）：`std::unique_ptr`、決策者由 Client 擁有 |
 
 ---
 
@@ -252,6 +253,7 @@ cd test && ./run_tests.sh                        # Windows: run_tests.bat
 | I9 | **勝負由 `RPG` 印**：`Battle::startBattle()` 跑到結束，`RPG::GameStart()` 再依 `Battle::isHeroAlive()` 印「你獲勝了！」或「你失敗了！」。`Battle` 在 `startBattle()` 開始時從兩軍找出 identity 為 `'h'` 的英雄，找不到就丟例外。 | D1「Battle 判斷是否結束並把結果回報給 RPG」；保留原本 `void startBattle()` 的簽名，用查詢函式回報結果 |
 | I10 | **Parser 介面 `RPG_parser::parse(std::istream&)`**：讀到 `#軍隊-2-結束` 就停，串流剩下的就是英雄決策；T1 第一位 `setIdentity('h')`，其他角色 `setDecider(new AIAction())`；**英雄的決策者由呼叫端設定**。技能建造函式 `RPG_parser::createSkill(name)` 也在這裡。放在 `test/libary`（D36），以 `__RPG_CLIENT_SRCS` 編進 `RPGGAME_LIB`，主程式與測試共用。 | 用串流而不是檔名（BigTwo 的做法），讀測資時同一個檔案串流可直接交給 `HeroAction`（D37）；`--play` 時改交 `std::cin`。不放進 `__TEST_UTILS__SRCS`，因為 `SimpleTest_LIB` 看不到模組的標頭檔 |
 | I11 | **`main.cpp` 三種用法**：`RPGGAME <測資.in>`（軍隊與決策都來自檔案）、`RPGGAME --play <測資.in>`（軍隊來自檔案、決策由鍵盤輸入）、`RPGGAME`（都從標準輸入，可 `< 測資.in`）；錯誤（檔案打不開、格式錯誤、未知技能、決策用完）印到 stderr 並回傳 1。原本結尾的 `std::system("pause")` 拿掉。 | 讀測資模式的輸出必須和 `.out` 完全相同，不能多印；`pause` 會讓 exe 一直執行，造成之前 build 時 `RPGGAME.exe: Permission denied` |
+| I12 | **`Role`、`Troop` 禁止複製**（複製建構與複製指定都 `= delete`）。 | D49 之後兩者都用裸指標擁有物件，若被複製，兩份解構子會重複 `delete`；目前沒有任何地方需要複製。RL-23 以 `static_assert` 檢查 |
 
 ### 7.3 2026-10-14：Role 與 Observer
 - **Observer**：7.1 已完成（`UntilDie(Role* dead)`、召喚 +30、詛咒 + 剩餘 MP、施放者已死不給）；本次只補測試（通知順序、只通知一次、移除後不通知、獎勵在死亡訊息之後）。
@@ -317,3 +319,13 @@ cd test && ./run_tests.sh                        # Windows: run_tests.bat
   - 測試：直接呼叫 `lossHp` 的 13 處改走 `doDamage`（`RoleTests` 用 fixture 的 `hurt()`）或完整流程（`SkillTests` 新增 `castThroughFlow()`）；`ExampleTests` 的 `SelfExplosionTest` 改為檢查 `attack()` 不扣施放者 HP、`costHp()` = 500；新增 `SelfExplosionCostsAllHpButAttackItselfDoesNotKill`、`OnlySelfExplosionCostsHp`、`DoDamageIsTheOnlyPublicWayToReduceHp`（用 C++20 concept + static_assert 在編譯期確認 `lossHp` / `damage` 不公開）。共 149 個通過，10 組測資整場輸出不變。
   - 刻意改壞：不支付 HP 代價、在施放前支付、預設代價改成全部 HP → 測試失敗；把 `lossHp` 或 `damage` 改回 public → **編譯失敗**（static_assert 訊息直接指出原因）。
 - **O5（D48）**：不改程式；維持兩處名稱定義，由 PA-05 檢查一致。
+
+### 7.9 2026-10-15：開放問題 O1（D49）
+- **程式**：
+  - `Troop::~Troop()` 釋放所有角色；`Role::~Role()` 另外釋放觀察者與決策者；`Role::setDecider()` 換掉不同的決策者時釋放舊的（設成同一個不釋放）；`OnePunch::~OnePunch()` 釋放處理鏈。
+  - `Role`、`Troop` 加上 `= delete` 的複製建構 / 複製指定（§7.2 I12）。
+  - `main.cpp`：英雄改為 `setDecider(new HeroAction(heroInput))`；戰鬥結束（或丟例外）後 `delete` 兩支 `Troop`。
+  - `RPG_parser`：角色建立後**先**加入 `Troop` 再加技能；格式錯誤時 `delete` 已建立的兩支 `Troop` 再丟例外（呼叫端拿不到 setup，只能由 parser 釋放）。
+- **測試**：原本把 stack 上的決策者交給 `setDecider(&x)` 的地方都改成 `new`（`StateFlowTests` 全部、`AIActionTests` AI-10、`HeroActionTests` HA-12、`RoleTests` RL-05、`BattleTests` / `SkillTests` 的 fixture、`TestcaseReplayTests`）；`ParserTests` 與 `TestcaseReplayTests` 用完 `delete` 兩支 `Troop`；RL-03、RL-12 自己 `delete` 被移除的角色 / 觀察者。新增 RL-23–25、SK-46，共 153 個通過，10 組測資整場輸出不變。
+- **記憶體檢查**：AddressSanitizer 建置下，`RPGGAME` 三種用法 × 10 組、未知技能、決策行不足都沒有洩漏或重複釋放（修改前 summon 一組就洩漏 63 個配置）；單元測試只剩 Anthony 原本的 `ExampleTests.cpp` 自己 `new` 而沒有釋放的物件（保留原樣）。
+- **刻意改壞**：Troop 不刪角色 → RL-23；Role 不刪決策者 / 觀察者 → RL-24；設成同一個決策者也刪 → RL-25（ASan 下 heap-use-after-free）；OnePunch 不刪處理鏈 → SK-46。

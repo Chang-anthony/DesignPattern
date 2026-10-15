@@ -43,12 +43,20 @@ void printUsage(const std::string& program) {
 // troopInput：軍隊定義的來源；heroInput：英雄決策的來源（D37）。兩者可以是同一個串流。
 int play(std::istream& troopInput, std::istream& heroInput) {
     RPGSetup setup = RPG_parser::parse(troopInput);
-    HeroAction heroDecider(heroInput);
-    setup.hero->setDecider(&heroDecider);
+    setup.hero->setDecider(new HeroAction(heroInput)); // 決策者交給英雄，由 Role 釋放（D49）
 
     RPG rpg;
-    rpg.GameStart(setup.t1, setup.t2);
+    try {
+        rpg.GameStart(setup.t1, setup.t2);
+    } catch (...) {
+        rpg.GameEnd();
+        delete setup.t1; // Client 擁有兩軍；角色由 Troop 一併釋放（D49）
+        delete setup.t2;
+        throw;
+    }
     rpg.GameEnd();
+    delete setup.t1;
+    delete setup.t2;
     return 0;
 }
 

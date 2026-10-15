@@ -4,7 +4,7 @@
 
 - 需求：[`../need/need.md`](../need/need.md)　設計決策 D1–D40 與實作紀錄：[`../CLAUDE.md`](../CLAUDE.md)　圖：[`../diagrams.md`](../diagrams.md)
 - 測試框架：GoogleTest（`TEST` / `TEST_F`），C++20
-- 最後更新：2026-10-14（加入 Battle、RPG、parser、main.cpp），共 **149** 個測試，全部通過；主程式的手動驗證見 §11
+- 最後更新：2026-10-15（O1 物件擁有權，D49），共 **153** 個測試，全部通過；主程式的手動驗證見 §11
 
 ---
 
@@ -33,7 +33,7 @@ cmake --build build                 # Windows (MinGW)：build 完會自動執行
 
 | 項目 | 標準 |
 |---|---|
-| 結果 | 最後一行為 `[  PASSED  ] 149 tests.`，沒有任何 `[  FAILED  ]` |
+| 結果 | 最後一行為 `[  PASSED  ] 153 tests.`，沒有任何 `[  FAILED  ]` |
 | 程式結束 | 測試程式正常結束（沒有 crash / segmentation fault）；crash 視同失敗 |
 | 新增測試檔 | `test/CMakeLists.txt` 以 `file(GLOB … CONFIGURE_DEPENDS *.cpp)` 收集，新增 / 刪除 `test/*.cpp` 後直接 build 即可，不必修改 CMake |
 | 單一測試 | 該測試內**所有** `EXPECT_*` / `ASSERT_*` 都成立；`ASSERT_*` 失敗會立即中止該測試（後續檢查不執行） |
@@ -43,15 +43,15 @@ cmake --build build                 # Windows (MinGW)：build 完會自動執行
 | 編號 | 檔案 | Test suite | 數量 | 測試對象 |
 |---|---|---|---|---|
 | EX | `ExampleTests.cpp` | `SkillTest` | 11 | Anthony 原本的技能測試（只檢查 HP / MP / 狀態，不檢查輸出） |
-| SK | `SkillTests.cpp` | `SkillBehaviorTest` | 45 | 技能：名稱、MP、候選、輸出訊息、傷害、狀態、召喚、詛咒、一拳攻擊 |
-| RL | `RoleTests.cpp` | `RoleTest` | 22 | `Role`：屬性、軍隊、MP、HP 與死亡、觀察者、狀態與回合倒數 |
+| SK | `SkillTests.cpp` | `SkillBehaviorTest` | 46 | 技能：名稱、MP、候選、輸出訊息、傷害、狀態、召喚、詛咒、一拳攻擊 |
+| RL | `RoleTests.cpp` | `RoleTest` | 25 | `Role`：屬性、軍隊、MP、HP 與死亡、觀察者、狀態與回合倒數、擁有權（D49） |
 | AI | `AIActionTests.cpp` | `AIActionTest` | 11 | `AIAction`：seed 規則（S1、S2、自動全選） |
 | HA | `HeroActionTests.cpp` | `HeroActionTest` | 15 | `HeroAction`：從輸入讀英雄決策（S1、S2、提示、格式容錯、錯誤處理） |
 | ST | `StateFlowTests.cpp` | `StateFlowTest` | 16 | `State::decision()` 行動流程、「輪到 …」、石化 / 中毒 / 鼓舞 |
 | RP | `TestcaseReplayTests.cpp` | `AllTestcases/TestcaseReplayTest`、`TestcaseListTest` | 11 | `testcases/` 10 組用正式 parser + RPG 整場比對、測資清單檢查 |
 | PA | `ParserTests.cpp` | `ParserTest` | 8 | Client 端 `RPG_parser`：解析輸入、技能建造函式、錯誤處理 |
 | BT | `BattleTests.cpp` | `BattleTest` | 10 | `Battle` 回合迴圈、結束條件、`RPG` 宣布勝負 |
-| | | **合計** | **149** | |
+| | | **合計** | **153** | |
 
 ### 1.4 測試共用的工具與慣例
 
@@ -60,13 +60,15 @@ cmake --build build                 # Windows (MinGW)：build 完會自動執行
 | `CoutCapture` | SK、RL | 建構時用 `std::cout.rdbuf()` 把輸出導向字串，解構時還原（D38）；`lines()` 依換行切成 `vector<string>`，用來**逐行比對**輸出 |
 | `SkillBehaviorTest` / `RoleTest` fixture | SK、RL | 內含 `Troop t1{1}`、`Troop t2{2}`；`add(troop, name, hp, mp, str)` 建立角色並加入軍隊，所以輸出名稱會帶 `[1]` / `[2]` 前綴 |
 | `run(skill, actor, targets)` | SK | 直接呼叫 `skill.attack(actor, targets)` 並回傳輸出行；**不經過 State 流程，所以不扣 MP、不印行動訊息、不付 HP 代價** |
-| `castThroughFlow(actor, index)` | SK | 用 fixture 的 `HeroAction`（輸入 `index`）讓 actor 經過完整的 `takeTurn` 施放第 index 個行動：扣 MP、施放、支付 HP 代價（D47）；回傳完整輸出 |
+| `castThroughFlow(actor, index)` | SK | 每次 `new` 一個讀 fixture 輸入（`index`）的 `HeroAction` 交給 actor（Role 擁有，換掉的舊決策者由 Role 釋放，D49），讓 actor 經過完整的 `takeTurn` 施放第 index 個行動：扣 MP、施放、支付 HP 代價（D47）；回傳完整輸出 |
 | `RoleTest::hurt(target, n)` | RL | 由 fixture 的 `attacker`（不在軍隊，名稱 `Attacker`）呼叫 `getState()->doDamage(target, n)`；`lossHp` 不公開後（D47），測試也走正規傷害通道，會多印一行「Attacker 對 … 造成 n 點傷害。」 |
 | `alive1()` / `alive2()` | SK | 模擬 Battle 交給技能的 T1、T2 名單（D30、D31） |
 | `requirementChain()` | SK | 依需求順序組好的一拳處理鏈：`HpHandler → PoisonPetrochemicalHandler → CheerupHandler → NormalHandler`（D21） |
 | `RecordingState` | RL | 只記錄 `decision()` 被呼叫的次數與參數，用來確認 `Role::takeTurn` 有交給狀態（D10） |
 | `RecordingObserver` | RL | 被通知時把「標籤:死者名稱」記到 log，用來確認通知順序與次數（D18） |
 | `DummyAction` | RL | 最簡單的 `IAction`：永遠選第一個行動、回傳全部候選 |
+| `TrackedAction` / `TrackedObserver` / `TrackedRole` | RL | 解構時把旗標設為 `true`，用來確認誰釋放了誰（D49） |
+| `TrackedHandler` | SK | 解構時計數 +1，用來確認 `OnePunch` 釋放處理鏈（D49） |
 | `std::istringstream` | HA | 模擬英雄的輸入（D37：`HeroAction` 注入 `std::istream&`） |
 | `namesOf(roles)` | AI、HA | 把 `vector<Role*>` 轉成名字清單，方便比對 |
 | `HeroActionTest::mute` | HA | fixture 成員 `CoutCapture`：把 `chooseTargets` 印的提示靜音；要檢查提示的測試在裡面再開一個 `CoutCapture`（巢狀導向，結束時還原到外層） |
@@ -200,7 +202,7 @@ Anthony 原本寫的技能測試。每個測試都直接呼叫 `skill->attack(ac
 
 ---
 
-## 3. SK — `SkillTests.cpp`（`SkillBehaviorTest`，45 個）
+## 3. SK — `SkillTests.cpp`（`SkillBehaviorTest`，46 個）
 
 技能的行為與**輸出文字**。角色用 fixture 的 `add(t1/t2, …)` 建立，所以名稱帶 `[1]` / `[2]` 前綴。`run(skill, actor, targets)` 直接呼叫 `attack()` 並收集輸出（不經過 State 流程：不扣 MP、不印行動訊息）。
 
@@ -576,9 +578,18 @@ Anthony 原本寫的技能測試。每個測試都直接呼叫 `skill->attack(ac
   2. 打 Slime → `["[1]英雄 對 [2]Slime 造成 300 點傷害。"]`（新規則不成立，往下到規則 1）
 - **通過標準**：兩行都相符。
 
+#### SK-46 `OnePunchReleasesItsHandlers`（2026-10-15 新增）
+- **目的**：`OnePunch` 擁有 Client 注入的處理鏈，解構時一併釋放。
+- **依據**：D49（O1）。
+- **準備**：兩個 `TrackedHandler`（解構時計數 +1）。
+- **步驟與預期**：
+  1. 在區塊內建立 `OnePunch punch({h1, h2})` → 計數 `0`
+  2. 離開區塊（`punch` 解構）→ 計數 `2`
+- **通過標準**：兩個 handler 都被釋放，且只釋放一次。
+
 ---
 
-## 4. RL — `RoleTests.cpp`（`RoleTest`，22 個）
+## 4. RL — `RoleTests.cpp`（`RoleTest`，25 個）
 
 `Role` 本身的責任：屬性、所屬軍隊、MP 檢查、HP 與死亡、觀察者、狀態與回合倒數。
 
@@ -606,6 +617,7 @@ Anthony 原本寫的技能測試。每個測試都直接呼叫 `skill->attack(ac
   2. → `t1.getRoles() == {英雄}`
   3. → `Ally->getTroop() == nullptr`、`Ally->getDisplayName() == "Ally"`（沒有前綴）
   4. → `英雄->getTroop()` 仍為 `&t1`
+  5. 測試最後 `delete Ally`：移出軍隊後擁有權交回呼叫端（D49）
 - **通過標準**：移除成功且只影響被移除的角色。
 
 ### 4.2 英雄識別（D6）與決策者（D4）
@@ -620,7 +632,7 @@ Anthony 原本寫的技能測試。每個測試都直接呼叫 `skill->attack(ac
 #### RL-05 `HoldsItsDecider`
 - **步驟與預期**：
   1. 新角色 → `getDecider() == nullptr`
-  2. `setDecider(&DummyAction)` → `getDecider()` 回傳同一個物件
+  2. `setDecider(new DummyAction)` → `getDecider()` 回傳同一個物件（之後由 Role 釋放，D49）
   3. `setDecider(nullptr)` → 丟出 `std::invalid_argument`
 - **通過標準**：三點都成立。
 
@@ -669,7 +681,7 @@ Anthony 原本寫的技能測試。每個測試都直接呼叫 `skill->attack(ac
 - **通過標準**：依加入順序、各只通知一次、收到的是死者本身（pull model）。
 
 #### RL-12 `RemovedObserverIsNotNotified`
-- **步驟與預期**：加入觀察者後 `removeObserver` → `getObservers()` 為空；T 死亡 → log 為空
+- **步驟與預期**：加入觀察者後 `removeObserver` → `getObservers()` 為空；T 死亡 → log 為空；移除後擁有權交回呼叫端，測試自己 `delete`（D49）
 - **通過標準**：移除後不會被通知。
 
 #### RL-13 `ObserverRewardsAreAppliedAfterDeathMessage`
@@ -745,6 +757,36 @@ Anthony 原本寫的技能測試。每個測試都直接呼叫 `skill->attack(ac
   3. `State::doDamage` → 呼叫得到
 - **通過標準**：**能編譯**就代表通過（執行時只有 `SUCCEED()`）。若有人把 `lossHp` 或 `damage` 改回 public，整個測試程式會編譯失敗，錯誤訊息是 `Role::lossHp must not be public` / `State::damage must not be public`。
 
+### 4.7 擁有權（D49）
+
+規則：Client（`main` / 測試）擁有兩支 `Troop` → `Troop` 擁有角色 → `Role` 擁有狀態、技能、觀察者、決策者 → `OnePunch` 擁有處理鏈（SK-46）。
+
+#### RL-23 `TroopReleasesItsRolesButNotRemovedOnes`（2026-10-15 新增）
+- **目的**：`Troop` 解構時釋放仍在軍隊裡的角色；被 `removeRole` 的角色不釋放。`Role`、`Troop` 不能複製。
+- **依據**：D49。
+- **準備**：`TrackedRole` Kept、Removed（解構時把各自的旗標設為 `true`）。
+- **步驟與預期**：
+  1. `static_assert`：`Troop`、`Role` 都不可複製建構、不可複製指定（不成立就**編譯失敗**）
+  2. 在區塊內建立 `Troop troop(1)`，加入 Kept、Removed，再 `removeRole(Removed)`
+  3. 離開區塊 → Kept 已釋放、Removed **沒有**被釋放
+  4. 測試自己 `delete Removed` → Removed 已釋放
+- **通過標準**：四點都成立。
+
+#### RL-24 `RoleReleasesItsObserversAndDecider`（2026-10-15 新增）
+- **目的**：`Role` 解構時釋放自己的觀察者與決策者（狀態、技能原本就會釋放）。
+- **依據**：D49。
+- **準備**：在區塊內建立 `Role role`，`addObserver(new TrackedObserver)`、`setDecider(new TrackedAction)`。
+- **步驟與預期**：離開區塊 → 觀察者、決策者的旗標都是 `true`
+- **通過標準**：兩個都被釋放。
+
+#### RL-25 `ReplacingDeciderReleasesOnlyTheOldOne`（2026-10-15 新增）
+- **目的**：換決策者時釋放舊的；設成同一個不能釋放自己。
+- **依據**：D49。
+- **步驟與預期**：
+  1. `setDecider(first)` 兩次 → first **沒有**被釋放、`getDecider() == first`
+  2. `setDecider(second)` → first 已釋放、second 沒有
+- **通過標準**：兩步都成立（若「設成同一個」也釋放，first 的旗標會變成 `true`，在 ASan 建置下還會出現 heap-use-after-free）。
+
 ---
 
 ## 5. AI — `AIActionTests.cpp`（`AIActionTest`，11 個）
@@ -807,7 +849,7 @@ Anthony 原本寫的技能測試。每個測試都直接呼叫 `skill->attack(ac
 - **通過標準**：m = 0（召喚、自我治療）不消耗 seed。
 
 #### AI-10 `RoleUsesAIActionThroughIActionInterface`
-- **準備**：角色有普通攻擊、下毒；`setDecider(&ai)`。
+- **準備**：角色有普通攻擊、下毒；`setDecider(new AIAction())`（Role 擁有，D49）。
 - **步驟與預期**：透過 `role.getDecider()`（型別 `IAction*`）呼叫 `chooseAction` 兩次 → 第一次是 `BasicAttack`、第二次是「下毒」
 - **通過標準**：Role 只認得 `IAction` 介面也能使用 AI。
 
@@ -914,7 +956,7 @@ Anthony 原本寫的技能測試。每個測試都直接呼叫 `skill->attack(ac
 ### 6.5 與 Role 搭配與測資重現
 
 #### HA-12 `RoleCarriesHeroActionThroughIActionInterface`
-- **步驟與預期**：英雄 `setIdentity('h')`、`setDecider(&heroAction)`，輸入 `"2\n"` → `isHero()` 為真；`getDecider()->chooseAction(...)` 為「水球」
+- **步驟與預期**：英雄 `setIdentity('h')`、`setDecider(new HeroAction(input))`（Role 擁有，D49），輸入 `"2\n"` → `isHero()` 為真；`getDecider()->chooseAction(...)` 為「水球」
 - **通過標準**：英雄透過 `IAction` 介面使用 `HeroAction`（D4、D6）。
 
 #### HA-13 `ReplaysHeroFromWaterballAndFireballTestcase`
@@ -1087,8 +1129,9 @@ X 對 a 造成 N 點傷害。 [a 死亡。] …                  ← attack
 ```
 ifstream in("testcases/<名稱>.in")
 RPGSetup setup = RPG_parser::parse(in)        // 讀兩軍，串流停在第一行英雄決策
-setup.hero->setDecider(new HeroAction(in))   // 同一個串流：剩下的行就是英雄決策
+setup.hero->setDecider(new HeroAction(in))   // 同一個串流：剩下的行就是英雄決策；由 Role 釋放（D49）
 RPG rpg; rpg.GameStart(t1, t2); rpg.GameEnd() // 在 CoutCapture 內，收集所有輸出（含「你獲勝了！」）
+delete setup.t1; delete setup.t2               // Client 擁有兩軍，角色由 Troop 一併釋放（D49）
 ```
 
 ### 8.1 每一組的流程與通過標準
@@ -1288,6 +1331,16 @@ Get-ChildItem testcases\*.in | ForEach-Object {
 | 檔案不存在 | stderr「錯誤：無法開啟檔案 …」、回傳 1 | ✅ |
 | 未知技能 | stderr「錯誤：RPG_parser: unknown skill …」、回傳 1 | ✅ |
 | 參數錯誤 / `--help` | 印用法；參數錯誤回傳 1、`--help` 回傳 0 | ✅ |
+| 記憶體（D49）：AddressSanitizer 建置，上面三種模式 × 10 組，加上未知技能、決策行不足 | 沒有任何 `AddressSanitizer` / `LeakSanitizer` 訊息（無洩漏、無重複釋放） | ✅（2026-10-15） |
+
+AddressSanitizer 建置（Linux / WSL，gcc 或 clang）：
+
+```bash
+cmake -S . -B build-asan -DCMAKE_BUILD_TYPE=Debug \
+  -DCMAKE_CXX_FLAGS="-fsanitize=address -fno-omit-frame-pointer" -DCMAKE_EXE_LINKER_FLAGS="-fsanitize=address"
+cmake --build build-asan
+./build-asan/bin/RPGGAME testcases/summon.in > /dev/null   # stderr 沒有輸出 = 通過
+```
 
 ---
 
@@ -1350,8 +1403,13 @@ Get-ChildItem testcases\*.in | ForEach-Object {
 | `Skill::costHp` 預設改成全部 HP | SK-45、BT（6 個）、ST（8 個）、RP（9 組） |
 | `Role::lossHp` 改回 public | RL-22（**編譯失敗**：`Role::lossHp must not be public`） |
 | `State::damage` 改回 public | RL-22（**編譯失敗**：`State::damage must not be public`） |
+| `Troop` 解構時不釋放角色 | RL-23 |
+| `Role` 解構時不釋放決策者 | RL-24 |
+| `Role` 解構時不釋放觀察者 | RL-24 |
+| `setDecider` 設成同一個決策者也釋放 | RL-25（ASan 建置下為 heap-use-after-free） |
+| `OnePunch` 解構時不釋放處理鏈 | SK-46 |
 
-> 最後一次全部重跑：2026-10-14，上表每一列都至少有一個測試失敗；還原後 149 個全部通過。
+> 最後一次全部重跑：2026-10-15，上表每一列都至少有一個測試失敗；還原後 153 個全部通過。
 
 ---
 
@@ -1361,4 +1419,4 @@ Get-ChildItem testcases\*.in | ForEach-Object {
 |---|---|
 | `main.cpp` 的單元測試 | 只負責把 parser、`HeroAction`、`RPG` 接起來，這條路已由 RP 覆蓋；執行檔本身用 §11 手動驗證 |
 | Windows 主控台以鍵盤輸入中文（不帶參數、軍隊從鍵盤輸入） | 已設定 `SetConsoleCP(CP_UTF8)`，但各版本 Windows 主控台的行為不同，沒有自動測試；建議用 `--play <測資.in>`（軍隊從檔案讀，只需要輸入數字） |
-| 物件釋放（記憶體） | 角色、技能、決策者大多以裸指標建立，沒有統一釋放（開放問題 O1），測試不檢查記憶體洩漏 |
+| 物件釋放（記憶體） | 擁有權已定義（D49），RL-23–25、SK-46 檢查「誰釋放誰」；有沒有洩漏不在單元測試裡判斷，改用 AddressSanitizer 手動檢查（§11.2）。Anthony 原本的 `ExampleTests.cpp` 直接 `new` 技能與軍隊而沒有釋放，在 ASan 下會回報測試本身的洩漏（保留原樣，不影響主程式） |

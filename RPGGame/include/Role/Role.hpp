@@ -10,6 +10,7 @@ class Skill; // Forward declaration
 class Troop;
 class IAction;
 
+// 擁有權（D49）：Role 擁有自己的狀態、技能、觀察者與決策者，解構時一併釋放
 class Role {
 private:
     int hp;
@@ -17,16 +18,18 @@ private:
     int str;
     std::string name;
     char identity; // 'h' = 英雄（D6），其他角色為 ' '
-    State* state; // One-to-one association with State
-    std::vector<Skill*> skills;
-    std::vector<SkillObserver*> observers; // Association with SkillObserver
-    Troop* troop; // Association with Troop
-    IAction* decider; // 決策者：英雄讀輸入、AI 依 seed（D4）
+    State* state; // One-to-one association with State（擁有）
+    std::vector<Skill*> skills; // 擁有
+    std::vector<SkillObserver*> observers; // Association with SkillObserver（擁有，D49）
+    Troop* troop; // Association with Troop（不擁有：Troop 擁有 Role）
+    IAction* decider; // 決策者：英雄讀輸入、AI 依 seed（D4）；擁有（D49）
 
 public:
     Role(int hp, int mp, int str, const std::string& name);
     Role(int hp, int mp, int str, const std::string& name, const std::vector<Skill*>& skills);
     virtual ~Role();
+    Role(const Role&) = delete;            // 擁有裸指標：禁止複製，避免重複釋放
+    Role& operator=(const Role&) = delete;
 
     // 輪到此角色時呼叫，交給目前的狀態主導這次行動（D10）；t1 / t2 為已排除死者的兩軍名單，actorSide = 1 或 2
     void takeTurn(const std::vector<Role*>& t1, const std::vector<Role*>& t2, int actorSide);
@@ -48,14 +51,14 @@ public:
     void gainMp(int mpGain);
     void gainHp(int hpGain);
     std::vector<SkillObserver*> getObservers();
-    void addObserver(SkillObserver* observer);
-    void removeObserver(SkillObserver* observer);
+    void addObserver(SkillObserver* observer);       // 之後由 Role 釋放（D49）
+    void removeObserver(SkillObserver* observer);    // 擁有權交回呼叫端
     void notifyObservers();
 
     void setTroop(Troop* troop);
     Troop* getTroop() const;
 
-    void setDecider(IAction* decider);
+    void setDecider(IAction* decider); // 之後由 Role 釋放；換掉的舊決策者會被釋放（D49）
     IAction* getDecider() const;
 
     void setIdentity(char identity);

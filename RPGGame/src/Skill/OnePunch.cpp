@@ -9,6 +9,13 @@ OnePunch::OnePunch(std::vector<OnePunchHandler*> handlers) : Skill(), handlers(h
     setMp(180);
 }
 
+OnePunch::~OnePunch()
+{
+    for (OnePunchHandler* handler : handlers) {
+        delete handler; // D49
+    }
+}
+
 
 void OnePunch::attack(Role* actor, std::vector<Role*> roles)
 {

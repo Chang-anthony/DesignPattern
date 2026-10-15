@@ -11,7 +11,11 @@ int Troop::getId() const {
     return id;
 }
 
-Troop::~Troop() {}
+Troop::~Troop() {
+    for (Role* role : roles) {
+        delete role; // Troop 擁有角色（D49）
+    }
+}
 
 void Troop::addRole(Role* role) {
     utils::RequireNonNull(role);

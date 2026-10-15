@@ -61,16 +61,15 @@ int countLinesStartingWith(const Lines& lines, const std::string& prefix) {
 
 class BattleTest : public ::testing::Test {
 protected:
+    std::istringstream heroInput; // 宣告在 Troop 之前：角色（含英雄的 HeroAction）先釋放
     Troop t1{1};
     Troop t2{2};
-    std::istringstream heroInput;
-    HeroAction heroDecider{heroInput};
 
     Role* addHero(int hp, int mp, int str, const std::string& decisions, const std::vector<Skill*>& skills = {}) {
         Role* hero = new Role(hp, mp, str, "英雄", skills);
         hero->setIdentity('h');
         heroInput.str(decisions);
-        hero->setDecider(&heroDecider);
+        hero->setDecider(new HeroAction(heroInput)); // Role 擁有決策者（D49）
         t1.addRole(hero);
         return hero;
     }

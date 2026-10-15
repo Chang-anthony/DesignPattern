@@ -61,14 +61,19 @@ Lines readExpected(const std::filesystem::path& path) {
 Lines playTestcase(const std::filesystem::path& inPath) {
     std::ifstream in(inPath);
     RPGSetup setup = RPG_parser::parse(in);
-    HeroAction heroDecider(in);
-    setup.hero->setDecider(&heroDecider);
+    setup.hero->setDecider(new HeroAction(in)); // Role 擁有決策者（D49）
 
-    CoutCapture capture;
-    RPG rpg;
-    rpg.GameStart(setup.t1, setup.t2);
-    rpg.GameEnd();
-    return capture.lines();
+    Lines lines;
+    {
+        CoutCapture capture;
+        RPG rpg;
+        rpg.GameStart(setup.t1, setup.t2);
+        rpg.GameEnd();
+        lines = capture.lines();
+    }
+    delete setup.t1; // Client 擁有兩軍（D49）
+    delete setup.t2;
+    return lines;
 }
 
 class TestcaseReplayTest : public ::testing::TestWithParam<std::string> {};

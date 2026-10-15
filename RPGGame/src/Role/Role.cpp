@@ -4,6 +4,7 @@
 #include "../State/State.hpp"
 #include "../State/NormalState.hpp"
 #include "BasicAttack.hpp"
+#include "IAction.hpp"
 #include "Troop.hpp"
 #include <iostream>
 #include "../utils/utils.h"
@@ -26,6 +27,10 @@ Role::~Role() {
     for (Skill* skill : skills) {
         delete skill;
     }
+    for (SkillObserver* observer : observers) {
+        delete observer; // D49
+    }
+    delete decider; // D49
 }
 
 void Role::takeTurn(const std::vector<Role*>& t1, const std::vector<Role*>& t2, int actorSide) {
@@ -151,7 +156,11 @@ Troop* Role::getTroop() const {
 }
 
 void Role::setDecider(IAction* decider) {
-    this->decider = utils::RequireNonNull(decider);
+    utils::RequireNonNull(decider);
+    if (this->decider != decider) {
+        delete this->decider; // 換掉的決策者由 Role 釋放（D49）
+    }
+    this->decider = decider;
 }
 
 IAction* Role::getDecider() const {

@@ -68,13 +68,13 @@
 |---|---|---|
 | `A <\|-- B`（實線、空心三角） | 繼承：B 是 A | `Skill <\|-- Fireball` |
 | `A <\|.. B`（虛線、空心三角） | 實作介面 | `IAction <\|.. AIAction` |
-| `A *-- B`（實心菱形） | 組合：A 擁有 B，A 解構時 `delete` B | `Role *-- State`、`Role *-- Skill` |
-| `A o-- B`（空心菱形） | 聚合：A 持有 B，但不負責釋放 | `Troop o-- Role`、`Role o-- SkillObserver` |
+| `A *-- B`（實心菱形） | 組合：A 擁有 B，A 解構時 `delete` B | `Troop *-- Role`、`Role *-- State`、`Role *-- IAction` |
+| `A o-- B`（空心菱形） | 聚合：A 持有 B，但不負責釋放 | （D49 之後本專案沒有；不擁有的指標畫成 `-->`，例如 `Battle --> Troop`） |
 | `A --> B`（實線箭頭） | 關聯：A 的成員變數指向 B | `State --> Role`、`Role --> Troop` |
 | `A ..> B`（虛線箭頭） | 依賴：A 只在函式裡**用到** B（參數、`new`、`dynamic_cast`、呼叫），不存成成員 | `Poison ..> PoisonedState : new` |
-| `"1"`、`"0..1"`、`"*"`、`"2"` | 數量（多重性）：每一個 A 對應幾個 B | `Troop "1" o-- "*" Role` |
+| `"1"`、`"0..1"`、`"*"`、`"2"` | 數量（多重性）：每一個 A 對應幾個 B | `Troop "1" *-- "*" Role` |
 
-> 組合 / 聚合是依**程式目前誰 `delete` 誰**來畫的：`Role::~Role()` 會 `delete state` 和所有技能，不會 `delete` 觀察者；`Troop`、`OnePunch` 都不 `delete` 它們持有的物件（O1 物件擁有權為開放問題）。
+> 組合是依**程式誰 `delete` 誰**來畫的（D49）：Client（`main` / 測試）擁有兩支 `Troop` → `Troop` 擁有角色（含召喚加入的史萊姆）→ `Role` 擁有狀態、技能、觀察者、決策者 → `OnePunch` 擁有注入的處理鏈。`Battle`、`RPG` 只借用 `Troop`。
 
 ### ① 總覽：結構關係與數量
 
@@ -139,21 +139,21 @@ classDiagram
     RPG "1" --> "0..1" Battle : battle
     RPG ..> Troop : GameStart 參數
     Battle "1" --> "2" Troop : T1, T2
-    Troop "1" o-- "*" Role : roles（依加入順序）
+    Troop "1" *-- "*" Role : roles（依加入順序；解構時釋放，D49）
     Role "*" --> "0..1" Troop : troop（removeRole 後為 nullptr）
 
     Role "1" *-- "1" State : state（目前的狀態）
     State "1" --> "1" Role : role（擁有此狀態的角色）
-    Role "1" --> "0..1" IAction : decider
+    Role "1" *-- "0..1" IAction : decider（擁有，D49）
     Role "1" *-- "1..*" Skill : skills（第 0 項固定是 BasicAttack）
-    Role "1" o-- "*" SkillObserver : observers（死亡時通知）
+    Role "1" *-- "*" SkillObserver : observers（死亡時通知；擁有，D49）
     SkillObserver "*" --> "1" Role : actor（施咒者 / 召喚者）
 
     Skill ..> Candidates : getCandidates() 回傳
     Skill ..> Role : attack(actor, targets)
     Skill ..> State : actor->getState()->doDamage()
     Skill <|-- OnePunch
-    OnePunch "1" o-- "*" OnePunchHandler : handlers（Client 注入，依序比對）
+    OnePunch "1" *-- "*" OnePunchHandler : handlers（Client 注入，依序比對；擁有，D49）
 ```
 
 讀圖重點：
@@ -161,7 +161,8 @@ classDiagram
 - **一個 `Role` 一定有 1 個 `State`**（建立時是 `NormalState`），換狀態時 `setState` 會 `delete` 舊的，所以是組合。`State` 反過來也指向它的 `Role`（雙向），`doDamage` / `damage` 才找得到「行動者」與「受傷者」。
 - **一個 `Role` 至少有 1 個 `Skill`**（`BasicAttack`，D28），Client 再加入 0 個以上。
 - `Role → Troop` 是 `0..1`：剛建立、或被 `removeRole` 之後都沒有軍隊；這正是 2026-10-14 修正的情境。
-- `Role → IAction` 程式目前是 `0..1`（建構時 `decider = nullptr`），設計上 Client 組裝後每個角色都要有 1 個（D4）。
+- `Role → IAction` 程式目前是 `0..1`（建構時 `decider = nullptr`），設計上 Client 組裝後每個角色都要有 1 個（D4）。決策者交給 `setDecider` 之後由 `Role` 釋放，換掉的舊決策者也會被釋放（D49）；英雄的 `HeroAction` 因此由 `main` 以 `new` 交出。
+- **擁有權（D49）**：`Troop` 解構時釋放所有角色，召喚的史萊姆加入軍隊後也一樣；`removeRole` 會把擁有權交回呼叫端。`Role`、`Troop` 禁止複製，避免兩份解構子重複釋放。
 - `Battle → Troop` 是 2（T1、T2）：Battle 是兩軍之間的關聯類別（D1）。
 
 ### ② Role 與 State（State pattern）
@@ -330,7 +331,7 @@ classDiagram
     Summon ..> AIAction : new，setDecider 給史萊姆（D40）
     Curse ..> CurserObserver : new，掛在目標上
     Curse ..> SkillObserver : 檢查是否同一施咒者
-    OnePunch "1" o-- "*" OnePunchHandler : handlers
+    OnePunch "1" *-- "*" OnePunchHandler : handlers
 ```
 
 各技能的目標規則（`getCandidates`，D29–D34）：
@@ -376,7 +377,7 @@ classDiagram
         doHandle: 100 傷害
     }
 
-    OnePunch "1" o-- "*" OnePunchHandler : 依 vector 順序，第一個成立就停
+    OnePunch "1" *-- "*" OnePunchHandler : 依 vector 順序，第一個成立就停
     OnePunchHandler <|-- HpHandler
     OnePunchHandler <|-- PoisonPetrochemicalHandler
     OnePunchHandler <|-- CheerupHandler
@@ -422,7 +423,7 @@ classDiagram
     class Summon
     class Curse
 
-    Role "1 被觀察者（死者）" o-- "*" SkillObserver : observers
+    Role "1 被觀察者（死者）" *-- "*" SkillObserver : observers
     SkillObserver "*" --> "1" Role : actor（拿獎勵的人）
     SkillObserver <|-- SummonObserver
     SkillObserver <|-- CurserObserver
@@ -466,11 +467,11 @@ classDiagram
 
     RPG --> Battle
     Battle --> Troop
-    Troop o-- Role
+    Troop *-- Role
     Role *-- State
     Role *-- Skill
-    Role --> IAction
-    Role o-- SkillObserver
+    Role *-- IAction
+    Role *-- SkillObserver
     Role ..> BasicAttack
     Role ..> NormalState
     State <|-- NormalState
@@ -486,7 +487,7 @@ classDiagram
     Role <|-- Slime
     Summon ..> SummonObserver
     Summon ..> Slime
-    OnePunch o-- OnePunchHandler
+    OnePunch *-- OnePunchHandler
     OnePunchHandler <|-- NormalHandler
     NormalHandler ..> NormalState
     IAction <|.. AIAction
@@ -528,7 +529,7 @@ classDiagram
         -readDecision() vector~int~
     }
 
-    Role "1" --> "0..1" IAction : decider
+    Role "1" *-- "0..1" IAction : decider（擁有，D49）
     IAction <|.. AIAction
     IAction <|.. HeroAction
     IAction ..> Skill : 回傳選中的行動

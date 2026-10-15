@@ -8,6 +8,7 @@
 #include <iostream>
 #include <sstream>
 #include <string>
+#include <type_traits>
 #include <vector>
 
 #include "Role.hpp"
@@ -94,6 +95,35 @@ public:
     std::vector<Role*> chooseTargets(const std::vector<Role*>& candidates, int) override { return candidates; }
 };
 
+// 擁有權測試用（D49）：被 delete 時把旗標設為 true
+class TrackedAction : public DummyAction {
+public:
+    explicit TrackedAction(bool* destroyed) : destroyed(destroyed) {}
+    ~TrackedAction() override { *destroyed = true; }
+
+private:
+    bool* destroyed;
+};
+
+class TrackedObserver : public SkillObserver {
+public:
+    TrackedObserver(Role* actor, bool* destroyed) : SkillObserver(actor), destroyed(destroyed) {}
+    ~TrackedObserver() override { *destroyed = true; }
+    void UntilDie(Role*) override {}
+
+private:
+    bool* destroyed;
+};
+
+class TrackedRole : public Role {
+public:
+    TrackedRole(const std::string& name, bool* destroyed) : Role(100, 0, 0, name), destroyed(destroyed) {}
+    ~TrackedRole() override { *destroyed = true; }
+
+private:
+    bool* destroyed;
+};
+
 class RoleTest : public ::testing::Test {
 protected:
     Troop t1{1};
@@ -145,6 +175,7 @@ TEST_F(RoleTest, RemoveRoleDetachesRoleFromTroop) {
     EXPECT_EQ(ally->getTroop(), nullptr);
     EXPECT_EQ(ally->getDisplayName(), "Ally"); // 不再帶軍隊前綴
     EXPECT_EQ(hero->getTroop(), &t1);
+    delete ally; // 移出軍隊後擁有權交回呼叫端（D49）
 }
 
 // =====================================================================
@@ -164,9 +195,9 @@ TEST_F(RoleTest, OnlyRoleMarkedWithHIsHero) {
 TEST_F(RoleTest, HoldsItsDecider) {
     Role role(100, 0, 0, "A");
     EXPECT_EQ(role.getDecider(), nullptr);
-    DummyAction decider;
-    role.setDecider(&decider);
-    EXPECT_EQ(role.getDecider(), &decider);
+    DummyAction* decider = new DummyAction(); // Role 擁有決策者（D49）
+    role.setDecider(decider);
+    EXPECT_EQ(role.getDecider(), decider);
     EXPECT_THROW(role.setDecider(nullptr), std::invalid_argument);
 }
 
@@ -262,6 +293,7 @@ TEST_F(RoleTest, RemovedObserverIsNotNotified) {
     target->addObserver(observer);
     target->removeObserver(observer);
     EXPECT_TRUE(target->getObservers().empty());
+    delete observer; // 移除後擁有權交回呼叫端（D49）
 
     CoutCapture mute;
     hurt(target, 10);
@@ -414,6 +446,54 @@ TEST_F(RoleTest, SlimeHasTheStatsGivenByRequirement) {
     EXPECT_NE(dynamic_cast<NormalState*>(slime.getState()), nullptr);
     EXPECT_FALSE(slime.isHero());
     EXPECT_EQ(slime.getDecider(), nullptr); // 決策者由 Summon 裝上（D40）
+}
+
+// =====================================================================
+// 擁有權（D49）：Client → Troop → Role → 狀態 / 技能 / 觀察者 / 決策者
+// =====================================================================
+
+TEST_F(RoleTest, TroopReleasesItsRolesButNotRemovedOnes) {
+    // 擁有裸指標的類別不能複製，否則兩份解構子會重複釋放
+    static_assert(!std::is_copy_constructible_v<Troop> && !std::is_copy_assignable_v<Troop>);
+    static_assert(!std::is_copy_constructible_v<Role> && !std::is_copy_assignable_v<Role>);
+
+    bool keptDestroyed = false, removedDestroyed = false;
+    TrackedRole* removed = new TrackedRole("Removed", &removedDestroyed);
+    {
+        Troop troop(1);
+        troop.addRole(new TrackedRole("Kept", &keptDestroyed));
+        troop.addRole(removed);
+        troop.removeRole(removed);
+    }
+    EXPECT_TRUE(keptDestroyed);     // 軍隊解構時一併釋放
+    EXPECT_FALSE(removedDestroyed); // 已移出：擁有權交回呼叫端
+    delete removed;
+    EXPECT_TRUE(removedDestroyed);
+}
+
+TEST_F(RoleTest, RoleReleasesItsObserversAndDecider) {
+    bool observerDestroyed = false, deciderDestroyed = false;
+    {
+        Role role(100, 0, 0, "A");
+        role.addObserver(new TrackedObserver(&attacker, &observerDestroyed));
+        role.setDecider(new TrackedAction(&deciderDestroyed));
+    }
+    EXPECT_TRUE(observerDestroyed);
+    EXPECT_TRUE(deciderDestroyed);
+}
+
+TEST_F(RoleTest, ReplacingDeciderReleasesOnlyTheOldOne) {
+    bool firstDestroyed = false, secondDestroyed = false;
+    Role role(100, 0, 0, "A");
+    TrackedAction* first = new TrackedAction(&firstDestroyed);
+    role.setDecider(first);
+    role.setDecider(first); // 設同一個：不能釋放自己
+    EXPECT_FALSE(firstDestroyed);
+    EXPECT_EQ(role.getDecider(), first);
+
+    role.setDecider(new TrackedAction(&secondDestroyed));
+    EXPECT_TRUE(firstDestroyed); // 換掉的舊決策者被釋放
+    EXPECT_FALSE(secondDestroyed);
 }
 
 } // namespace

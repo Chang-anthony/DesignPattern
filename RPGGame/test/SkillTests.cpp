@@ -99,11 +99,10 @@ protected:
 
     // 經過完整的 State 流程施放 actor 的第 index 個行動：S3 扣 MP、施放、支付 HP 代價（D47）
     std::istringstream flowInput;
-    HeroAction flowDecider{flowInput};
     Lines castThroughFlow(Role* actor, int index) {
         flowInput.clear();
         flowInput.str(std::to_string(index) + "\n");
-        actor->setDecider(&flowDecider);
+        actor->setDecider(new HeroAction(flowInput)); // Role 擁有決策者，換掉的舊決策者由 Role 釋放（D49）
         int side = actor->getTroop() == &t1 ? 1 : 2;
         CoutCapture capture;
         actor->takeTurn(alive1(), alive2(), side);
@@ -786,6 +785,27 @@ TEST_F(SkillBehaviorTest, OnePunchFromCheeredActorAdds50ToEveryHit) {
         "[1]英雄 對 [2]Slime1 造成 130 點傷害。",
     }));
     EXPECT_EQ(slime->getHp(), 10);
+}
+
+// 擁有權（D49）：OnePunch 擁有注入的處理鏈，解構時釋放
+class TrackedHandler : public OnePunchHandler {
+public:
+    explicit TrackedHandler(int* destroyed) : destroyed(destroyed) {}
+    ~TrackedHandler() override { (*destroyed)++; }
+    bool match(Role*, Role*) override { return false; }
+    void doHandle(Role*, Role*) override {}
+
+private:
+    int* destroyed;
+};
+
+TEST_F(SkillBehaviorTest, OnePunchReleasesItsHandlers) {
+    int destroyed = 0;
+    {
+        OnePunch punch({new TrackedHandler(&destroyed), new TrackedHandler(&destroyed)});
+        EXPECT_EQ(destroyed, 0);
+    }
+    EXPECT_EQ(destroyed, 2);
 }
 
 TEST_F(SkillBehaviorTest, OnePunchWithoutHandlersDoesNothing) {

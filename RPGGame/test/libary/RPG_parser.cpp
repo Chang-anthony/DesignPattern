@@ -59,11 +59,11 @@ void parseTroop(std::istream& input, Troop* troop, const std::string& endMarker)
             throw std::invalid_argument("RPG_parser: bad role line \"" + line + "\"");
         }
         Role* role = new Role(hp, mp, str, name);
+        troop->addRole(role); // 先交給 Troop：之後技能名稱錯誤丟例外時，角色也會跟著 Troop 被釋放（D49）
         std::string skillName;
         while (ss >> skillName) {
             role->addSkill(RPG_parser::createSkill(skillName));
         }
-        troop->addRole(role);
     }
     throw std::invalid_argument("RPG_parser: missing \"" + endMarker + "\"");
 }
@@ -73,13 +73,19 @@ void parseTroop(std::istream& input, Troop* troop, const std::string& endMarker)
 RPGSetup RPG_parser::parse(std::istream& input) {
     RPGSetup setup{new Troop(1), new Troop(2), nullptr};
 
-    expect(input, "#軍隊-1-開始");
-    parseTroop(input, setup.t1, "#軍隊-1-結束");
-    expect(input, "#軍隊-2-開始");
-    parseTroop(input, setup.t2, "#軍隊-2-結束");
+    try {
+        expect(input, "#軍隊-1-開始");
+        parseTroop(input, setup.t1, "#軍隊-1-結束");
+        expect(input, "#軍隊-2-開始");
+        parseTroop(input, setup.t2, "#軍隊-2-結束");
 
-    if (setup.t1->getRoles().empty()) {
-        throw std::invalid_argument("RPG_parser: troop 1 has no role (the hero is its first role)");
+        if (setup.t1->getRoles().empty()) {
+            throw std::invalid_argument("RPG_parser: troop 1 has no role (the hero is its first role)");
+        }
+    } catch (...) {
+        delete setup.t1; // 格式錯誤：呼叫端拿不到 setup，由 parser 釋放（D49）
+        delete setup.t2;
+        throw;
     }
     setup.hero = setup.t1->getRoles().front();
     setup.hero->setIdentity('h');
