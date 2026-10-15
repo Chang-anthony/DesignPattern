@@ -71,8 +71,8 @@
 - ✅ A11 已結案（決策 D35–D39）。**必要問題 A1–A11 全部結案，架構設計完成。**
 - ✅ 2026-10-13 進入實作：技能周邊 + 單元測試完成（§7）。
 - ✅ 2026-10-14：全部實作完成，10 組測資整場輸出與 `.out` 一致（§7.7）。
-- ⏸ **下一步**：確認 §7.2 的實作選擇（I1–I11）；開放問題 O1–O6 視時間討論。
-- 之後依序：開放問題 O1–O5 視時間討論；開放問題 O1–O4 視時間討論。
+- ✅ 2026-10-15：開放問題 O2–O5 結案（D42–D48）。
+- ⏸ **下一步**：開放問題 O1、O6 視時間討論。
 
 ### 收尾建議順序
 主流程是骨架，其他問題都掛在它上面，所以建議依序：
@@ -156,7 +156,7 @@
 - **O2. `Troop` 與 `Battle` 的責任** ✅ 結案（D42、D45）：`Troop::StartBattle()` 已刪除（`Troop` 不再認識 `Battle`）；`Battle` 的成員改名為陣營 `heroTroop` / `opponentTroop`。
 - **O3. 命名與詞彙表** ✅ 結案（D46）：維持 `Skill` / `attack()` 命名，`attack` 意指「施放行動」，已在 `Skill.hpp` 註明。
 - **O4. 防止技能繞過傷害通道** ✅ 結案（D47）：`lossHp` private、`damage` protected，技能只能用 `doDamage`；自爆的自殺改為 `costHp()` 由流程支付；`RoleTests` 以 static_assert 在編譯期檢查。
-- **O5. 技能名稱重複定義**：Client 的建造函式（D26）與技能本身（D27）各寫一次「火球」，改名或拼錯時兩邊可能不一致。（需求的測資名稱固定，Anthony 決定先假設不會寫錯）
+- **O5. 技能名稱重複定義** ✅ 結案（D48）：維持現狀，名稱在 Client 的建造函式與技能本身各寫一次；兩邊一致由 `ParserTest.CreatesEveryRequirementSkillByChineseName`（PA-05）把關。日後有需求再補名稱 → 建立技能的 factory mapping。
 - **O6. 輸出目的地可替換**：模組直接寫 `std::cout`（D38），測試靠 `rdbuf` 導向。若要讓輸出可注入（`ostream&` 或輸出介面），需改整條呼叫鏈。（需求未要求）
 
 ## 5. 設計決策紀錄
@@ -210,6 +210,7 @@
 | D45 | 2026-10-14 | O2 | **`Battle` 的兩支軍隊改名為陣營：`heroTroop`（英雄方，T1，先行動）與 `opponentTroop`（對手方，T2）**，取代原本的 `ally` / `enemy`。 | Anthony 認為 `Battle` 應該知道哪一軍是英雄方。不用 `ally` / `enemy`，因為需求詞彙表的「友軍 / 敵軍」是相對於某個角色而言（T2 的角色行動時，T1 是它的敵軍），容易混淆。已排除：維持 `ally` / `enemy`、以輪流順序命名 `t1` / `t2` |
 | D46 | 2026-10-14 | O3 | **維持 `Skill` / `attack()` 的命名**：`Skill` 是所有行動（含普通攻擊）的抽象，`attack(actor, targets)` 的意思是「施放這個行動」，不限於造成傷害。只在 `Skill.hpp` 的宣告加上註解說明，不改名。 | Anthony 認為這不是問題：`Skill` 只是用來抽象描述技能，`attack` 當成施放。改名（例如 `cast` / `perform`）要動 11 個技能、測試與文件，換來的只是用詞更貼近詞彙表 |
 | D47 | 2026-10-14 | O4 | **技能造成傷害只能走 `doDamage`，由編譯器強制**：`Role::lossHp` 改為 private（`friend class State`）、`State::damage` 改為 protected；中毒改呼叫自己的 `damage(30)`。**自爆的自殺改視為技能的「HP 代價」**：`Skill` 新增 `virtual int costHp(Role* actor) const`（預設 0），`SelfExplosion` 回傳全部 HP；`State::decision()` 在 `attack()` 之後支付（不印傷害訊息，死亡訊息自然排在所有目標之後，D34）。 | Anthony 要求技能的寫法統一、不要多一個 `die()` 入口；自殺與 MP 一樣是施放的代價，由流程支付。代價：`Skill` 多一個 virtual；直接呼叫 `attack()` 的自爆測試改成經過流程 |
+| D48 | 2026-10-15 | O5 | **技能名稱維持兩處定義，不改**：輸入名稱留在 Client 的 `RPG_parser::createSkill`（D26），輸出名稱留在各技能的建構子（D27）。 | Anthony 認為不是大問題：兩邊不一致時 PA-05 會失敗；日後若有其他需求（例如技能種類變多、名稱可設定）再補 factory mapping。已排除（目前）：名稱只寫一次的註冊機制 |
 
 ---
 
@@ -307,7 +308,7 @@ cd test && ./run_tests.sh                        # Windows: run_tests.bat
   - `TestcaseReplayTests.cpp` 11 個：原本 `StateFlowTests` 裡的測試用鷹架（簡易 parser + 迴圈）**移除**，改用正式的 `RPG_parser` + `HeroAction` + `RPG`；不一致時寫出 `<名稱>.actual.txt`（D39）；另加一個測試確認 `testcases/` 的每個 `.in` 都有被跑到。
   - 共 145 個全部通過；`RPGGAME` 主程式三種用法對 10 組測資的輸出都與 `.out` 相同（含 LF / CRLF 檔案）；刻意改壞 Battle / RPG / parser 的 14 個地方都會被抓到（見 `TESTS.md`）。
 
-### 7.8 2026-10-14：開放問題 O2–O4
+### 7.8 2026-10-14：開放問題 O2–O5
 - **O2（D42、D45）**：刪除 `Troop::StartBattle()`；`Battle` 的成員改名為 `heroTroop` / `opponentTroop`。
 - **O3（D46）**：維持 `Skill` / `attack()` 命名，在 `Skill.hpp` 註明 `attack` 是「施放」。
 - **O4（D47）**：
@@ -315,3 +316,4 @@ cd test && ./run_tests.sh                        # Windows: run_tests.bat
   - `Skill::costHp(actor)`（預設 0）、`SelfExplosion::costHp` = 全部 HP；`SelfExplosion::attack` 不再自殺；`State::decision()` 在 `attack()` 之後詢問並支付 HP 代價（施放途中得到的 HP 也算在內）。
   - 測試：直接呼叫 `lossHp` 的 13 處改走 `doDamage`（`RoleTests` 用 fixture 的 `hurt()`）或完整流程（`SkillTests` 新增 `castThroughFlow()`）；`ExampleTests` 的 `SelfExplosionTest` 改為檢查 `attack()` 不扣施放者 HP、`costHp()` = 500；新增 `SelfExplosionCostsAllHpButAttackItselfDoesNotKill`、`OnlySelfExplosionCostsHp`、`DoDamageIsTheOnlyPublicWayToReduceHp`（用 C++20 concept + static_assert 在編譯期確認 `lossHp` / `damage` 不公開）。共 149 個通過，10 組測資整場輸出不變。
   - 刻意改壞：不支付 HP 代價、在施放前支付、預設代價改成全部 HP → 測試失敗；把 `lossHp` 或 `damage` 改回 public → **編譯失敗**（static_assert 訊息直接指出原因）。
+- **O5（D48）**：不改程式；維持兩處名稱定義，由 PA-05 檢查一致。
