@@ -1,4 +1,5 @@
 #include "State.hpp"
+#include "Output.hpp"
 #include <iostream>
 #include "utils.h"
 #include "Role.hpp"
@@ -46,8 +47,8 @@ void State::exitState() {
 
 void State::doDamage(Role* target, int n) {
     utils::RequireNonNull(target);
-    std::cout << utils::RequireNonNull(role)->getDisplayName() << " 對 " << target->getDisplayName()
-              << " 造成 " << n << " 點傷害。" << std::endl;
+    io::output().write(utils::RequireNonNull(role)->getDisplayName() + " 對 " + target->getDisplayName() +
+                          " 造成 " + std::to_string(n) + " 點傷害。"); // D50
     utils::RequireNonNull(target->getState())->damage(n);
 }
 
@@ -59,14 +60,14 @@ namespace {
 
 // S1 的提示：「選擇行動：(0) 普通攻擊 (1) 火球 …」，每個角色都會印（含 AI）
 void printActionMenu(const std::vector<Skill*>& skills) {
-    std::cout << "選擇行動：";
+    std::string menu = "選擇行動：";
     for (size_t i = 0; i < skills.size(); i++) {
         if (i > 0) {
-            std::cout << " ";
+            menu += " ";
         }
-        std::cout << "(" << i << ") " << skills[i]->getName();
+        menu += "(" + std::to_string(i) + ") " + skills[i]->getName();
     }
-    std::cout << std::endl;
+    io::output().write(menu); // D50
 }
 
 } // namespace
@@ -83,7 +84,7 @@ void State::decision(const std::vector<Role*>& t1, const std::vector<Role*>& t2,
         if (actor->checkMp(skill)) {
             break;
         }
-        std::cout << "你缺乏 MP，不能進行此行動。" << std::endl;
+        io::output().write("你缺乏 MP，不能進行此行動。"); // D50
     }
 
     // S2：技能算候選（D29），決策者選目標；n ≤ m 自動全選由決策者判斷（D8）

@@ -1,4 +1,5 @@
 #include "HeroAction.hpp"
+#include "Output.hpp"
 #include <sstream>
 #include <stdexcept>
 #include <string>
@@ -34,11 +35,11 @@ std::vector<Role*> HeroAction::chooseTargets(const std::vector<Role*>& candidate
         return candidates; // 略過 S2：不讀輸入
     }
     // S2 的提示只在英雄真的要選時印（需求：「如果此為英雄的回合」；§7.2 I7）
-    std::cout << "選擇 " << m << " 位目標:";
+    std::string prompt = "選擇 " + std::to_string(m) + " 位目標:";
     for (int i = 0; i < n; i++) {
-        std::cout << " (" << i << ") " << candidates[i]->getDisplayName();
+        prompt += " (" + std::to_string(i) + ") " + candidates[i]->getDisplayName();
     }
-    std::cout << std::endl;
+    io::output().write(prompt); // 輸出經由 utils（D50）
 
     std::vector<int> decision = readDecision();
     if (static_cast<int>(decision.size()) != m) {

@@ -11,6 +11,7 @@
 #include <string>
 #include <vector>
 
+#include "Output.hpp"
 #include "Battle.hpp"
 #include "RPG.hpp"
 #include "Troop.hpp"
@@ -24,10 +25,11 @@ namespace {
 
 using Lines = std::vector<std::string>;
 
-class CoutCapture {
+// 在作用域內把模組輸出（io::output()）導向字串，解構時還原（D50）
+class OutputCapture {
 public:
-    CoutCapture() : old(std::cout.rdbuf(buffer.rdbuf())) {}
-    ~CoutCapture() { std::cout.rdbuf(old); }
+    OutputCapture() : sink(buffer), previous(io::setOutput(&sink)) {}
+    ~OutputCapture() { io::setOutput(previous); }
 
     Lines lines() const {
         Lines result;
@@ -39,7 +41,8 @@ public:
 
 private:
     std::ostringstream buffer;
-    std::streambuf* old;
+    io::StreamOutput sink;
+    io::Output* previous;
 };
 
 // 只留下「輪到 …」的行，用來檢查輪流順序
@@ -82,7 +85,7 @@ protected:
     }
 
     Lines runBattle(Battle& battle) {
-        CoutCapture capture;
+        OutputCapture capture;
         battle.startBattle();
         return capture.lines();
     }
@@ -218,7 +221,7 @@ TEST_F(BattleTest, RPGAnnouncesVictoryWhenHeroSurvives) {
     addHero(500, 0, 100, "0\n");
     addAI(t2, "Slime1", 100, 0, 0);
     RPG rpg;
-    CoutCapture capture;
+    OutputCapture capture;
     rpg.GameStart(&t1, &t2);
     rpg.GameEnd();
     Lines out = capture.lines();
@@ -231,7 +234,7 @@ TEST_F(BattleTest, RPGAnnouncesDefeatWhenHeroDies) {
     addHero(10, 0, 0, "0\n");
     addAI(t2, "Slime1", 100, 0, 50);
     RPG rpg;
-    CoutCapture capture;
+    OutputCapture capture;
     rpg.GameStart(&t1, &t2);
     rpg.GameEnd();
     Lines out = capture.lines();

@@ -1,7 +1,7 @@
 /*
  * Role 與 Observer 的單元測試。
  *  - 依據：need/need.txt、CLAUDE.md 決策 D4、D6、D9–D11、D14、D17、D18、D28
- *  - 輸出以 rdbuf 導向字串收集（D38）
+ *  - 輸出以 io::setOutput 導向字串收集（D50；原本用 rdbuf，D38）
  */
 #include <gtest/gtest.h>
 
@@ -11,6 +11,7 @@
 #include <type_traits>
 #include <vector>
 
+#include "Output.hpp"
 #include "Role.hpp"
 #include "Troop.hpp"
 #include "IAction.hpp"
@@ -36,10 +37,11 @@ template <class R> concept CanCallLossHp = requires(R& r) { r.lossHp(1); };
 template <class S> concept CanCallDamage = requires(S& s) { s.damage(1); };
 template <class S> concept CanCallDoDamage = requires(S& s, Role* target) { s.doDamage(target, 1); };
 
-class CoutCapture {
+// 在作用域內把模組輸出（io::output()）導向字串，解構時還原（D50）
+class OutputCapture {
 public:
-    CoutCapture() : old(std::cout.rdbuf(buffer.rdbuf())) {}
-    ~CoutCapture() { std::cout.rdbuf(old); }
+    OutputCapture() : sink(buffer), previous(io::setOutput(&sink)) {}
+    ~OutputCapture() { io::setOutput(previous); }
 
     std::vector<std::string> lines() const {
         std::vector<std::string> result;
@@ -53,7 +55,8 @@ public:
 
 private:
     std::ostringstream buffer;
-    std::streambuf* old;
+    io::StreamOutput sink;
+    io::Output* previous;
 };
 
 using Lines = std::vector<std::string>;
@@ -211,7 +214,7 @@ TEST_F(RoleTest, CheckMpOnlyChecksAndPrintsNothing) {
     Waterball waterball; // 50
     Curse curse;         // 100
 
-    CoutCapture capture;
+    OutputCapture capture;
     EXPECT_TRUE(role.checkMp(&fireball));
     EXPECT_TRUE(role.checkMp(&waterball));
     EXPECT_FALSE(role.checkMp(&curse));
@@ -243,19 +246,19 @@ TEST_F(RoleTest, LossAndGainMp) {
 TEST_F(RoleTest, LossHpAnnouncesDeathOnlyWhenHpReachesZero) {
     Role* slime = add(t2, "Slime1", 100, 0, 0);
     {
-        CoutCapture capture;
+        OutputCapture capture;
         hurt(slime, 99);
         EXPECT_EQ(capture.lines(), (Lines{"Attacker 對 [2]Slime1 造成 99 點傷害。"})); // 沒有死亡訊息
     }
     EXPECT_EQ(slime->getHp(), 1);
     {
-        CoutCapture capture;
+        OutputCapture capture;
         hurt(slime, 1);
         EXPECT_EQ(capture.lines(), (Lines{"Attacker 對 [2]Slime1 造成 1 點傷害。", "[2]Slime1 死亡。"}));
     }
     EXPECT_TRUE(slime->isDead());
     {
-        CoutCapture capture;
+        OutputCapture capture;
         hurt(slime, 10); // 已死亡：只有傷害訊息，不再印死亡、不再通知
         EXPECT_EQ(capture.lines(), (Lines{"Attacker 對 [2]Slime1 造成 10 點傷害。"}));
     }
@@ -279,7 +282,7 @@ TEST_F(RoleTest, ObserversAreNotifiedOnceInTheOrderTheyWereAdded) {
     target->addObserver(new RecordingObserver(a, &log, "a"));
     target->addObserver(new RecordingObserver(b, &log, "b"));
 
-    CoutCapture mute;
+    OutputCapture mute;
     hurt(target, 10);
     hurt(target, 10);
     EXPECT_EQ(log, (std::vector<std::string>{"a:T", "b:T"}));
@@ -295,7 +298,7 @@ TEST_F(RoleTest, RemovedObserverIsNotNotified) {
     EXPECT_TRUE(target->getObservers().empty());
     delete observer; // 移除後擁有權交回呼叫端（D49）
 
-    CoutCapture mute;
+    OutputCapture mute;
     hurt(target, 10);
     EXPECT_TRUE(log.empty());
 }
@@ -307,7 +310,7 @@ TEST_F(RoleTest, ObserverRewardsAreAppliedAfterDeathMessage) {
     target->addObserver(new CurserObserver(curser));
     target->addObserver(new SummonObserver(summoner));
 
-    CoutCapture capture;
+    OutputCapture capture;
     hurt(target, 10);
     EXPECT_EQ(capture.lines(), (Lines{"Attacker 對 [2]T 造成 10 點傷害。", "[2]T 死亡。"})); // 獎勵本身不印訊息
     EXPECT_EQ(curser->getHp(), 170);   // + 剩餘 MP
@@ -321,7 +324,7 @@ TEST_F(RoleTest, DeadObserverOwnersGetNoReward) {
     target->addObserver(new CurserObserver(curser));
     target->addObserver(new SummonObserver(summoner));
 
-    CoutCapture mute;
+    OutputCapture mute;
     hurt(curser, 10);
     hurt(summoner, 10);
     hurt(target, 10);
@@ -348,7 +351,7 @@ TEST_F(RoleTest, TakeTurnHandsTheBattlefieldToCurrentState) {
     hero->setState(state);
 
     {
-        CoutCapture capture;
+        OutputCapture capture;
         hero->takeTurn(t1.getRoles(), t2.getRoles(), 1);
         // 「輪到 …」由 Role 在交給狀態之前印（§7.2 I6）
         EXPECT_EQ(capture.lines(), (Lines{"輪到 [1]英雄 (HP: 100, MP: 0, STR: 0, State: 測試)。"}));
@@ -404,7 +407,7 @@ TEST_F(RoleTest, CheerupBonusEndsWhenStateExpires) {
     servant->setState(new CheerupedState());
     BasicAttack attack;
     {
-        CoutCapture capture;
+        OutputCapture capture;
         attack.attack(servant, {slime});
         EXPECT_EQ(capture.lines(), (Lines{"[1]Servant1 對 [2]Slime1 造成 50 點傷害。"}));
     }
@@ -412,7 +415,7 @@ TEST_F(RoleTest, CheerupBonusEndsWhenStateExpires) {
     servant->endThisRound();
     servant->endThisRound();
     {
-        CoutCapture capture;
+        OutputCapture capture;
         attack.attack(servant, {slime}); // 回到正常狀態，傷害還原為 STR（0）
         EXPECT_EQ(capture.lines(), (Lines{"[1]Servant1 對 [2]Slime1 造成 0 點傷害。"}));
     }

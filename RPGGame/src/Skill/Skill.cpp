@@ -1,4 +1,5 @@
 #include "Skill.hpp"
+#include "Output.hpp"
 #include "utils.h"
 
 // Constructor and Destructor
@@ -23,17 +24,17 @@ Candidates Skill::getCandidates(Role* actor, const std::vector<Role*>& t1,
 void Skill::announce(Role* actor, const std::vector<Role*>& targets) const {
     utils::RequireNonNull(actor);
     if (targets.empty()) {
-        std::cout << actor->getDisplayName() << " 使用了 " << name << "。" << std::endl;
+        io::output().write(actor->getDisplayName() + " 使用了 " + name + "。"); // D50
         return;
     }
-    std::cout << actor->getDisplayName() << " 對 ";
+    std::string line = actor->getDisplayName() + " 對 ";
     for (size_t i = 0; i < targets.size(); i++) {
         if (i > 0) {
-            std::cout << ", ";
+            line += ", ";
         }
-        std::cout << targets[i]->getDisplayName();
+        line += targets[i]->getDisplayName();
     }
-    std::cout << " 使用了 " << name << "。" << std::endl;
+    io::output().write(line + " 使用了 " + name + "。");
 }
 
 std::vector<Role*> Skill::enemiesOf(const std::vector<Role*>& t1, const std::vector<Role*>& t2, int actorSide) {

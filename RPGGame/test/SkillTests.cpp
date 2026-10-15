@@ -1,7 +1,7 @@
 /*
  * 技能（行動）的單元測試。
  *  - 依據：need/need.txt、CLAUDE.md 決策 D1–D39、testcases/*.out 的輸出格式
- *  - 輸出以 rdbuf 導向字串收集（D38）
+ *  - 輸出以 io::setOutput 導向字串收集（D50；原本用 rdbuf，D38）
  */
 #include <gtest/gtest.h>
 
@@ -11,6 +11,7 @@
 #include <string>
 #include <vector>
 
+#include "Output.hpp"
 #include "Skill.hpp"
 #include "BasicAttack.hpp"
 #include "Waterball.hpp"
@@ -47,11 +48,11 @@ namespace {
 
 // ===== 測試輔助 =====
 
-// 在作用域內把 std::cout 導向字串（D38）
-class CoutCapture {
+// 在作用域內把模組輸出（io::output()）導向字串，解構時還原（D50）
+class OutputCapture {
 public:
-    CoutCapture() : old(std::cout.rdbuf(buffer.rdbuf())) {}
-    ~CoutCapture() { std::cout.rdbuf(old); }
+    OutputCapture() : sink(buffer), previous(io::setOutput(&sink)) {}
+    ~OutputCapture() { io::setOutput(previous); }
 
     std::vector<std::string> lines() const {
         std::vector<std::string> result;
@@ -65,7 +66,8 @@ public:
 
 private:
     std::ostringstream buffer;
-    std::streambuf* old;
+    io::StreamOutput sink;
+    io::Output* previous;
 };
 
 // Client 端組裝一拳攻擊的處理鏈（D21、D23）：順序 = 需求列出的由上而下
@@ -92,7 +94,7 @@ protected:
 
     // 執行技能並回傳輸出（只呼叫 attack()：不扣 MP、不付 HP 代價）
     Lines run(Skill& skill, Role* actor, const std::vector<Role*>& targets) {
-        CoutCapture capture;
+        OutputCapture capture;
         skill.attack(actor, targets);
         return capture.lines();
     }
@@ -104,7 +106,7 @@ protected:
         flowInput.str(std::to_string(index) + "\n");
         actor->setDecider(new HeroAction(flowInput)); // Role 擁有決策者，換掉的舊決策者由 Role 釋放（D49）
         int side = actor->getTroop() == &t1 ? 1 : 2;
-        CoutCapture capture;
+        OutputCapture capture;
         actor->takeTurn(alive1(), alive2(), side);
         return capture.lines();
     }
@@ -275,7 +277,7 @@ TEST_F(SkillBehaviorTest, AnnounceFormats) {
     Role* s1 = add(t2, "Slime1", 100, 0, 0);
     Role* s2 = add(t2, "Slime2", 100, 0, 0);
 
-    CoutCapture capture;
+    OutputCapture capture;
     BasicAttack().announce(hero, {s1});
     Fireball().announce(hero, {s1, s2});
     Waterball().announce(hero, {s2});
@@ -682,7 +684,7 @@ TEST_F(SkillBehaviorTest, CursedRoleDyingFromOtherHpLossStillRewardsCurser) {
     run(curse, hero, {slime});
     slime->setState(new PoisonedState());
     {
-        CoutCapture capture;
+        OutputCapture capture;
         slime->takeTurn(alive1(), alive2(), 2); // 中毒扣 30 致死：不是技能傷害，也要通知觀察者（D17）
         EXPECT_EQ(capture.lines(), (Lines{
             "輪到 [2]Slime (HP: 30, MP: 999, STR: 0, State: 中毒)。",

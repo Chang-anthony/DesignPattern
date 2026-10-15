@@ -1,4 +1,5 @@
 #include "SelfHealing.hpp"
+#include "Output.hpp"
 #include <iostream>
 #include "Role.hpp"
 
@@ -19,5 +20,5 @@ Candidates SelfHealing::getCandidates(Role* actor, const std::vector<Role*>& t1,
 
 // 「X 使用了 自我治療。」（自我治療不列出目標）
 void SelfHealing::announce(Role* actor, const std::vector<Role*>& targets) const {
-    std::cout << actor->getDisplayName() << " 使用了 " << getName() << "。" << std::endl;
+    io::output().write(actor->getDisplayName() + " 使用了 " + getName() + "。"); // D50
 }

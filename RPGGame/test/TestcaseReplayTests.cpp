@@ -14,6 +14,7 @@
 #include <string>
 #include <vector>
 
+#include "Output.hpp"
 #include "RPG.hpp"
 #include "Troop.hpp"
 #include "Role.hpp"
@@ -24,10 +25,11 @@ namespace {
 
 using Lines = std::vector<std::string>;
 
-class CoutCapture {
+// 在作用域內把模組輸出（io::output()）導向字串，解構時還原（D50）
+class OutputCapture {
 public:
-    CoutCapture() : old(std::cout.rdbuf(buffer.rdbuf())) {}
-    ~CoutCapture() { std::cout.rdbuf(old); }
+    OutputCapture() : sink(buffer), previous(io::setOutput(&sink)) {}
+    ~OutputCapture() { io::setOutput(previous); }
 
     Lines lines() const {
         Lines result;
@@ -39,7 +41,8 @@ public:
 
 private:
     std::ostringstream buffer;
-    std::streambuf* old;
+    io::StreamOutput sink;
+    io::Output* previous;
 };
 
 const std::filesystem::path kTestcaseDir = std::filesystem::path(__FILE__).parent_path().parent_path() / "testcases";
@@ -65,7 +68,7 @@ Lines playTestcase(const std::filesystem::path& inPath) {
 
     Lines lines;
     {
-        CoutCapture capture;
+        OutputCapture capture;
         RPG rpg;
         rpg.GameStart(setup.t1, setup.t2);
         rpg.GameEnd();

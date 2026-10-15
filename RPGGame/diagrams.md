@@ -1,8 +1,10 @@
 # RPGGame — Diagrams
 
-> **Patterns:** Template Method + State（`State` 主導一次行動的流程）、Strategy（`IAction` 決策者、`Skill` 行動）、Observer（`SkillObserver` 死亡事件）、Chain of Responsibility（`OnePunchHandler`，由 Client 注入）
+> **Patterns:** Template Method + State（`State` 主導一次行動的流程）、Strategy（`IAction` 決策者、`Skill` 行動）、Observer（`SkillObserver` 死亡事件）、Chain of Responsibility（`OnePunchHandler`，由 Client 注入）、Composite（`io::Output` 輸出，D50）
 >
 > **依據：** [`CLAUDE.md`](CLAUDE.md) §5 設計決策 D1–D39（2026-10-12 架構設計完成）與 §7 實作紀錄。
+>
+> **2026-10-15 更新**：擁有權改為實心菱形（D49）；模組的輸出改走 `io::output()`，新增 ⑧ 輸出（Composite，D50）。
 >
 > **2026-10-14 更新**：**全部已實作**（技能周邊、Role、Observer、`IAction` / `AIAction` / `HeroAction`、State 行動流程、`Battle`、`RPG`、Client 的 parser 與 `main.cpp`），圖中**使用程式裡的實際名稱**（例如 `attack`、`addSkill`、`State::decision`），並補上實作時的修正（`lossHp` 只印一次死亡、`setTroop(nullptr)`、`announce`、`handle` 回傳 `bool`）。下表標出各部分的狀態。
 
@@ -16,6 +18,7 @@
 | Strategy：行動 | `Skill` ← `BasicAttack` + 10 種技能 | ✅ |
 | Observer | `SkillObserver` ← `SummonObserver`、`CurserObserver` | ✅ |
 | Chain of Responsibility | `OnePunchHandler` ← `HpHandler`、`PoisonPetrochemicalHandler`、`CheerupHandler`、`NormalHandler` | ✅ |
+| Composite（輸出） | `io::Output` ← `ConsoleOutput`、`StreamOutput`（Leaf）、`CompositeOutput`（`include/utils/Output.hpp`） | ✅（D50） |
 
 ### 與舊版（從程式碼反推的圖）相比的主要改變
 
@@ -50,7 +53,7 @@
 
 ## OOD — 類別圖
 
-類別圖拆成 7 張，每張只看一個面向，避免全部擠在一起：
+類別圖拆成 8 張，每張只看一個面向，避免全部擠在一起：
 
 | 圖 | 看什麼 |
 |---|---|
@@ -61,6 +64,7 @@
 | ⑤ 觀察者（Observer） | 誰被觀察、誰是觀察者、誰負責掛上觀察者 |
 | ⑥ 依賴方向：模組 vs 外部擴充 | 驗證需求 ②：刪除外部擴充的檔案，模組不受影響 |
 | ⑦ 決策者（Strategy） | `IAction` 介面、`AIAction` 的 seed 規則、與 `Role` 的關係 |
+| ⑧ 輸出（Composite） | 模組只寫 `io::output()`；Leaf 決定輸出到哪、Composite 決定渲染；Client 組裝 |
 
 ### 圖例
 
@@ -559,6 +563,62 @@ classDiagram
 - 每個技能子類別各自持有自己的**中文名稱**，輸出時用 `getName()`（D27）。
 - `Hero` / `AI` 子類別已刪除（D4），`NonHero` 也已刪除（D43）；召喚用的 `Slime` 直接繼承 `Role`，只畫在 ③ 與 ⑥。
 
+### ⑧ 輸出（Composite，✅ 2026-10-15，D50）
+
+```mermaid
+classDiagram
+    class Output {
+        <<interface>>
+        +write(string line)*
+    }
+    class ConsoleOutput {
+        +write(line) std::cout + endl
+    }
+    class StreamOutput {
+        -ostream& stream（不擁有）
+        +write(line)
+    }
+    class CompositeOutput {
+        -vector~Output~ children
+        +write(line) 先 render 再依序分送
+        #render(line) string（預設原樣）
+    }
+    class io {
+        <<namespace>>
+        +output()$ Output&
+        +setOutput(Output next)$ Output 先前的
+    }
+
+    Output <|.. ConsoleOutput : Leaf：主控台
+    Output <|.. StreamOutput : Leaf：檔案 / 測試字串
+    Output <|.. CompositeOutput
+    CompositeOutput "1" *-- "*" Output : children（擁有，解構時釋放）
+    io --> "0..1" Output : 目前的輸出（不擁有；未設定 = 預設主控台）
+    RPG ..> io : 勝負
+    Role ..> io : 輪到 / 死亡
+    State ..> io : 選單 / MP 不足 / 傷害
+    Skill ..> io : 行動訊息
+    HeroAction ..> io : 選目標提示
+    Client ..> CompositeOutput : 組裝後 setOutput
+```
+
+組裝範例（巢狀 Composite 讓不同分支有不同渲染；`TimestampOutput` 只是示意，**未實作**）：
+
+```mermaid
+flowchart TD
+    C["Client：io::setOutput(&root)"] --> R["CompositeOutput（原樣）"]
+    R --> CO["ConsoleOutput → 主控台（與 .out 一字不差）"]
+    R --> TS["TimestampOutput（繼承 CompositeOutput、覆寫 render）"]
+    TS --> F["StreamOutput → 戰鬥紀錄檔"]
+```
+
+讀圖重點：
+
+- **模組只依賴 `io::output()`**，不再直接寫 `std::cout`；輸出到哪裡、要不要加渲染，由 Client 組裝（D50）。
+- **Leaf 決定輸出到哪，Composite 決定渲染**：要新增目的地就寫一個 Leaf，要新增渲染就寫一個覆寫 `render` 的 `CompositeOutput` 子類別，模組都不用改。
+- `setOutput` 不擁有傳入的物件（由 Client 釋放），回傳先前的值方便還原；傳 `nullptr` 回到預設主控台。測試的 `OutputCapture` 就是「建構時 `setOutput(字串)`、解構時還原」。
+- 命名空間用 `io`：`utils.h` 裡的 `utils` 是 class，不能再當命名空間（§7.2 I13）。
+
 ### 每個類別負責什麼
 
 | 類別 | 責任 | 決策 |
@@ -574,6 +634,7 @@ classDiagram
 | `SkillObserver` | 收到死者後自行讀資料、自行判斷施咒者 / 召喚者是否還活著 | D18 |
 | `Curse` | 從目標的 observer 清單判斷「同一施咒者不疊加」 | D19 |
 | `OnePunch` | 對每位目標依序呼叫 Client 注入的 handler 的 `handle()`，第一個回傳 `true` 就停；**沒有預設鏈** | D21–D23 |
+| `io::Output`（utils） | 模組的輸出出口：`io::output().write(一整行)`；Leaf 決定輸出到哪，`CompositeOutput` 先渲染再分送；Client 用 `setOutput` 更換 | D50 |
 
 ### 模組內部 vs 外部擴充（只列已決定的）
 
@@ -581,7 +642,8 @@ classDiagram
 |---|---|---|
 | **模組內部** | `RPG`、`Battle`、`Troop`、`Role`、`State`、`NormalState`、`IAction`、`AIAction`、`HeroAction`、`Skill`、`BasicAttack`、`SkillObserver`、`OnePunchHandler`（抽象類別） | D1、D11、D28、D32、D41 |
 | **外部擴充**（可直接刪檔，不影響模組） | 10 種技能（含 `OnePunch`）、具體的一拳 handler（`HpHandler` 等）、新增的 AI（實作 `IAction`）；`Curse` / `CurserObserver` 等技能專屬的觀察者；技能帶出的狀態（中毒、石化、鼓舞） | D19、D23、D24、需求 ② |
-| **Client** | `main.cpp`、`test/libary/RPG_parser`：讀測資 / 輸入、名稱 → 技能的建造函式、組裝一拳攻擊的處理鏈、建立角色與軍隊、決定每個角色的 `IAction` | D21、D26、D36、D37 |
+| **Client** | `main.cpp`、`test/libary/RPG_parser`：讀測資 / 輸入、名稱 → 技能的建造函式、組裝一拳攻擊的處理鏈、建立角色與軍隊、決定每個角色的 `IAction`、組裝輸出（`io::setOutput`）、釋放兩軍 | D21、D26、D36、D37、D49、D50 |
+| **工具（utils）** | `include/utils/Output.hpp`（header-only）：`io::Output`、`ConsoleOutput`、`StreamOutput`、`CompositeOutput`、`output()` / `setOutput()` | D50 |
 
 
 ---
@@ -615,11 +677,13 @@ sequenceDiagram
     P->>R: 其他角色：setDecider(new AIAction())
     P-->>M: RPGSetup{t1, t2, hero}（輸入停在第一行英雄決策）
     M->>H: new HeroAction(heroInput)
-    M->>R: hero->setDecider(heroAction)
+    M->>R: hero->setDecider(heroAction)（之後由 Role 釋放，D49）
+    M->>M: output = CompositeOutput({new ConsoleOutput()})<br/>previous = io::setOutput(&output)（D50）
     M->>G: GameStart(t1, t2)
-    G->>G: new Battle(t1, t2)、startBattle()
-    G->>G: 印「你獲勝了！」或「你失敗了！」
+    G->>G: new Battle(t1, t2)、startBattle()<br/>（所有輸出都經由 io::output()）
+    G->>G: io::output().write("你獲勝了！" / "你失敗了！")
     M->>G: GameEnd()
+    M->>M: io::setOutput(previous)、delete t1、delete t2（D49）
 ```
 
 > `heroInput`（D37）：讀測資時是**同一個檔案串流**（parser 讀完軍隊後剩下的就是決策行）；`--play` 時是 `std::cin`；不帶參數時軍隊與決策都來自 `std::cin`。S1 和 S2 共用同一串輸入。
@@ -827,14 +891,15 @@ sequenceDiagram
     participant T as TEST_P（每組 .in / .out 一個案例）
     participant P as RPG_parser（test/libary）
     participant G as RPG
-    participant O as ostringstream
+    participant O as OutputCapture（StreamOutput → ostringstream）
 
     T->>P: parse(ifstream("testcases/<名稱>.in"))
     P-->>T: t1, t2, hero（串流停在英雄決策行）
     T->>T: hero->setDecider(new HeroAction(同一個串流))
-    T->>O: std::cout.rdbuf(O)
-    T->>G: GameStart(t1, t2)、GameEnd()
-    T->>T: 還原 std::cout
+    T->>O: 建立：previous = io::setOutput(&sink)（D50）
+    T->>G: GameStart(t1, t2)、GameEnd()（輸出寫進 O）
+    T->>O: 解構：io::setOutput(previous)
+    T->>T: delete t1、delete t2（D49）
     T->>T: 和 <名稱>.out 逐行比對（含最後的「你獲勝了！」）
     opt 不一致
         T->>T: 報出第一個不同的行號，寫出 <名稱>.actual.txt（測試執行時的目前目錄）
@@ -843,4 +908,4 @@ sequenceDiagram
 
 > 這和 `RPGGAME <測資.in>` 走的是同一條路（`main.cpp` 的 `play(file, file)`），所以主程式的輸出也會和 `.out` 相同。
 >
-> 目前的測試（✅）：`ExampleTests.cpp` 11、`SkillTests.cpp` 43、`RoleTests.cpp` 20、`AIActionTests.cpp` 11、`HeroActionTests.cpp` 15、`StateFlowTests.cpp` 16、`BattleTests.cpp` 10、`ParserTests.cpp` 8、`TestcaseReplayTests.cpp` 11（10 組測資 + 測資清單檢查），共 145 個。每個測試的流程與通過標準見 [`test/TESTS.md`](test/TESTS.md)；輸出用 `rdbuf` 收集（D38）。
+> 目前的測試（✅）：`ExampleTests.cpp` 11、`SkillTests.cpp` 46、`RoleTests.cpp` 25、`AIActionTests.cpp` 11、`HeroActionTests.cpp` 15、`StateFlowTests.cpp` 16、`BattleTests.cpp` 10、`ParserTests.cpp` 8、`TestcaseReplayTests.cpp` 11（10 組測資 + 測資清單檢查）、`OutputTests.cpp` 7，共 160 個。每個測試的流程與通過標準見 [`test/TESTS.md`](test/TESTS.md)；輸出用 `OutputCapture`（`io::setOutput`，D50）收集。

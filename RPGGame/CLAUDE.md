@@ -53,8 +53,9 @@
 | `Role/` | ✅ `lossHp()`：歸零當下印死亡並通知觀察者（D17）；建立時自動加入普通攻擊（D28）；`getDisplayName()`；`checkMp(Skill*)` 只檢查（D9，取代 `checkActionLossMp`）；`endThisRound()`（D11）；`takeTurn(t1, t2, actorSide)` 交給 `state->decision(...)`（D10）；決策者 `setDecider / getDecider`（D4）；英雄識別 `setIdentity / isHero`（D6）；✅ `Hero` / `AI` 子類別已刪除（D4）；`NonHero` 已刪除、`Slime` 直接繼承 `Role`（D43）並以 `Slime()` 持有需求數值（D44）；`lossHp()` 改為 private、只開放給 `State`（D47）；解構時也釋放觀察者與決策者，`setDecider` 換掉時釋放舊的、禁止複製（D49） |
 | `IAction` / `AIAction` / `HeroAction` | ✅ `IAction`：`chooseAction(skills)`、`chooseTargets(candidates, m)`（D4、D5、D7、D8）；`AIAction`：seed 規則（§7.2 I5）；`HeroAction`：從注入的 `istream` 讀英雄決策（D37，§7.5） |
 | `Game/` | ✅ `Troop` 新增軍隊編號（輸出前綴）；`Battle::startBattle()` 回合迴圈（D1、D11、D20、D30、D31）、`isHeroAlive()`；`RPG::GameStart()` 啟動戰鬥並印勝負（§7.2 I9）；`RPG::makeAction()`、`Troop::StartBattle()` 已刪除（D42）；`Troop` 擁有角色（含召喚的史萊姆），解構時釋放、禁止複製（D49） |
-| Client | ✅ `test/libary/RPG_parser`：解析輸入、技能建造函式（D26、D36，§7.2 I10）；`main.cpp`：讀測資 / `--play` 實際玩 / 標準輸入三種用法（§7.2 I11）；Client 擁有並釋放兩支 `Troop`，英雄的 `HeroAction` 以 `new` 交給 Role；parser 格式錯誤時自行釋放已建立的物件（D49） |
-| 測試 | ✅ `ExampleTests.cpp` 11、`SkillTests.cpp` 46、`RoleTests.cpp` 25、`AIActionTests.cpp` 11、`HeroActionTests.cpp` 15、`StateFlowTests.cpp` 16、`BattleTests.cpp` 10、`ParserTests.cpp` 8、`TestcaseReplayTests.cpp` 11（`testcases/` 10 組用正式的 parser + RPG 整場比對，加上測資清單檢查），共 153 個全部通過；主程式 `RPGGAME <測資.in>` 的輸出也與 10 組 `.out` 完全相同。每個測試的流程與通過標準見 [`test/TESTS.md`](test/TESTS.md) |
+| Client | ✅ `test/libary/RPG_parser`：解析輸入、技能建造函式（D26、D36，§7.2 I10）；`main.cpp`：讀測資 / `--play` 實際玩 / 標準輸入三種用法（§7.2 I11）；Client 擁有並釋放兩支 `Troop`，英雄的 `HeroAction` 以 `new` 交給 Role；parser 格式錯誤時自行釋放已建立的物件（D49）；`main` 組裝輸出 `CompositeOutput({ConsoleOutput})` 並 `io::setOutput`（D50） |
+| `utils/Output.hpp` | ✅ 輸出小工具（D50）：`io::Output` ← `ConsoleOutput`、`StreamOutput`、`CompositeOutput`；模組的 19 處 `std::cout` 全部改成 `io::output().write(...)` |
+| 測試 | ✅ `ExampleTests.cpp` 11、`SkillTests.cpp` 46、`RoleTests.cpp` 25、`OutputTests.cpp` 7、`AIActionTests.cpp` 11、`HeroActionTests.cpp` 15、`StateFlowTests.cpp` 16、`BattleTests.cpp` 10、`ParserTests.cpp` 8、`TestcaseReplayTests.cpp` 11（`testcases/` 10 組用正式的 parser + RPG 整場比對，加上測資清單檢查），共 160 個全部通過；主程式 `RPGGAME <測資.in>` 的輸出也與 10 組 `.out` 完全相同。每個測試的流程與通過標準見 [`test/TESTS.md`](test/TESTS.md) |
 
 ---
 
@@ -71,8 +72,7 @@
 - ✅ A11 已結案（決策 D35–D39）。**必要問題 A1–A11 全部結案，架構設計完成。**
 - ✅ 2026-10-13 進入實作：技能周邊 + 單元測試完成（§7）。
 - ✅ 2026-10-14：全部實作完成，10 組測資整場輸出與 `.out` 一致（§7.7）。
-- ✅ 2026-10-15：開放問題 O2–O5 結案（D42–D48）；O1 結案（D49）。
-- ⏸ **下一步**：開放問題 O6 視時間討論。
+- ✅ 2026-10-15：開放問題 O2–O5 結案（D42–D48）；O1 結案（D49）；O6 結案（D50）。**開放問題 O1–O6 全部結案。**
 
 ### 收尾建議順序
 主流程是骨架，其他問題都掛在它上面，所以建議依序：
@@ -157,7 +157,7 @@
 - **O3. 命名與詞彙表** ✅ 結案（D46）：維持 `Skill` / `attack()` 命名，`attack` 意指「施放行動」，已在 `Skill.hpp` 註明。
 - **O4. 防止技能繞過傷害通道** ✅ 結案（D47）：`lossHp` private、`damage` protected，技能只能用 `doDamage`；自爆的自殺改為 `costHp()` 由流程支付；`RoleTests` 以 static_assert 在編譯期檢查。
 - **O5. 技能名稱重複定義** ✅ 結案（D48）：維持現狀，名稱在 Client 的建造函式與技能本身各寫一次；兩邊一致由 `ParserTest.CreatesEveryRequirementSkillByChineseName`（PA-05）把關。日後有需求再補名稱 → 建立技能的 factory mapping。
-- **O6. 輸出目的地可替換**：模組直接寫 `std::cout`（D38），測試靠 `rdbuf` 導向。若要讓輸出可注入（`ostream&` 或輸出介面），需改整條呼叫鏈。（需求未要求）
+- **O6. 輸出目的地可替換** ✅ 結案（D50）：模組改寫 `io::output()`（`include/utils/Output.hpp`），輸出用 Composite 組裝：Leaf 決定輸出到哪、Composite 決定渲染；Client 以 `io::setOutput` 更換，測試不再需要 `rdbuf`。
 
 ## 5. 設計決策紀錄
 
@@ -200,7 +200,7 @@
 | D35 | 2026-10-12 | A11 | **測資放在 `RPGGame/testcases/`（10 組 `.in` / `.out`）並 commit 進 repo**，不照 BigTwo 放 `test/testSet/`。 | 根目錄 `.gitignore` 忽略 `testSet`，放在 `testcases/` 才會被 commit |
 | D36 | 2026-10-12 | A11 | **解析 `.in` 沿用 BigTwo 做法**：在 `test/libary/` 放 RPG 專用 parser，把軍隊行建成 `Troop`（技能用 D26 的建造函式、T1 第一位標成英雄 D6），其餘各行為英雄決策。 | D26「Client 讀檔」的落實；測資的英雄名字是「英雄」而非需求寫的「Hero」，D6 用旗標判斷不受影響 |
 | D37 | 2026-10-12 | A11 | **英雄的 `IAction` 注入 `std::istream&`**：正式執行傳 `std::cin`，測試傳讀測資檔的 stream。 | 依 D4 只有英雄的 `IAction` 讀輸入，只注入這一處；不照抄 BigTwo 把 `plays` 一路傳遞 / 回傳穿過每一層；S1、S2 共用同一串輸入、MP 不足重選讀下一行都自然成立；`std::istream` 本身即可替換的輸入來源，不另設介面 |
-| D38 | 2026-10-12 | A11 | **測試時用 `rdbuf` 把 `std::cout` 導向字串收集輸出**，模組內部維持直接寫 `std::cout`。 | 輸出散落在 `doDamage`、`lossHp`、State 流程、技能等多處，注入 `ostream&` 要改整條呼叫鏈的簽名；需求只要求輸出正確，未要求輸出目的地可替換（列為 O6） |
+| D38 | 2026-10-12 | A11 | （2026-10-15 已由 D50 取代）**測試時用 `rdbuf` 把 `std::cout` 導向字串收集輸出**，模組內部維持直接寫 `std::cout`。 | 輸出散落在 `doDamage`、`lossHp`、State 流程、技能等多處，注入 `ostream&` 要改整條呼叫鏈的簽名；需求只要求輸出正確，未要求輸出目的地可替換（列為 O6） |
 | D39 | 2026-10-12 | A11 | **用 gtest 參數化測試（`TEST_P`）比對**：每組 `.in` / `.out` 一個案例，逐行比對，失敗時報出第一個不同的行號，並把實際輸出寫到 `build/<名稱>.actual.txt` 供 diff。 | 10 組、每組數十到上百行，無法人工比對；一組一案例可直接看出哪個技能出錯 |
 | D40 | 2026-10-14 | A2（補充） | **召喚的史萊姆由 AI 操控，但和其他角色一樣「攜帶」決策者**：`Summon` 建出史萊姆後呼叫 `slime->setDecider(new AIAction())`，不把 AI 寫死在 `Slime` 類別裡；每隻史萊姆有自己的 `AIAction`（seed 從 0 開始、互不影響）。 | 需求：英雄以外的角色都由 AI 操控；沿用 D4「Role 持有 `IAction`」的同一套機制。取捨：`Summon`（外部擴充）因此依賴 `AIAction`；依 D41 `AIAction` 屬於模組內部，這是「外部 → 模組」的依賴，方向正確 |
 | D41 | 2026-10-14 | 實作後補充（模組邊界） | **`AIAction`、`HeroAction` 與抽象的 `OnePunchHandler` 屬於模組內部**。要擴充時，在模組外部新增實作（新的 AI、新的一拳規則 handler），只依賴它該依賴的介面（`IAction`、`OnePunchHandler`），模組內部不必改動。具體的一拳 handler（`HpHandler` 等）仍是外部擴充（D24）。 | 介面與需求要求的兩種決策者是模組提供的能力；新增實作只往模組方向依賴（需求 ①④），刪除外部的實作不影響模組 |
@@ -212,6 +212,7 @@
 | D47 | 2026-10-14 | O4 | **技能造成傷害只能走 `doDamage`，由編譯器強制**：`Role::lossHp` 改為 private（`friend class State`）、`State::damage` 改為 protected；中毒改呼叫自己的 `damage(30)`。**自爆的自殺改視為技能的「HP 代價」**：`Skill` 新增 `virtual int costHp(Role* actor) const`（預設 0），`SelfExplosion` 回傳全部 HP；`State::decision()` 在 `attack()` 之後支付（不印傷害訊息，死亡訊息自然排在所有目標之後，D34）。 | Anthony 要求技能的寫法統一、不要多一個 `die()` 入口；自殺與 MP 一樣是施放的代價，由流程支付。代價：`Skill` 多一個 virtual；直接呼叫 `attack()` 的自爆測試改成經過流程 |
 | D48 | 2026-10-15 | O5 | **技能名稱維持兩處定義，不改**：輸入名稱留在 Client 的 `RPG_parser::createSkill`（D26），輸出名稱留在各技能的建構子（D27）。 | Anthony 認為不是大問題：兩邊不一致時 PA-05 會失敗；日後若有其他需求（例如技能種類變多、名稱可設定）再補 factory mapping。已排除（目前）：名稱只寫一次的註冊機制 |
 | D49 | 2026-10-15 | O1 | **擁有權順著「誰裝著誰」**：Client（`main` / 測試）擁有兩支 `Troop`；`Troop` 擁有加入的角色（含召喚加入的史萊姆），解構時釋放，`removeRole` 交回呼叫端；`Role` 擁有狀態、技能、觀察者與**決策者**，`setDecider` 換掉時釋放舊的；`OnePunch` 擁有注入的處理鏈。英雄的 `HeroAction` 改由 `main` 以 `new` 交給 Role。**以裸指標 + 解構子 `delete` 實作，不用 `std::unique_ptr`**。 | Anthony：結束時由 Troop 自動釋放角色，Role 釋放自己持有的；決策者也歸 Role 擁有（若改由 Client 擁有，召喚途中產生的 `AIAction` 沒人知道要釋放）。`unique_ptr` 主要是讓型別保護記憶體，但需求沒有要求，用 `delete` 改動最小。已排除（目前）：`std::unique_ptr`、決策者由 Client 擁有 |
+| D50 | 2026-10-15 | O6 | **輸出改用一個簡單的 Composite 小工具，放在 utils**（`include/utils/Output.hpp`，header-only）：介面 `io::Output::write(一整行)`；**Leaf 決定輸出到哪**（`ConsoleOutput`、`StreamOutput`），**Composite 決定加上什麼渲染**（`CompositeOutput::render()` 預設原樣，先渲染再依序分送；巢狀組合讓不同分支有不同渲染）。**模組透過單一存取點取得**：`io::output()`；Client 用 `io::setOutput()` 組裝 / 更換，未設定時是主控台。取代 D38（測試改用 `setOutput`，不再換 `rdbuf`）。 | Anthony：`std::cout` 寫死目的地、全域格式狀態、只能一個目的地、遊戲輸出與除錯訊息分不開；參考 logframework 的 Exporter / Composite，但只要最簡單的版本。取得方式選單一存取點（B）：改動最小；代價是它仍是全域狀態（只是換成自己定義的介面）。已排除：一路注入 `Output&`（A）、直接引用 logframework（有 Level / 時間戳記，不符合「輸出必須與 .out 一字不差」） |
 
 ---
 
@@ -254,6 +255,7 @@ cd test && ./run_tests.sh                        # Windows: run_tests.bat
 | I10 | **Parser 介面 `RPG_parser::parse(std::istream&)`**：讀到 `#軍隊-2-結束` 就停，串流剩下的就是英雄決策；T1 第一位 `setIdentity('h')`，其他角色 `setDecider(new AIAction())`；**英雄的決策者由呼叫端設定**。技能建造函式 `RPG_parser::createSkill(name)` 也在這裡。放在 `test/libary`（D36），以 `__RPG_CLIENT_SRCS` 編進 `RPGGAME_LIB`，主程式與測試共用。 | 用串流而不是檔名（BigTwo 的做法），讀測資時同一個檔案串流可直接交給 `HeroAction`（D37）；`--play` 時改交 `std::cin`。不放進 `__TEST_UTILS__SRCS`，因為 `SimpleTest_LIB` 看不到模組的標頭檔 |
 | I11 | **`main.cpp` 三種用法**：`RPGGAME <測資.in>`（軍隊與決策都來自檔案）、`RPGGAME --play <測資.in>`（軍隊來自檔案、決策由鍵盤輸入）、`RPGGAME`（都從標準輸入，可 `< 測資.in`）；錯誤（檔案打不開、格式錯誤、未知技能、決策用完）印到 stderr 並回傳 1。原本結尾的 `std::system("pause")` 拿掉。 | 讀測資模式的輸出必須和 `.out` 完全相同，不能多印；`pause` 會讓 exe 一直執行，造成之前 build 時 `RPGGAME.exe: Permission denied` |
 | I12 | **`Role`、`Troop` 禁止複製**（複製建構與複製指定都 `= delete`）。 | D49 之後兩者都用裸指標擁有物件，若被複製，兩份解構子會重複 `delete`；目前沒有任何地方需要複製。RL-23 以 `static_assert` 檢查 |
+| I13 | **輸出小工具的細節**：命名空間用 `io`（`utils.h` 的 `utils` 是 class，不能再當命名空間）；`write` 一次寫一整行，模組先組好字串再寫；`ConsoleOutput` 用 `std::endl`（每行 flush，`--play` 的提示會在讀鍵盤前出現，與原本行為相同）；`setOutput` 不擁有傳入物件、回傳先前的值方便還原、`nullptr` = 預設主控台；`CompositeOutput` 擁有子節點、禁止複製（比照 D49）。 | 與既有程式風格與 D49 一致；測試的 `OutputCapture` 可以巢狀使用 |
 
 ### 7.3 2026-10-14：Role 與 Observer
 - **Observer**：7.1 已完成（`UntilDie(Role* dead)`、召喚 +30、詛咒 + 剩餘 MP、施放者已死不給）；本次只補測試（通知順序、只通知一次、移除後不通知、獎勵在死亡訊息之後）。
@@ -329,3 +331,10 @@ cd test && ./run_tests.sh                        # Windows: run_tests.bat
 - **測試**：原本把 stack 上的決策者交給 `setDecider(&x)` 的地方都改成 `new`（`StateFlowTests` 全部、`AIActionTests` AI-10、`HeroActionTests` HA-12、`RoleTests` RL-05、`BattleTests` / `SkillTests` 的 fixture、`TestcaseReplayTests`）；`ParserTests` 與 `TestcaseReplayTests` 用完 `delete` 兩支 `Troop`；RL-03、RL-12 自己 `delete` 被移除的角色 / 觀察者。新增 RL-23–25、SK-46，共 153 個通過，10 組測資整場輸出不變。
 - **記憶體檢查**：AddressSanitizer 建置下，`RPGGAME` 三種用法 × 10 組、未知技能、決策行不足都沒有洩漏或重複釋放（修改前 summon 一組就洩漏 63 個配置）；單元測試只剩 Anthony 原本的 `ExampleTests.cpp` 自己 `new` 而沒有釋放的物件（保留原樣）。
 - **刻意改壞**：Troop 不刪角色 → RL-23；Role 不刪決策者 / 觀察者 → RL-24；設成同一個決策者也刪 → RL-25（ASan 下 heap-use-after-free）；OnePunch 不刪處理鏈 → SK-46。
+
+### 7.10 2026-10-15：開放問題 O6（D50）
+- **新增** `include/utils/Output.hpp`（header-only，命名空間 `io`）：`Output`、`ConsoleOutput`、`StreamOutput`、`CompositeOutput`（`render` 預設原樣）、`output()`、`setOutput()`（§7.2 I13）。
+- **模組**：`RPG`、`Role`、`HeroAction`、`State`、`Skill`、`BasicAttack`、`SelfHealing` 的 19 處 `std::cout` 改成先組好一行字串、再 `io::output().write(...)`；模組內已沒有 `std::cout`。
+- **Client**：`main.cpp` 組裝 `CompositeOutput({new ConsoleOutput()})`，開局 `setOutput`、結束（或丟例外）時還原。
+- **測試**：各檔的 `CoutCapture` 改名 `OutputCapture`，改用 `setOutput(StreamOutput(字串))`；`ParserTests` 的手動 `rdbuf` 也改掉。新增 `OutputTests.cpp`（OU-01–07）。共 160 個通過，10 組測資整場輸出不變（三種用法都相同），AddressSanitizer 下 `RPGGAME` 無洩漏。
+- **刻意改壞**：Composite 不套用 render → OU-04；不釋放子節點 → OU-05；`setOutput` 不回傳先前的 → OU-06；死亡訊息改回直接寫 `std::cout` → 27 個測試失敗（`OutputCapture` 收不到）。

@@ -10,6 +10,7 @@
 #include <string>
 #include <vector>
 
+#include "Output.hpp"
 #include "RPG_parser.hpp"
 #include "Troop.hpp"
 #include "Role.hpp"
@@ -130,9 +131,10 @@ TEST(ParserTest, OnePunchGetsTheRequirementChain) {
     Skill* punch = RPG_parser::createSkill("一拳攻擊");
     ASSERT_NE(dynamic_cast<OnePunch*>(punch), nullptr);
     std::ostringstream out;
-    std::streambuf* old = std::cout.rdbuf(out.rdbuf());
+    io::StreamOutput sink(out);
+    io::Output* previous = io::setOutput(&sink); // 模組輸出導向字串（D50）
     punch->attack(hero, {slime});
-    std::cout.rdbuf(old);
+    io::setOutput(previous);
     EXPECT_EQ(out.str(), "[1]英雄 對 [2]Slime 造成 300 點傷害。\n"); // 規則 1 生效：鏈已注入
     delete punch;
 }

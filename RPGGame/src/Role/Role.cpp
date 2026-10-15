@@ -6,6 +6,7 @@
 #include "BasicAttack.hpp"
 #include "IAction.hpp"
 #include "Troop.hpp"
+#include "Output.hpp"
 #include <iostream>
 #include "../utils/utils.h"
 
@@ -35,8 +36,8 @@ Role::~Role() {
 
 void Role::takeTurn(const std::vector<Role*>& t1, const std::vector<Role*>& t2, int actorSide) {
     // 「輪到 …」在狀態效果之前印：石化也要印、中毒印的是扣 30 之前的 HP（§7.2 I6，對照 testcases/poison.out）
-    std::cout << "輪到 " << getDisplayName() << " (HP: " << hp << ", MP: " << mp << ", STR: " << str
-              << ", State: " << state->getDisplayName() << ")。" << std::endl;
+    io::output().write("輪到 " + getDisplayName() + " (HP: " + std::to_string(hp) + ", MP: " + std::to_string(mp) +
+                          ", STR: " + std::to_string(str) + ", State: " + state->getDisplayName() + ")。"); // D50
     state->decision(t1, t2, actorSide);
 }
 
@@ -49,7 +50,7 @@ void Role::lossHp(int damage) {
     hp -= damage;
     if (hp < 0) hp = 0;
     if (wasAlive && isDead()) {
-        std::cout << getDisplayName() << " 死亡。" << std::endl;
+        io::output().write(getDisplayName() + " 死亡。"); // D50
         notifyObservers();
     }
 }

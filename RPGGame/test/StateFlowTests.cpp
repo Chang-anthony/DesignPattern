@@ -1,7 +1,7 @@
 /*
  * State 行動流程（State::decision）的單元測試。
  *  - 依據：need/need.md「遊戲流程」「角色狀態」「輸出格式」、CLAUDE.md 決策 D5、D8–D12、D16、D17、D29
- *  - 輸出以 rdbuf 導向字串收集（D38）
+ *  - 輸出以 io::setOutput 導向字串收集（D50；原本用 rdbuf，D38）
  *  - 整場測資比對在 TestcaseReplayTests.cpp
  */
 #include <gtest/gtest.h>
@@ -11,6 +11,7 @@
 #include <string>
 #include <vector>
 
+#include "Output.hpp"
 #include "Role.hpp"
 #include "Troop.hpp"
 #include "State.hpp"
@@ -33,10 +34,11 @@ namespace {
 
 using Lines = std::vector<std::string>;
 
-class CoutCapture {
+// 在作用域內把模組輸出（io::output()）導向字串，解構時還原（D50）
+class OutputCapture {
 public:
-    CoutCapture() : old(std::cout.rdbuf(buffer.rdbuf())) {}
-    ~CoutCapture() { std::cout.rdbuf(old); }
+    OutputCapture() : sink(buffer), previous(io::setOutput(&sink)) {}
+    ~OutputCapture() { io::setOutput(previous); }
 
     Lines lines() const {
         Lines result;
@@ -48,7 +50,8 @@ public:
 
 private:
     std::ostringstream buffer;
-    std::streambuf* old;
+    io::StreamOutput sink;
+    io::Output* previous;
 };
 
 // 角色由 fixture 的 Troop 擁有、決策者由 Role 擁有（D49）：各測試 new 出決策者交給 setDecider 即可
@@ -67,7 +70,7 @@ protected:
     // 讓 role 行動一次（模擬 Battle 輪到它），回傳輸出
     Lines turn(Role* role) {
         int side = role->getTroop() == &t1 ? 1 : 2;
-        CoutCapture capture;
+        OutputCapture capture;
         role->takeTurn(t1.getRoles(), t2.getRoles(), side);
         return capture.lines();
     }
@@ -171,11 +174,11 @@ TEST_F(StateFlowTest, HeroIsPromptedForTargetsOnlyWhenChoosing) {
     EXPECT_EQ(s2->getHp(), 80);
 
     {
-        CoutCapture mute;
+        OutputCapture mute;
         hero->getState()->doDamage(s2, 80); // Slime2 死亡（lossHp 不公開，走正規通道，D47）
     }
     std::vector<Role*> aliveT2{s1};
-    CoutCapture capture;
+    OutputCapture capture;
     hero->takeTurn(t1.getRoles(), aliveT2, 1); // 只剩 1 位候選 → 不印「選擇 1 位目標」、不讀行
     EXPECT_EQ(capture.lines(), (Lines{
         "輪到 [1]英雄 (HP: 300, MP: 450, STR: 100, State: 正常)。",
@@ -206,7 +209,7 @@ TEST_F(StateFlowTest, AIChoosesTargetsWithoutPrompt) {
 TEST_F(StateFlowTest, RoleWithoutDeciderCannotAct) {
     Role* hero = add(t1, "英雄", 300, 500, 100);
     add(t2, "Slime1", 200, 60, 49);
-    CoutCapture mute;
+    OutputCapture mute;
     EXPECT_THROW(hero->takeTurn(t1.getRoles(), t2.getRoles(), 1), std::invalid_argument);
 }
 
@@ -235,7 +238,7 @@ TEST_F(StateFlowTest, PetrifiedHeroDoesNotConsumeInput) {
     hero->setState(new PetrochemicaledState());
 
     EXPECT_EQ(turn(hero).size(), 1u);
-    CoutCapture mute;
+    OutputCapture mute;
     EXPECT_EQ(decider->chooseAction(hero->getSkills())->getName(), "水球"); // 「1」這行還在
 }
 
@@ -278,7 +281,7 @@ TEST_F(StateFlowTest, PoisonDeathTriggersObservers) {
     AIAction* ai = new AIAction();
     slime->setDecider(ai);
     {
-        CoutCapture mute;
+        OutputCapture mute;
         Curse().attack(hero, {slime});
     }
     slime->setState(new PoisonedState());

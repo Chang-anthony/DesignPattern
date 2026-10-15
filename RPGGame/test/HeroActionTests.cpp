@@ -13,6 +13,7 @@
 #include <string>
 #include <vector>
 
+#include "Output.hpp"
 #include "HeroAction.hpp"
 #include "IAction.hpp"
 #include "Role.hpp"
@@ -26,10 +27,11 @@ using Names = std::vector<std::string>;
 
 namespace {
 
-class CoutCapture {
+// 在作用域內把模組輸出（io::output()）導向字串，解構時還原（D50）
+class OutputCapture {
 public:
-    CoutCapture() : old(std::cout.rdbuf(buffer.rdbuf())) {}
-    ~CoutCapture() { std::cout.rdbuf(old); }
+    OutputCapture() : sink(buffer), previous(io::setOutput(&sink)) {}
+    ~OutputCapture() { io::setOutput(previous); }
 
     std::vector<std::string> lines() const {
         std::vector<std::string> result;
@@ -41,7 +43,8 @@ public:
 
 private:
     std::ostringstream buffer;
-    std::streambuf* old;
+    io::StreamOutput sink;
+    io::Output* previous;
 };
 
 Names namesOf(const std::vector<Role*>& roles) {
@@ -54,7 +57,7 @@ Names namesOf(const std::vector<Role*>& roles) {
 
 class HeroActionTest : public ::testing::Test {
 protected:
-    CoutCapture mute; // chooseTargets 會印「選擇 m 位目標」，其他測試不檢查輸出
+    OutputCapture mute; // chooseTargets 會印「選擇 m 位目標」，其他測試不檢查輸出
     Role a{100, 0, 0, "A"};
     Role b{100, 0, 0, "B"};
     Role c{100, 0, 0, "C"};
@@ -127,7 +130,7 @@ TEST_F(HeroActionTest, PromptsForTargetsOnlyWhenActuallyChoosing) {
     // 需求「輸出格式」：S2 時印「選擇 <m> 位目標: (0) <候選-1> (1) <候選-2> …」（§7.2 I7）
     std::istringstream input("2, 0\n");
     HeroAction decider(input);
-    CoutCapture capture;
+    OutputCapture capture;
     decider.chooseTargets(abc, 2);
     decider.chooseTargets({&a, &b}, 2); // n = m：略過 S2，不印
     decider.chooseTargets({}, 0);       // m = 0：不印

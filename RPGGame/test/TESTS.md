@@ -4,7 +4,7 @@
 
 - 需求：[`../need/need.md`](../need/need.md)　設計決策 D1–D40 與實作紀錄：[`../CLAUDE.md`](../CLAUDE.md)　圖：[`../diagrams.md`](../diagrams.md)
 - 測試框架：GoogleTest（`TEST` / `TEST_F`），C++20
-- 最後更新：2026-10-15（O1 物件擁有權，D49），共 **153** 個測試，全部通過；主程式的手動驗證見 §11
+- 最後更新：2026-10-15（O1 物件擁有權 D49、O6 輸出 Composite D50），共 **160** 個測試，全部通過；主程式的手動驗證見 §11
 
 ---
 
@@ -33,7 +33,7 @@ cmake --build build                 # Windows (MinGW)：build 完會自動執行
 
 | 項目 | 標準 |
 |---|---|
-| 結果 | 最後一行為 `[  PASSED  ] 153 tests.`，沒有任何 `[  FAILED  ]` |
+| 結果 | 最後一行為 `[  PASSED  ] 160 tests.`，沒有任何 `[  FAILED  ]` |
 | 程式結束 | 測試程式正常結束（沒有 crash / segmentation fault）；crash 視同失敗 |
 | 新增測試檔 | `test/CMakeLists.txt` 以 `file(GLOB … CONFIGURE_DEPENDS *.cpp)` 收集，新增 / 刪除 `test/*.cpp` 後直接 build 即可，不必修改 CMake |
 | 單一測試 | 該測試內**所有** `EXPECT_*` / `ASSERT_*` 都成立；`ASSERT_*` 失敗會立即中止該測試（後續檢查不執行） |
@@ -51,13 +51,14 @@ cmake --build build                 # Windows (MinGW)：build 完會自動執行
 | RP | `TestcaseReplayTests.cpp` | `AllTestcases/TestcaseReplayTest`、`TestcaseListTest` | 11 | `testcases/` 10 組用正式 parser + RPG 整場比對、測資清單檢查 |
 | PA | `ParserTests.cpp` | `ParserTest` | 8 | Client 端 `RPG_parser`：解析輸入、技能建造函式、錯誤處理 |
 | BT | `BattleTests.cpp` | `BattleTest` | 10 | `Battle` 回合迴圈、結束條件、`RPG` 宣布勝負 |
-| | | **合計** | **153** | |
+| OU | `OutputTests.cpp` | `OutputTest` | 7 | `io::Output`：Leaf、Composite 渲染與分送、擁有子節點、單一存取點（D50，見 §14） |
+| | | **合計** | **160** | |
 
 ### 1.4 測試共用的工具與慣例
 
 | 名稱 | 所在檔案 | 用途 |
 |---|---|---|
-| `CoutCapture` | SK、RL | 建構時用 `std::cout.rdbuf()` 把輸出導向字串，解構時還原（D38）；`lines()` 依換行切成 `vector<string>`，用來**逐行比對**輸出 |
+| `OutputCapture` | SK、RL、HA、ST、BT、RP | 建構時 `io::setOutput()` 換成寫到字串的 `StreamOutput`，解構時還原成先前的輸出（D50；原本叫 `CoutCapture`、用 `std::cout.rdbuf()`，D38）。模組若有地方繞過 `io::output()` 直接寫 `std::cout`，就收不到而讓測試失敗；`lines()` 依換行切成 `vector<string>`，用來**逐行比對**輸出 |
 | `SkillBehaviorTest` / `RoleTest` fixture | SK、RL | 內含 `Troop t1{1}`、`Troop t2{2}`；`add(troop, name, hp, mp, str)` 建立角色並加入軍隊，所以輸出名稱會帶 `[1]` / `[2]` 前綴 |
 | `run(skill, actor, targets)` | SK | 直接呼叫 `skill.attack(actor, targets)` 並回傳輸出行；**不經過 State 流程，所以不扣 MP、不印行動訊息、不付 HP 代價** |
 | `castThroughFlow(actor, index)` | SK | 每次 `new` 一個讀 fixture 輸入（`index`）的 `HeroAction` 交給 actor（Role 擁有，換掉的舊決策者由 Role 釋放，D49），讓 actor 經過完整的 `takeTurn` 施放第 index 個行動：扣 MP、施放、支付 HP 代價（D47）；回傳完整輸出 |
@@ -71,7 +72,7 @@ cmake --build build                 # Windows (MinGW)：build 完會自動執行
 | `TrackedHandler` | SK | 解構時計數 +1，用來確認 `OnePunch` 釋放處理鏈（D49） |
 | `std::istringstream` | HA | 模擬英雄的輸入（D37：`HeroAction` 注入 `std::istream&`） |
 | `namesOf(roles)` | AI、HA | 把 `vector<Role*>` 轉成名字清單，方便比對 |
-| `HeroActionTest::mute` | HA | fixture 成員 `CoutCapture`：把 `chooseTargets` 印的提示靜音；要檢查提示的測試在裡面再開一個 `CoutCapture`（巢狀導向，結束時還原到外層） |
+| `HeroActionTest::mute` | HA | fixture 成員 `OutputCapture`：把 `chooseTargets` 印的提示靜音；要檢查提示的測試在裡面再開一個 `OutputCapture`（巢狀導向，結束時還原到外層） |
 | `StateFlowTest::turn(role)` | ST | 依角色所屬軍隊決定 actorSide，呼叫 `takeTurn(t1.getRoles(), t2.getRoles(), side)` 並回傳**完整輸出** |
 | `readExpected` / `playTestcase` | RP | 讀 `.out`（去 `\r`、去檔尾空行）／用正式的 `RPG_parser` + `HeroAction` + `RPG` 跑一組測資（見 §8） |
 | `addHero` / `addAI` / `runBattle` / `turnHeaders` | BT | 建立英雄與 AI 角色、執行 `startBattle()` 收集輸出、只取「輪到 …」行（見 §10） |
@@ -295,7 +296,7 @@ Anthony 原本寫的技能測試。每個測試都直接呼叫 `skill->attack(ac
 - **目的**：`announce()` 印出的 S3 行動訊息格式正確。
 - **依據**：需求「輸出格式」；§7.2 I1。
 - **準備**：T1 = 英雄；T2 = Slime1、Slime2。
-- **步驟與預期**：在同一個 `CoutCapture` 內依序呼叫，輸出必須**逐行**等於：
+- **步驟與預期**：在同一個 `OutputCapture` 內依序呼叫，輸出必須**逐行**等於：
   1. `BasicAttack().announce(英雄, {Slime1})` → `[1]英雄 攻擊 [2]Slime1。`
   2. `Fireball().announce(英雄, {Slime1, Slime2})` → `[1]英雄 對 [2]Slime1, [2]Slime2 使用了 火球。`
   3. `Waterball().announce(英雄, {Slime2})` → `[1]英雄 對 [2]Slime2 使用了 水球。`
@@ -641,7 +642,7 @@ Anthony 原本寫的技能測試。每個測試都直接呼叫 `skill->attack(ac
 #### RL-06 `CheckMpOnlyChecksAndPrintsNothing`
 - **目的**：`checkMp` 只回傳是否足夠，不扣 MP、不印訊息（「你缺乏 MP…」由 State 流程印）。
 - **準備**：`Role 100 / 60 / 0`；火球 50、水球 50、詛咒 100。
-- **步驟與預期**（在 `CoutCapture` 內）：
+- **步驟與預期**（在 `OutputCapture` 內）：
   1. `checkMp(火球)` → 真；`checkMp(水球)` → 真；`checkMp(詛咒)` → 假；`checkMp(普通攻擊)` → 真
   2. → MP 仍為 `60`
   3. → 沒有任何輸出
@@ -917,7 +918,7 @@ Anthony 原本寫的技能測試。每個測試都直接呼叫 `skill->attack(ac
 #### HA-15 `PromptsForTargetsOnlyWhenActuallyChoosing`（2026-10-14 新增）
 - **目的**：英雄在 S2 真的要選時印提示；略過 S2 時不印。
 - **依據**：需求「輸出格式」：「如果此為英雄的回合」印 `選擇 <m> 位目標: (0) <候選-1> …`；§7.2 I7。
-- **準備**：輸入 `"2, 0\n"`；在 `CoutCapture` 內執行。
+- **準備**：輸入 `"2, 0\n"`；在 `OutputCapture` 內執行。
 - **步驟與預期**：
   1. `chooseTargets(abc, 2)` → 印 `選擇 2 位目標: (0) A (1) B (2) C`
   2. `chooseTargets({A, B}, 2)`（n = m）→ 不印
@@ -1130,7 +1131,7 @@ X 對 a 造成 N 點傷害。 [a 死亡。] …                  ← attack
 ifstream in("testcases/<名稱>.in")
 RPGSetup setup = RPG_parser::parse(in)        // 讀兩軍，串流停在第一行英雄決策
 setup.hero->setDecider(new HeroAction(in))   // 同一個串流：剩下的行就是英雄決策；由 Role 釋放（D49）
-RPG rpg; rpg.GameStart(t1, t2); rpg.GameEnd() // 在 CoutCapture 內，收集所有輸出（含「你獲勝了！」）
+RPG rpg; rpg.GameStart(t1, t2); rpg.GameEnd() // 在 OutputCapture 內，收集所有輸出（含「你獲勝了！」）
 delete setup.t1; delete setup.t2               // Client 擁有兩軍，角色由 Troop 一併釋放（D49）
 ```
 
@@ -1225,7 +1226,7 @@ Ally 100 0 10
 
 `Battle` 的回合迴圈與 `RPG` 的勝負宣告（D1、D6、D11、D20、D30、D31，§7.2 I9）。每個情境都設計成會自然結束；英雄用 `HeroAction` + 固定的輸入，其他角色用 `AIAction`。
 
-> 共同準備：fixture 的 `addHero(hp, mp, str, 決策行, 技能)` 建立英雄（`setIdentity('h')`）加入 T1；`addAI(troop, 名稱, hp, mp, str)` 建立 AI 角色；`runBattle(battle)` 在 `CoutCapture` 內呼叫 `startBattle()`；`turnHeaders(lines)` 只留下「輪到 …」的行，用來檢查順序。
+> 共同準備：fixture 的 `addHero(hp, mp, str, 決策行, 技能)` 建立英雄（`setIdentity('h')`）加入 T1；`addAI(troop, 名稱, hp, mp, str)` 建立 AI 角色；`runBattle(battle)` 在 `OutputCapture` 內呼叫 `startBattle()`；`turnHeaders(lines)` 只留下「輪到 …」的行，用來檢查順序。
 
 #### BT-01 `RequiresAHero`
 - **步驟與預期**：兩軍都只有 AI 角色 → `startBattle()` 丟 `std::invalid_argument`
@@ -1409,7 +1410,12 @@ cmake --build build-asan
 | `setDecider` 設成同一個決策者也釋放 | RL-25（ASan 建置下為 heap-use-after-free） |
 | `OnePunch` 解構時不釋放處理鏈 | SK-46 |
 
-> 最後一次全部重跑：2026-10-15，上表每一列都至少有一個測試失敗；還原後 153 個全部通過。
+| `CompositeOutput` 不套用 `render` | OU-04 |
+| `CompositeOutput` 解構時不釋放子節點 | OU-05 |
+| `io::setOutput` 不回傳先前的輸出 | OU-06 |
+| 模組某處改回直接寫 `std::cout`（例：死亡訊息） | 27 個（RP 10 組、ST、SK、RL、BT…）：`OutputCapture` 收不到 |
+
+> 最後一次全部重跑：2026-10-15，上表每一列都至少有一個測試失敗；還原後 160 個全部通過。
 
 ---
 
@@ -1420,3 +1426,52 @@ cmake --build build-asan
 | `main.cpp` 的單元測試 | 只負責把 parser、`HeroAction`、`RPG` 接起來，這條路已由 RP 覆蓋；執行檔本身用 §11 手動驗證 |
 | Windows 主控台以鍵盤輸入中文（不帶參數、軍隊從鍵盤輸入） | 已設定 `SetConsoleCP(CP_UTF8)`，但各版本 Windows 主控台的行為不同，沒有自動測試；建議用 `--play <測資.in>`（軍隊從檔案讀，只需要輸入數字） |
 | 物件釋放（記憶體） | 擁有權已定義（D49），RL-23–25、SK-46 檢查「誰釋放誰」；有沒有洩漏不在單元測試裡判斷，改用 AddressSanitizer 手動檢查（§11.2）。Anthony 原本的 `ExampleTests.cpp` 直接 `new` 技能與軍隊而沒有釋放，在 ASan 下會回報測試本身的洩漏（保留原樣，不影響主程式） |
+
+---
+
+## 14. OU — `OutputTests.cpp`（`OutputTest`，7 個，2026-10-15 新增）
+
+`include/utils/Output.hpp` 的輸出小工具（D50）：模組只寫 `io::output().write(一整行)`；Leaf 決定輸出到哪，`CompositeOutput` 決定渲染；Client 用 `io::setOutput` 組裝。fixture 的 `TearDown` 一律 `setOutput(nullptr)` 還原成預設，避免影響其他測試。
+
+| 工具 | 用途 |
+|---|---|
+| `PrefixOutput` | 測試用的 `CompositeOutput` 子類別：`render` 在每行前加上 tag（示範「Composite 決定渲染」） |
+| `TrackedOutput` | 解構時計數 +1，確認 Composite 釋放子節點 |
+
+#### OU-01 `ConsoleOutputWritesLineToCout`
+- **目的**：`ConsoleOutput` 把一行寫到 `std::cout` 並換行。
+- **步驟與預期**：暫時把 `std::cout` 導向字串（只有測 `ConsoleOutput` 本身才碰 `std::cout`）→ `write("輪到 [1]英雄")` → 收到 `"輪到 [1]英雄\n"`
+- **通過標準**：內容與換行都相符。
+
+#### OU-02 `StreamOutputWritesLineToGivenStream`
+- **步驟與預期**：`StreamOutput(ostringstream)` 寫 `"a"`、`"b"` → 串流內容 `"a\nb\n"`
+- **通過標準**：依序寫入、每行換行。
+
+#### OU-03 `CompositeForwardsSameLineToAllChildrenInOrder`
+- **準備**：`CompositeOutput({StreamOutput(first), StreamOutput(second)})`。
+- **步驟與預期**：`write("[2]Slime1 死亡。")` → 兩個串流都收到同一行
+- **通過標準**：每個子節點都收到，內容不變（預設 `render` 原樣輸出）。
+
+#### OU-04 `NestedCompositesRenderEachBranchIndependently`
+- **目的**：渲染只影響該 Composite 底下的子節點（巢狀組合 = 不同分支不同渲染）。
+- **準備**：根 `CompositeOutput`（原樣）底下掛 `StreamOutput(plain)` 與 `PrefixOutput("[log] ", {StreamOutput(logged)})`。
+- **步驟與預期**：`write("你獲勝了！")` → plain 收到 `"你獲勝了！\n"`、logged 收到 `"[log] 你獲勝了！\n"`
+- **通過標準**：兩個分支各自正確。
+
+#### OU-05 `CompositeReleasesItsChildren`
+- **步驟與預期**：區塊內建立掛兩個 `TrackedOutput` 的 `CompositeOutput` → 計數 `0`；離開區塊 → 計數 `2`
+- **通過標準**：子節點由 Composite 釋放，且只釋放一次（比照 D49）。
+
+#### OU-06 `DefaultIsConsoleAndSetOutputReturnsPreviousForRestore`
+- **步驟與預期**：
+  1. 未設定 → `io::output()` 是 `ConsoleOutput`
+  2. `setOutput(&A)` 回傳 `nullptr`；`setOutput(&B)` 回傳 `&A`；寫 `"x"` → 進 B
+  3. `setOutput(&A)` 回傳 `&B`（還原）；寫 `"y"` → 進 A
+  4. `setOutput(nullptr)` → 回到 `ConsoleOutput`
+- **通過標準**：A 只有 `"y"`、B 只有 `"x"`，四步都成立。
+
+#### OU-07 `ModuleWritesOnlyThroughCurrentOutput`
+- **目的**：模組的輸出全部經由 `io::output()`，完全不碰 `std::cout`。
+- **準備**：A（T1）、B（T2，`10 HP`）；`setOutput(StreamOutput(captured))`，同時把 `std::cout` 導向另一個字串。
+- **步驟與預期**：A 的狀態 `doDamage(B, 10)` → captured = `"[1]A 對 [2]B 造成 10 點傷害。\n[2]B 死亡。\n"`；`std::cout` 收到空字串
+- **通過標準**：兩點都成立。
